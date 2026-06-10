@@ -71,7 +71,10 @@ export default function LoginPage() {
             Não tem uma conta? Cadastre-se
             </button>
 
-            <button className="text-sm text-gray-900 cursor-pointer hover:underline">
+            <button 
+              className="text-sm text-gray-900 cursor-pointer hover:underline"
+              onClick={() => router.push("/recuperacao")}
+            >
                 Esqueceu a senha?
             </button>
         </div>

@@ -1,16 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
-  const [identifier, setIdentifier] = useState("");
+export default function CadastroPage() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login:", { identifier, password });
+    
+    if (name && email && phone && password) {
+      console.log("Cadastro realizado com sucesso:", { name, email, phone, password });
+      router.push("/login");
+    } else {
+      alert("Por favor, preencha todos os campos.");
+    }
   };
 
   return (
@@ -36,8 +45,8 @@ export default function LoginPage() {
             <input
                 type="text"
                 placeholder="Digite seu nome completo"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-3.5 rounded-xl bg-white text-sm text-gray-700 placeholder-gray-400 shadow-md outline-none focus:ring-2 focus:ring-white/70 transition"
             />
@@ -46,10 +55,10 @@ export default function LoginPage() {
           <div>
             <p className="text-sm text-gray-900 mb-1">Email</p>
             <input
-                type="text"
+                type="email"
                 placeholder="Digite seu email"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3.5 rounded-xl bg-white text-sm text-gray-700 placeholder-gray-400 shadow-md outline-none focus:ring-2 focus:ring-white/70 transition"
             />
@@ -58,10 +67,10 @@ export default function LoginPage() {
           <div>
             <p className="text-sm text-gray-900 mb-1">Telefone</p>
             <input
-                type="text"
+                type="tel"
                 placeholder="Digite seu telefone"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
                 className="w-full px-4 py-3.5 rounded-xl bg-white text-sm text-gray-700 placeholder-gray-400 shadow-md outline-none focus:ring-2 focus:ring-white/70 transition"
             />
@@ -70,10 +79,10 @@ export default function LoginPage() {
           <div>
             <p className="text-sm text-gray-900 mb-1">Senha</p>
             <input
-                type="text"
+                type="password"
                 placeholder="Digite sua senha"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-4 py-3.5 rounded-xl bg-white text-sm text-gray-700 placeholder-gray-400 shadow-md outline-none focus:ring-2 focus:ring-white/70 transition"
             />
@@ -87,7 +96,10 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <button className="mt-6 text-sm text-gray-900 cursor-pointer hover:underline">
+        <button 
+          onClick={() => router.push("/recuperacao")}
+          className="mt-6 text-sm text-gray-900 cursor-pointer hover:underline"
+        >
             Esqueceu a senha?
         </button>
       </div>
