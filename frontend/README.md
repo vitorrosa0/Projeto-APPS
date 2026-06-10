@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SJPA - Sistema de Gestão dos Animais
 
-## Getting Started
+Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão e proteção de animais, desenvolvida como parte das Práticas Extensionistas e Projeto Integrador.
 
-First, run the development server:
+## Tecnologias
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Este projeto foi construído utilizando as seguintes tecnologias:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Next.js 15+** (App Router)
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS**
+- **React Icons**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Funcionalidades Implementadas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Atualmente, o projeto conta com o fluxo completo de autenticação e visualização inicial:
 
-## Learn More
+- **Home:** Tela principal com visão geral do sistema.
+- **Login:** Autenticação de usuários cadastrados.
+- **Cadastro:** Registro de novos usuários com validação de campos.
+- **Recuperação de Senha:** Fluxo completo para solicitação de nova senha e confirmação de envio de link.
+- **Gestão de Animais:** Listagem e categorização (Cães/Gatos) de animais.
+- **Interface Responsiva:** Otimizada para dispositivos móveis com menu inferior (`BottomNav`) e cabeçalho dinâmico.
 
-To learn more about Next.js, take a look at the following resources:
+## Como Executar o Projeto
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone o repositório:**
+   ```
+   git clone <url-do-repositorio>
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Acesse a pasta do frontend:**
+   ```
+   cd frontend
+   ```
 
-## Deploy on Vercel
+3. **Instale as dependências:**
+   ```
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Inicie o servidor de desenvolvimento:**
+   ```
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Acesse no navegador:**
+   ```
+   http://localhost:3000
+   ```
+## Notas de Desenvolvimento
+
+- O projeto utiliza a convenção `page.tsx` dentro de pastas para definição de rotas.
+- Componentes de interface estão sendo padronizados para garantir consistência visual em todas as etapas.
+- A navegação é gerida pelo hook `useRouter` do Next.js.
