@@ -1,0 +1,158 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { MdSearch, MdEdit, MdDelete } from "react-icons/md";
+import { PiDogFill, PiCatFill } from "react-icons/pi";
+import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
+import PawBackground from "@/components/PawBackground";
+import PageTitle from "@/components/PageTitle";
+import AnimalAvatar from "@/components/AnimalAvatar";
+import ConfirmModal from "@/components/ConfirmModal";
+
+export interface Animal {
+  id: number;
+  nome: string;
+  idade: string;
+  raca: string;
+  setor: string;
+  canil: string;
+  foto?: string;
+}
+
+interface AnimalListPageProps {
+  titulo: string;
+  tipo: "cao" | "gato";
+  animaisIniciais: Animal[];
+  editarBase?: string;
+}
+
+export default function AnimalListPage({
+  titulo,
+  tipo,
+  animaisIniciais,
+  editarBase = "/animais/cadastrar",
+}: AnimalListPageProps) {
+  const router = useRouter();
+  const [animais, setAnimais] = useState<Animal[]>(animaisIniciais);
+  const [busca, setBusca] = useState("");
+  const [paraExcluir, setParaExcluir] = useState<Animal | null>(null);
+
+  const EmptyIcon = tipo === "cao" ? PiDogFill : PiCatFill;
+
+  const animaisFiltrados = useMemo(() => {
+    const termo = busca.toLowerCase().trim();
+    if (!termo) return animais;
+    return animais.filter(
+      (a) =>
+        a.nome.toLowerCase().includes(termo) ||
+        a.raca.toLowerCase().includes(termo) ||
+        a.setor.toLowerCase().includes(termo) ||
+        a.canil.toLowerCase().includes(termo)
+    );
+  }, [animais, busca]);
+
+  const handleEditar = (animal: Animal) => {
+    router.push(`${editarBase}?id=${animal.id}`);
+  };
+
+  const handleConfirmarExclusao = () => {
+    if (!paraExcluir) return;
+    setAnimais((prev) => prev.filter((a) => a.id !== paraExcluir.id));
+    setParaExcluir(null);
+  };
+
+  return (
+    <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
+
+      <Header showBack={true} />
+      <PawBackground />
+
+      <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">
+
+        <PageTitle>{titulo}</PageTitle>
+
+        {/* Campo de busca */}
+        <div className="relative">
+          <input
+            type="search"
+            placeholder="Digite um nome/setor/canil"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="w-full h-11 bg-white border-2 border-gray-300 rounded-full pl-4 pr-11 text-sm text-gray-800 outline-none focus:border-[#2DB38B] transition-colors placeholder:text-gray-400"
+          />
+          <MdSearch
+            size={22}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
+        </div>
+
+        {/* Lista */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          {animaisFiltrados.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
+              <EmptyIcon size={40} />
+              <p className="text-sm">Nenhum animal encontrado.</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {animaisFiltrados.map((animal) => (
+                <li key={animal.id} className="flex items-center gap-3 px-4 py-3">
+
+                  <AnimalAvatar foto={animal.foto} nome={animal.nome} tipo={tipo} />
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-800 text-sm truncate">{animal.nome}</p>
+                    <p className="text-xs text-gray-500">{animal.idade} · {animal.raca}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      Setor {animal.setor} &nbsp;·&nbsp; {animal.canil}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => handleEditar(animal)}
+                      aria-label={`Editar ${animal.nome}`}
+                      className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-[#25967A] active:scale-95 transition-all cursor-pointer"
+                    >
+                      <MdEdit size={18} />
+                    </button>
+                    <button
+                      onClick={() => setParaExcluir(animal)}
+                      aria-label={`Excluir ${animal.nome}`}
+                      className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-red-500 active:scale-95 transition-all cursor-pointer"
+                    >
+                      <MdDelete size={18} />
+                    </button>
+                  </div>
+
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Contador */}
+        <p className="text-xs text-gray-400 text-right pr-1">
+          {animaisFiltrados.length}{" "}
+          {animaisFiltrados.length === 1 ? "animal" : "animais"} encontrado
+          {animaisFiltrados.length !== 1 ? "s" : ""}
+        </p>
+
+      </main>
+
+      {paraExcluir && (
+        <ConfirmModal
+          titulo="Excluir animal"
+          mensagem={`Tem certeza que deseja excluir ${paraExcluir.nome}?`}
+          labelConfirmar="Excluir"
+          onConfirm={handleConfirmarExclusao}
+          onCancel={() => setParaExcluir(null)}
+        />
+      )}
+
+      <BottomNav />
+    </div>
+  );
+}
