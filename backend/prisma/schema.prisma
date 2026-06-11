@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// =============================================================
+// BANCO DE DADOS ATUAL: SQLite (para desenvolvimento/protótipo)
+//
+// Para migrar para PostgreSQL (recomendado para produção/ONG):
+//   1. Altere o provider abaixo de "sqlite" para "postgresql"
+//   2. Atualize o arquivo prisma.config.ts com a URL do PostgreSQL
+//   3. Atualize o src/prisma.js (veja comentários lá)
+//   4. Execute: npm run migrate
+//
+// Exemplo de URL PostgreSQL (coloque no prisma.config.ts):
+//   url: process.env["DATABASE_URL"]
+// E no .env:
+//   DATABASE_URL="postgresql://usuario:senha@localhost:5432/sjpa"
+//
+// Serviços gratuitos para hospedar PostgreSQL:
+//   - https://supabase.com
+//   - https://railway.app
+//   - https://render.com
+// =============================================================
+datasource db {
+  // MIGRAÇÃO: troque "sqlite" por "postgresql" quando for para produção
+  provider = "sqlite"
+}
+
+model Animal {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  tipo      String
+  raca      String
+  idade     String
+  setor     String
+  canil     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Colaborador {
+  id                    Int            @id @default(autoincrement())
+  nome                  String
+  email                 String         @unique
+  telefone              String
+  dataAdesao            String
+  status                String         @default("Ativo")
+  informacoesAdicionais String?
+  contribuicoes         Contribuicao[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+model Contribuicao {
+  id            Int         @id @default(autoincrement())
+  colaboradorId Int
+  colaborador   Colaborador @relation(fields: [colaboradorId], references: [id], onDelete: Cascade)
+  tipo          String
+  valor         String
+  data          String
+  createdAt     DateTime    @default(now())
+}
