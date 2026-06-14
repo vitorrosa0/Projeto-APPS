@@ -57,7 +57,7 @@ export default function ColaboradoresPage() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#1a1a2e",
+        backgroundColor: "#dcdcdc",
         display: "flex",
         flexDirection: "column",
         fontFamily: "sans-serif",
@@ -66,7 +66,7 @@ export default function ColaboradoresPage() {
       {/* Header */}
       <div
         style={{
-          backgroundColor: "#1a1a2e",
+          backgroundColor: "#2DB38B",
           padding: "12px 16px",
           display: "flex",
           alignItems: "center",
@@ -79,7 +79,7 @@ export default function ColaboradoresPage() {
             width: 40,
             height: 40,
             borderRadius: "50%",
-            backgroundColor: "#2a2a4a",
+            backgroundColor: "#2DB38B",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -109,7 +109,7 @@ export default function ColaboradoresPage() {
               width: 10,
               height: 10,
               borderRadius: "50%",
-              backgroundColor: "#4dd0b8",
+              backgroundColor: "#2DB38B",
               display: "inline-block",
             }}
           />
@@ -122,7 +122,7 @@ export default function ColaboradoresPage() {
             <div
               key={col.id}
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "white",
                 borderRadius: 8,
                 padding: "12px 16px",
                 display: "flex",
@@ -236,7 +236,7 @@ export default function ColaboradoresPage() {
             marginTop: 24,
             width: "100%",
             padding: "14px",
-            backgroundColor: "#4dd0b8",
+            backgroundColor: "#2DB38B",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -270,7 +270,7 @@ function BottomNav({ active }: { active: string }) {
   return (
     <div
       style={{
-        backgroundColor: "#1a1a2e",
+        backgroundColor: "#2DB38B",
         display: "flex",
         justifyContent: "space-around",
         padding: "12px 0",

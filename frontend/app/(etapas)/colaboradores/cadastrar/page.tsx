@@ -26,7 +26,7 @@ export default function CadastrarColaboradorPage() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#1a1a2e",
+        backgroundColor: "#dcdcdc",
         display: "flex",
         flexDirection: "column",
         fontFamily: "sans-serif",
@@ -35,12 +35,12 @@ export default function CadastrarColaboradorPage() {
       {/* Header */}
       <div
         style={{
-          backgroundColor: "#1a1a2e",
+          backgroundColor: "#2DB38B",
           padding: "12px 16px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: "1px solid #2e2e4e",
+          borderBottom: "1px solid #2DB38B",
         }}
       >
         <div
@@ -48,7 +48,7 @@ export default function CadastrarColaboradorPage() {
             width: 40,
             height: 40,
             borderRadius: "50%",
-            backgroundColor: "#2a2a4a",
+            backgroundColor: "#2DB38B",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -96,7 +96,7 @@ export default function CadastrarColaboradorPage() {
               width: 10,
               height: 10,
               borderRadius: "50%",
-              backgroundColor: "#4dd0b8",
+              backgroundColor: "#2DB38B",
               display: "inline-block",
             }}
           />
@@ -125,7 +125,7 @@ export default function CadastrarColaboradorPage() {
                 height: 80,
                 borderRadius: "50%",
                 backgroundColor: "#e0e0e0",
-                border: "3px solid #4dd0b8",
+                border: "3px solid #2DB38B",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -142,7 +142,7 @@ export default function CadastrarColaboradorPage() {
                   width: 24,
                   height: 24,
                   borderRadius: "50%",
-                  backgroundColor: "#4dd0b8",
+                  backgroundColor: "#2DB38B",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -201,7 +201,7 @@ export default function CadastrarColaboradorPage() {
                 width: "100%",
                 padding: "10px 12px",
                 borderRadius: 6,
-                border: "1px solid #4dd0b8",
+                border: "1px solid #2DB38B",
                 backgroundColor: "#e8faf7",
                 fontSize: 13,
                 color: "#333",
@@ -243,7 +243,7 @@ export default function CadastrarColaboradorPage() {
                 minHeight: 80,
                 padding: "10px 12px",
                 borderRadius: 6,
-                border: "1px solid #4dd0b8",
+                border: "1px solid #2DB38B",
                 backgroundColor: "#e8faf7",
                 fontSize: 13,
                 color: "#333",
@@ -260,7 +260,7 @@ export default function CadastrarColaboradorPage() {
             style={{
               width: "100%",
               padding: "13px",
-              backgroundColor: "#4dd0b8",
+              backgroundColor: "#2DB38B",
               color: "#fff",
               border: "none",
               borderRadius: 8,
@@ -316,7 +316,7 @@ function Campo({
           width: "100%",
           padding: "10px 12px",
           borderRadius: 6,
-          border: "1px solid #4dd0b8",
+          border: "1px solid #2DB38B",
           backgroundColor: "#e8faf7",
           fontSize: 13,
           color: "#333",
@@ -339,11 +339,11 @@ function BottomNav({ active }: { active: string }) {
   return (
     <div
       style={{
-        backgroundColor: "#1a1a2e",
+        backgroundColor: "#2DB38B",
         display: "flex",
         justifyContent: "space-around",
         padding: "12px 0",
-        borderTop: "1px solid #2e2e4e",
+        borderTop: "1px solid #2DB38B",
       }}
     >
       {items.map((item) => (
