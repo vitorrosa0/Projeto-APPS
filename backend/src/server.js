@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const authRoutes = require("./routes/auth");
 const animaisRoutes = require("./routes/animais");
 const colaboradoresRoutes = require("./routes/colaboradores");
 
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
   res.json({ mensagem: "API SJPA funcionando!" });
 });
 
+app.use("/auth", authRoutes);
 app.use("/animais", animaisRoutes);
 app.use("/colaboradores", colaboradoresRoutes);
 
