@@ -13,6 +13,8 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Login:", { identifier, password });
+    // TODO: validar credenciais via backend (auth) antes de navegar
+    router.push("/home");
   };
 
   const handleRegisterClick = () => {

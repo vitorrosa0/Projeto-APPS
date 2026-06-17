@@ -17,16 +17,29 @@ async function buscarPorId(req, res, next) {
   } catch (e) { next(e); }
 }
 
+const CAMPOS_ANIMAL = [
+  "nome", "tipo", "raca", "idade", "sexo", "setor",
+  "canil", "cor", "temperamento", "vacinacao", "dataVacinacao", "foto", "outros",
+];
+
+function extrairDados(body) {
+  const data = {};
+  for (const campo of CAMPOS_ANIMAL) {
+    if (body[campo] !== undefined) data[campo] = body[campo];
+  }
+  return data;
+}
+
 async function criar(req, res, next) {
   try {
-    const { nome, tipo, raca, idade, setor, canil } = req.body;
-    if (!nome || !tipo || !raca || !idade || !setor || !canil) {
-      return res.status(400).json({ erro: "Todos os campos são obrigatórios" });
+    const { nome, tipo } = req.body;
+    if (!nome || !tipo) {
+      return res.status(400).json({ erro: "Nome e tipo são obrigatórios" });
     }
     if (!["cao", "gato"].includes(tipo)) {
       return res.status(400).json({ erro: "Tipo deve ser 'cao' ou 'gato'" });
     }
-    const animal = await prisma.animal.create({ data: { nome, tipo, raca, idade, setor, canil } });
+    const animal = await prisma.animal.create({ data: extrairDados(req.body) });
     res.status(201).json(animal);
   } catch (e) { next(e); }
 }
@@ -36,11 +49,11 @@ async function atualizar(req, res, next) {
     const id = Number(req.params.id);
     const existe = await prisma.animal.findUnique({ where: { id } });
     if (!existe) return res.status(404).json({ erro: "Animal não encontrado" });
-    const { nome, tipo, raca, idade, setor, canil } = req.body;
+    const { tipo } = req.body;
     if (tipo && !["cao", "gato"].includes(tipo)) {
       return res.status(400).json({ erro: "Tipo deve ser 'cao' ou 'gato'" });
     }
-    const animal = await prisma.animal.update({ where: { id }, data: { nome, tipo, raca, idade, setor, canil } });
+    const animal = await prisma.animal.update({ where: { id }, data: extrairDados(req.body) });
     res.json(animal);
   } catch (e) { next(e); }
 }

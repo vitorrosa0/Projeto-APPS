@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
+import { api } from "@/lib/api";
 
 type StatusType = "Ativo" | "Inativo" | "Pausado";
 type TipoContribuicao = "Financeiro" | "Produto" | "Serviço";
@@ -10,44 +11,62 @@ type TipoContribuicao = "Financeiro" | "Produto" | "Serviço";
 interface Contribuicao {
   valor: string;
   data: string;
-  tipo?: TipoContribuicao;
+  tipo?: string;
 }
 
-const mockContribuicoes: Contribuicao[] = [
-  { valor: "R$ 1500,00", data: "10/07/2025" },
-  { valor: "R$ 1500,00", data: "10/06/2025" },
-  { valor: "R$ 1000,00", data: "10/05/2025" },
-  { valor: "R$ 500,00", data: "10/04/2025" },
-  { valor: "R$ 250,00", data: "10/03/2025" },
-  { valor: "5 Kg de Ração", data: "10/02/2025" },
-  { valor: "R$ 900,00", data: "10/01/2024" },
-  { valor: "R$ 750,00", data: "10/09/2024" },
-  { valor: "R$ 1500,00", data: "10/07/2024" },
-];
+// O backend usa "Servico" (sem cedilha) no enum de tipos.
+const TIPO_CONTRIB_MAP: Record<TipoContribuicao, string> = {
+  Financeiro: "Financeiro",
+  Produto: "Produto",
+  Serviço: "Servico",
+};
 
 export default function EditarColaboradorPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params?.id;
+  const id = params?.id as string;
 
-  const [nome] = useState("Wilton Pereira Sampaio");
-  const [telefone] = useState("(32) 98888-7777");
-  const [email] = useState("wilton.pereira@gmail.com");
-  const [dataAdesao] = useState("14/01/2025");
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [email, setEmail] = useState("");
+  const [dataAdesao, setDataAdesao] = useState("");
   const [status, setStatus] = useState<StatusType>("Ativo");
-  const [ultimaContribuicao] = useState("R$ 1500,00");
-  const [totalContribuicoes] = useState("R$ 25000,00");
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("");
-  const [contribuicoes] = useState<Contribuicao[]>(mockContribuicoes);
+  const [contribuicoes, setContribuicoes] = useState<Contribuicao[]>([]);
 
-  // Estado para o modal de nova contribuição
+  // Estado para o painel de nova contribuição
   const [showNovaContribuicao, setShowNovaContribuicao] = useState(false);
   const [tipoContribuicao, setTipoContribuicao] =
     useState<TipoContribuicao>("Financeiro");
-  const [valorContribuido, setValorContribuido] = useState("300,00");
-  const [diaContribuicao, setDiaContribuicao] = useState("DD");
-  const [mesContribuicao, setMesContribuicao] = useState("MM");
-  const [anoContribuicao, setAnoContribuicao] = useState("AAAA");
+  const [valorContribuido, setValorContribuido] = useState("");
+  const [dataContribuicao, setDataContribuicao] = useState("");
+  const [salvandoContrib, setSalvandoContrib] = useState(false);
+
+  const ultimaContribuicao = contribuicoes[0]?.valor ?? "—";
+
+  const carregar = useCallback(() => {
+    if (!id) return;
+    api<{
+      nome: string; email: string; telefone: string; dataAdesao: string;
+      status: StatusType; informacoesAdicionais: string | null;
+      contribuicoes: Contribuicao[];
+    }>(`/colaboradores/${id}`)
+      .then((c) => {
+        setNome(c.nome);
+        setEmail(c.email);
+        setTelefone(c.telefone);
+        setDataAdesao(c.dataAdesao);
+        setStatus(c.status);
+        setInformacoesAdicionais(c.informacoesAdicionais ?? "");
+        setContribuicoes(c.contribuicoes ?? []);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar colaborador:", err);
+        alert("Não foi possível carregar o colaborador.");
+      });
+  }, [id]);
+
+  useEffect(() => { carregar(); }, [carregar]);
 
   const statusColor: Record<StatusType, string> = {
     Ativo: "#4CAF50",
@@ -55,9 +74,44 @@ export default function EditarColaboradorPage() {
     Pausado: "#FF9800",
   };
 
-  const handleSalvar = () => {
-    // TODO: salvar dados
-    router.back();
+  const handleSalvar = async () => {
+    try {
+      await api(`/colaboradores/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ nome, email, telefone, dataAdesao, status, informacoesAdicionais }),
+      });
+      router.push("/colaboradores");
+    } catch (err) {
+      console.error("Erro ao salvar:", err);
+      alert(err instanceof Error ? err.message : "Erro ao salvar.");
+    }
+  };
+
+  const handleSalvarContribuicao = async () => {
+    if (!valorContribuido || !dataContribuicao) {
+      alert("Preencha o valor e a data da contribuição.");
+      return;
+    }
+    setSalvandoContrib(true);
+    try {
+      await api(`/colaboradores/${id}/contribuicoes`, {
+        method: "POST",
+        body: JSON.stringify({
+          tipo: TIPO_CONTRIB_MAP[tipoContribuicao],
+          valor: valorContribuido,
+          data: dataContribuicao,
+        }),
+      });
+      setValorContribuido("");
+      setDataContribuicao("");
+      setShowNovaContribuicao(false);
+      carregar(); // recarrega histórico
+    } catch (err) {
+      console.error("Erro ao salvar contribuição:", err);
+      alert(err instanceof Error ? err.message : "Erro ao salvar contribuição.");
+    } finally {
+      setSalvandoContrib(false);
+    }
   };
 
   return (
@@ -221,7 +275,7 @@ export default function EditarColaboradorPage() {
           <div style={{ fontSize: 13, color: "#333", marginBottom: 12 }}>
             Total de contribuições:{" "}
             <span style={{ color: "#f44336", fontWeight: "bold" }}>
-              {totalContribuicoes}
+              {contribuicoes.length}
             </span>
           </div>
 
@@ -373,34 +427,24 @@ export default function EditarColaboradorPage() {
               <div style={{ fontSize: 13, color: "#333", marginBottom: 6 }}>
                 Data da contribuição:
               </div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                {[
-                  { val: diaContribuicao, set: setDiaContribuicao, label: "DD" },
-                  { val: mesContribuicao, set: setMesContribuicao, label: "MM" },
-                  {
-                    val: anoContribuicao,
-                    set: setAnoContribuicao,
-                    label: "AAAA",
-                  },
-                ].map((item) => (
-                  <select
-                    key={item.label}
-                    value={item.val}
-                    onChange={(e) => item.set(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: "6px",
-                      borderRadius: 4,
-                      border: "1px solid #ccc",
-                      fontSize: 13,
-                    }}
-                  >
-                    <option value={item.label}>{item.label}</option>
-                  </select>
-                ))}
-              </div>
+              <input
+                type="date"
+                value={dataContribuicao}
+                onChange={(e) => setDataContribuicao(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  borderRadius: 4,
+                  border: "1px solid #ccc",
+                  fontSize: 13,
+                  marginBottom: 12,
+                  boxSizing: "border-box",
+                }}
+              />
 
               <button
+                onClick={handleSalvarContribuicao}
+                disabled={salvandoContrib}
                 style={{
                   width: "100%",
                   padding: "10px",
@@ -410,10 +454,11 @@ export default function EditarColaboradorPage() {
                   borderRadius: 6,
                   fontSize: 14,
                   fontWeight: "bold",
-                  cursor: "pointer",
+                  cursor: salvandoContrib ? "not-allowed" : "pointer",
+                  opacity: salvandoContrib ? 0.6 : 1,
                 }}
               >
-                Salvar
+                {salvandoContrib ? "Salvando…" : "Salvar"}
               </button>
             </div>
           )}

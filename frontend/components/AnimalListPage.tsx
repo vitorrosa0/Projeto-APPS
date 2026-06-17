@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MdSearch, MdEdit, MdDelete } from "react-icons/md";
+import { api } from "@/lib/api";
+import { MdSearch, MdEdit, MdDelete, MdAddCircleOutline } from "react-icons/md";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -24,22 +25,31 @@ export interface Animal {
 interface AnimalListPageProps {
   titulo: string;
   tipo: "cao" | "gato";
-  animaisIniciais: Animal[];
   editarBase?: string;
 }
 
 export default function AnimalListPage({
   titulo,
   tipo,
-  animaisIniciais,
   editarBase = "/animais/cadastrar",
 }: AnimalListPageProps) {
   const router = useRouter();
-  const [animais, setAnimais] = useState<Animal[]>(animaisIniciais);
+  const [animais, setAnimais] = useState<Animal[]>([]);
+  const [carregando, setCarregando] = useState(true);
   const [busca, setBusca] = useState("");
   const [paraExcluir, setParaExcluir] = useState<Animal | null>(null);
 
   const EmptyIcon = tipo === "cao" ? PiDogFill : PiCatFill;
+
+  useEffect(() => {
+    let ativo = true;
+    setCarregando(true);
+    api<Animal[]>(`/animais?tipo=${tipo}`)
+      .then((dados) => { if (ativo) setAnimais(dados); })
+      .catch((err) => console.error("Erro ao carregar animais:", err))
+      .finally(() => { if (ativo) setCarregando(false); });
+    return () => { ativo = false; };
+  }, [tipo]);
 
   const animaisFiltrados = useMemo(() => {
     const termo = busca.toLowerCase().trim();
@@ -57,16 +67,24 @@ export default function AnimalListPage({
     router.push(`${editarBase}?id=${animal.id}`);
   };
 
-  const handleConfirmarExclusao = () => {
+  const handleConfirmarExclusao = async () => {
     if (!paraExcluir) return;
-    setAnimais((prev) => prev.filter((a) => a.id !== paraExcluir.id));
-    setParaExcluir(null);
+    const id = paraExcluir.id;
+    try {
+      await api(`/animais/${id}`, { method: "DELETE" });
+      setAnimais((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir:", err);
+      alert(err instanceof Error ? err.message : "Erro ao excluir o animal.");
+    } finally {
+      setParaExcluir(null);
+    }
   };
 
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
 
-      <Header showBack={true} />
+      <Header showBack onBack={() => router.push("/animais")} />
       <PawBackground />
 
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">
@@ -90,7 +108,12 @@ export default function AnimalListPage({
 
         {/* Lista */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {animaisFiltrados.length === 0 ? (
+          {carregando ? (
+            <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
+              <EmptyIcon size={40} />
+              <p className="text-sm">Carregando…</p>
+            </div>
+          ) : animaisFiltrados.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-12 text-gray-400">
               <EmptyIcon size={40} />
               <p className="text-sm">Nenhum animal encontrado.</p>
@@ -139,6 +162,15 @@ export default function AnimalListPage({
           {animaisFiltrados.length === 1 ? "animal" : "animais"} encontrado
           {animaisFiltrados.length !== 1 ? "s" : ""}
         </p>
+
+        {/* Botão adicionar novo animal */}
+        <button
+          onClick={() => router.push(`${editarBase}?tipo=${tipo}`)}
+          className="w-full flex items-center justify-center gap-2 bg-[#2DB38B] text-white rounded-full px-6 py-3 text-sm font-semibold shadow-md hover:bg-[#25967A] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+        >
+          <MdAddCircleOutline size={20} />
+          Adicionar {tipo === "cao" ? "cão" : "gato"}
+        </button>
 
       </main>
 
