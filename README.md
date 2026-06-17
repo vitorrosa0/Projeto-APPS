@@ -47,6 +47,16 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 
 **Campos do Animal:** `nome`, `tipo` (cao/gato), `raca`, `idade`, `setor`, `canil`
 
+#### Autenticação (`/auth`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/auth/register` | Cadastra um novo usuário (retorna token JWT) |
+| POST | `/auth/login` | Autentica e retorna token JWT |
+
+**Campos do Usuário:** `nome`, `email`, `telefone` (opcional), `senha`
+
+> **Usuário padrão (criado pelo seed):** email `admin@sjpa.com` / senha `admin123`.
+
 #### Colaboradores (`/colaboradores`)
 | Método | Rota | Descrição |
 |--------|------|-----------|
@@ -100,17 +110,28 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
    npm install
    ```
 
-3. Execute as migrations do banco de dados:
+3. Crie o arquivo `.env` na pasta `backend/` com a URL do banco:
+   ```
+   DATABASE_URL="file:../dev.db"
+   ```
+   > Esse passo é obrigatório: o `prisma migrate dev` exige a variável `DATABASE_URL`. O `.env` não é versionado (está no `.gitignore`), então cada desenvolvedor precisa criá-lo.
+
+4. Execute as migrations do banco de dados:
    ```
    npm run migrate
    ```
 
-4. Inicie o servidor:
+5. (Opcional) Crie o usuário admin padrão (`admin@sjpa.com` / `admin123`):
+   ```
+   npm run seed
+   ```
+
+6. Inicie o servidor:
    ```
    npm run dev
    ```
 
-5. A API estará disponível em:
+7. A API estará disponível em:
    ```
    http://localhost:3001
    ```
