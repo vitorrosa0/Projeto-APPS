@@ -1,15 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MdAddCircleOutline, MdPets } from "react-icons/md";
+import { MdPets } from "react-icons/md";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 
 const animalItems = [
-  { label: "Cães",      icon: <PiDogFill size={24} />,         href: "/animais/caes" },
-  { label: "Gatos",     icon: <PiCatFill size={24} />,         href: "/animais/gatos" },
-  { label: "Cadastrar", icon: <MdAddCircleOutline size={26} />, href: "/animais/cadastrar" },
+  { label: "Cães",  icon: <PiDogFill size={24} />, href: "/animais/caes" },
+  { label: "Gatos", icon: <PiCatFill size={24} />, href: "/animais/gatos" },
 ];
 
 const pawPositions = [
@@ -28,7 +27,7 @@ export default function Animais() {
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-hidden flex flex-col md:ml-56 pb-16 md:pb-0">
 
-      <Header showBack />
+      <Header />
 
       {/* Patinhas decorativas */}
       <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">

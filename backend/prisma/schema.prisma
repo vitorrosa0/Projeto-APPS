@@ -37,15 +37,22 @@ model Usuario {
 }
 
 model Animal {
-  id        Int      @id @default(autoincrement())
-  nome      String
-  tipo      String
-  raca      String
-  idade     String
-  setor     String
-  canil     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  nome          String
+  tipo          String // "cao" | "gato"
+  raca          String?
+  idade         String?
+  sexo          String?
+  setor         String?
+  canil         String?
+  cor           String?
+  temperamento  String?
+  vacinacao     String?
+  dataVacinacao String?
+  foto          String?
+  outros        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Colaborador {

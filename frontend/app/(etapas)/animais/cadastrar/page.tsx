@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MdAdd, MdCheckCircle } from "react-icons/md";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 import Header from "@/components/Header";
@@ -9,6 +10,11 @@ import InputGroup from "@/components/InputGroup";
 import SelectGroup from "@/components/SelectGroup";
 import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
+import { api } from "@/lib/api";
+
+// O backend espera tipo "cao" | "gato"; o formulário usa rótulos amigáveis.
+const TIPO_MAP: Record<string, string> = { Cachorro: "cao", Gato: "gato" };
+const TIPO_LABEL: Record<string, string> = { cao: "Cachorro", gato: "Gato" };
 
 const SETORES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
 
@@ -45,13 +51,57 @@ const FORM_INITIAL: FormData = {
 };
 
 export default function CadastroPet() {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>(FORM_INITIAL);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [backHref, setBackHref] = useState("/animais");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const listaHref = (tipo: string | null | undefined) =>
+    tipo === "cao" ? "/animais/caes" : tipo === "gato" ? "/animais/gatos" : "/animais";
+
   const canilOptions = formData.setor ? (CANAIS_POR_SETOR[formData.setor] ?? []) : [];
+
+  // Modo edição: se houver ?id= na URL, carrega o animal e preenche o formulário.
+  // Se houver apenas ?tipo=, pré-seleciona o tipo (vindo das listas de cães/gatos).
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const tipoParam = params.get("tipo");
+    if (!id) {
+      if (tipoParam && TIPO_LABEL[tipoParam]) {
+        setFormData((prev) => ({ ...prev, tipo: TIPO_LABEL[tipoParam] }));
+        setBackHref(listaHref(tipoParam));
+      }
+      return;
+    }
+    setEditId(Number(id));
+    api<Record<string, string | null>>(`/animais/${id}`)
+      .then((animal) => {
+        setBackHref(listaHref(animal.tipo));
+        setFormData({
+          nome: animal.nome ?? "",
+          tipo: TIPO_LABEL[animal.tipo ?? ""] ?? "",
+          idade: animal.idade ?? "",
+          sexo: animal.sexo ?? "",
+          setor: animal.setor ?? "",
+          canil: animal.canil ?? "",
+          cor: animal.cor ?? "",
+          temperamento: animal.temperamento ?? "",
+          vacinacao: animal.vacinacao ?? "",
+          dataVacinacao: animal.dataVacinacao ?? "",
+          outros: animal.outros ?? "",
+        });
+        if (animal.foto) setPhotoPreview(animal.foto);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar animal:", err);
+        alert("Não foi possível carregar os dados do animal.");
+      });
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -78,11 +128,19 @@ export default function CadastroPet() {
     e.preventDefault();
     setLoading(true);
     try {
-      await new Promise((res) => setTimeout(res, 800)); // TODO: substituir pelo envio real
-      console.log("Dados do Pet:", formData);
+      const { tipo, ...resto } = formData;
+      const payload = JSON.stringify({ ...resto, tipo: TIPO_MAP[tipo] ?? tipo });
+      if (editId) {
+        await api(`/animais/${editId}`, { method: "PUT", body: payload });
+      } else {
+        await api("/animais", { method: "POST", body: payload });
+        setFormData(FORM_INITIAL);
+        setPhotoPreview(null);
+      }
       showToast();
     } catch (err) {
       console.error("Erro ao salvar:", err);
+      alert(err instanceof Error ? err.message : "Erro ao salvar o animal.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +149,7 @@ export default function CadastroPet() {
   return (
     <div className="relative min-h-screen bg-white overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
 
-      <Header showBack={true} />
+      <Header showBack onBack={() => router.push(backHref)} />
 
       {/* Toast de sucesso */}
       <div
@@ -101,7 +159,7 @@ export default function CadastroPet() {
         }`}
       >
         <MdCheckCircle size={20} />
-        Pet cadastrado com sucesso!
+        {editId ? "Pet atualizado com sucesso!" : "Pet cadastrado com sucesso!"}
       </div>
 
       <PawBackground />
@@ -109,7 +167,7 @@ export default function CadastroPet() {
       <main className="relative z-10 px-6 py-8 flex-1 w-full max-w-md mx-auto">
 
         <div className="mb-8">
-          <PageTitle>Cadastro de Pet</PageTitle>
+          <PageTitle>{editId ? "Editar Pet" : "Cadastro de Pet"}</PageTitle>
         </div>
 
         {/* Upload / Preview de foto */}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
+import { api } from "@/lib/api";
 
 type StatusType = "Ativo" | "Inativo" | "Pausado";
 
@@ -16,10 +17,26 @@ export default function CadastrarColaboradorPage() {
   const [status, setStatus] = useState<StatusType>("Ativo");
   const [ultimaContribuicao, setUltimaContribuicao] = useState("");
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
-  const handleSalvar = () => {
-    // TODO: salvar no backend
-    router.push("/colaboradores");
+  const handleSalvar = async () => {
+    if (!nome || !email || !telefone || !dataAdesao) {
+      alert("Preencha nome, email, telefone e data de adesão.");
+      return;
+    }
+    setSalvando(true);
+    try {
+      await api("/colaboradores", {
+        method: "POST",
+        body: JSON.stringify({ nome, email, telefone, dataAdesao, status, informacoesAdicionais }),
+      });
+      router.push("/colaboradores");
+    } catch (err) {
+      console.error("Erro ao salvar colaborador:", err);
+      alert(err instanceof Error ? err.message : "Erro ao salvar o colaborador.");
+    } finally {
+      setSalvando(false);
+    }
   };
 
   return (
@@ -257,6 +274,7 @@ export default function CadastrarColaboradorPage() {
           {/* Botão Salvar */}
           <button
             onClick={handleSalvar}
+            disabled={salvando}
             style={{
               width: "100%",
               padding: "13px",
@@ -266,11 +284,12 @@ export default function CadastrarColaboradorPage() {
               borderRadius: 8,
               fontSize: 15,
               fontWeight: "bold",
-              cursor: "pointer",
+              cursor: salvando ? "not-allowed" : "pointer",
+              opacity: salvando ? 0.6 : 1,
               marginTop: 4,
             }}
           >
-            Salvar
+            {salvando ? "Salvando…" : "Salvar"}
           </button>
         </div>
       </div>

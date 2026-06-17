@@ -1,17 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Pencil, MinusCircle } from "lucide-react";
+import { api } from "@/lib/api";
 
 type StatusType = "Ativo" | "Inativo" | "Pausado";
+
+interface Contribuicao {
+  valor: string;
+  data: string;
+}
 
 interface Colaborador {
   id: number;
   nome: string;
   status: StatusType;
   dataAdesao: string;
-  ultimaContribuicao: string | number;
+  contribuicoes?: Contribuicao[];
 }
 
 const statusColor: Record<StatusType, string> = {
@@ -20,37 +26,25 @@ const statusColor: Record<StatusType, string> = {
   Pausado: "#FF9800",
 };
 
-const mockColaboradores: Colaborador[] = [
-  {
-    id: 1,
-    nome: "Nome",
-    status: "Ativo",
-    dataAdesao: "14/01/2025",
-    ultimaContribuicao: "+1500",
-  },
-  {
-    id: 2,
-    nome: "Nome",
-    status: "Inativo",
-    dataAdesao: "26/03/2025",
-    ultimaContribuicao: 0,
-  },
-  {
-    id: 3,
-    nome: "Nome",
-    status: "Pausado",
-    dataAdesao: "10/02/2023",
-    ultimaContribuicao: "+1000",
-  },
-];
-
 export default function ColaboradoresPage() {
   const router = useRouter();
-  const [colaboradores, setColaboradores] =
-    useState<Colaborador[]>(mockColaboradores);
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
 
-  const handleRemover = (id: number) => {
-    setColaboradores((prev) => prev.filter((c) => c.id !== id));
+  useEffect(() => {
+    api<Colaborador[]>("/colaboradores")
+      .then(setColaboradores)
+      .catch((err) => console.error("Erro ao carregar colaboradores:", err));
+  }, []);
+
+  const handleRemover = async (id: number) => {
+    if (!confirm("Tem certeza que deseja excluir este colaborador?")) return;
+    try {
+      await api(`/colaboradores/${id}`, { method: "DELETE" });
+      setColaboradores((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir:", err);
+      alert(err instanceof Error ? err.message : "Erro ao excluir.");
+    }
   };
 
   return (
@@ -173,16 +167,11 @@ export default function ColaboradoresPage() {
                 <div
                   style={{
                     fontSize: 13,
-                    color:
-                      col.ultimaContribuicao === 0
-                        ? "#555"
-                        : "#4dd0b8",
+                    color: col.contribuicoes?.[0] ? "#4dd0b8" : "#555",
                     fontWeight: "bold",
                   }}
                 >
-                  {col.ultimaContribuicao === 0
-                    ? "0"
-                    : col.ultimaContribuicao}
+                  {col.contribuicoes?.[0]?.valor ?? "0"}
                 </div>
               </div>
 
