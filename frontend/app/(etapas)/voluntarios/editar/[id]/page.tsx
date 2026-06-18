@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
@@ -23,10 +23,30 @@ const FORM_INICIAL: FormVoluntario = {
   informacoesAdicionais: "",
 };
 
-export default function CadastroVoluntarioPage() {
+export default function EditarVoluntarioPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params?.id as string;
+
   const [form, setForm] = useState<FormVoluntario>(FORM_INICIAL);
   const [salvando, setSalvando] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    api<Partial<FormVoluntario>>(`/voluntarios/${id}`)
+      .then((v) =>
+        setForm({
+          nome: v.nome ?? "",
+          email: v.email ?? "",
+          telefone: v.telefone ?? "",
+          informacoesAdicionais: v.informacoesAdicionais ?? "",
+        })
+      )
+      .catch((err) => {
+        console.error("Erro ao carregar voluntário:", err);
+        alert("Não foi possível carregar o voluntário.");
+      });
+  }, [id]);
 
   const handleChange = (field: keyof FormVoluntario) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -40,7 +60,7 @@ export default function CadastroVoluntarioPage() {
     if (!podeSalvar) return;
     setSalvando(true);
     try {
-      await api("/voluntarios", { method: "POST", body: JSON.stringify(form) });
+      await api(`/voluntarios/${id}`, { method: "PUT", body: JSON.stringify(form) });
       router.push("/voluntarios/lista");
     } catch (err) {
       console.error("Erro ao salvar voluntário:", err);
@@ -58,7 +78,7 @@ export default function CadastroVoluntarioPage() {
 
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-5">
 
-        <PageTitle>Cadastro de Voluntário</PageTitle>
+        <PageTitle>Editar Voluntário</PageTitle>
 
         <InputGroup
           label="Nome"

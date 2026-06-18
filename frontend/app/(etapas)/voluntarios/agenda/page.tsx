@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { MdPersonAdd, MdNoteAdd } from "react-icons/md";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -38,6 +39,7 @@ function formatarData(dateKey: string): string {
 type ModalAberto = "voluntario" | "lembrete" | null;
 
 export default function AgendaVoluntariosPage() {
+  const router = useRouter();
   const hoje = new Date();
   const [ano, setAno] = useState(hoje.getFullYear());
   const [mes, setMes] = useState(hoje.getMonth());
@@ -83,7 +85,7 @@ export default function AgendaVoluntariosPage() {
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
 
-      <Header showBack={true} />
+      <Header showBack onBack={() => router.push("/voluntarios")} />
       <PawBackground />
 
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">

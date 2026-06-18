@@ -1,51 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MdSearch } from "react-icons/md";
+import { MdSearch, MdPersonAdd } from "react-icons/md";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
 import VoluntarioRow from "@/components/VoluntarioRow";
 import ConfirmModal from "@/components/ConfirmModal";
+import { api } from "@/lib/api";
 
-// ---------------------------------------------------------------------------
-// Tipos
-// ---------------------------------------------------------------------------
 interface Voluntario {
   id: number;
   nome: string;
 }
 
-// ---------------------------------------------------------------------------
-// Dados mock — substituir pela chamada à API quando o backend estiver pronto
-// ---------------------------------------------------------------------------
-const VOLUNTARIOS_MOCK: Voluntario[] = [
-  { id: 1,  nome: "Aline Tavares"    },
-  { id: 2,  nome: "Ana Ribeiro"      },
-  { id: 3,  nome: "André Moraes"     },
-  { id: 4,  nome: "Bruno Azevedo"    },
-  { id: 5,  nome: "Caio Ribeiro"     },
-  { id: 6,  nome: "Daniela Pires"    },
-  { id: 7,  nome: "Daniel Freire"    },
-  { id: 8,  nome: "Diego Freitas"    },
-  { id: 9,  nome: "Eduardo Campos"   },
-  { id: 10, nome: "Fernanda Prado"   },
-  { id: 11, nome: "Felipe Duarte"    },
-  { id: 12, nome: "Fábio Cunha"      },
-  { id: 13, nome: "Gabriel Oliveira" },
-  { id: 14, nome: "Gabriela Siqueira"},
-  { id: 15, nome: "Henrique Paiva"   },
-  { id: 16, nome: "Igor Carvalho"    },
-  { id: 17, nome: "Letícia Xavier"   },
-];
-
 export default function ListaVoluntariosPage() {
   const router = useRouter();
 
-  const [voluntarios, setVoluntarios] = useState<Voluntario[]>(VOLUNTARIOS_MOCK);
+  const [voluntarios, setVoluntarios] = useState<Voluntario[]>([]);
   const [busca, setBusca] = useState("");
   const [voluntarioParaExcluir, setVoluntarioParaExcluir] = useState<Voluntario | null>(null);
+
+  useEffect(() => {
+    api<Voluntario[]>("/voluntarios")
+      .then(setVoluntarios)
+      .catch((err) => console.error("Erro ao carregar voluntários:", err));
+  }, []);
 
   const voluntariosFiltrados = voluntarios.filter((v) =>
     v.nome.toLowerCase().includes(busca.toLowerCase())
@@ -55,17 +36,24 @@ export default function ListaVoluntariosPage() {
     router.push(`/voluntarios/editar/${id}`);
   };
 
-  const handleConfirmarExclusao = () => {
+  const handleConfirmarExclusao = async () => {
     if (!voluntarioParaExcluir) return;
-    // TODO: integrar com API para deletar o voluntário
-    setVoluntarios((prev) => prev.filter((v) => v.id !== voluntarioParaExcluir.id));
-    setVoluntarioParaExcluir(null);
+    const id = voluntarioParaExcluir.id;
+    try {
+      await api(`/voluntarios/${id}`, { method: "DELETE" });
+      setVoluntarios((prev) => prev.filter((v) => v.id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir voluntário:", err);
+      alert(err instanceof Error ? err.message : "Erro ao excluir.");
+    } finally {
+      setVoluntarioParaExcluir(null);
+    }
   };
 
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
 
-      <Header showBack={true} />
+      <Header showBack onBack={() => router.push("/voluntarios")} />
       <PawBackground />
 
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">
@@ -108,6 +96,15 @@ export default function ListaVoluntariosPage() {
             </p>
           )}
         </div>
+
+        {/* Botão adicionar voluntário */}
+        <button
+          onClick={() => router.push("/voluntarios/cadastrar")}
+          className="w-full flex items-center justify-center gap-2 bg-[#2DB38B] text-white rounded-full px-6 py-3 text-sm font-semibold shadow-md hover:bg-[#25967A] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+        >
+          <MdPersonAdd size={20} />
+          Adicionar voluntário
+        </button>
 
       </main>
 

@@ -1,15 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { MdCalendarMonth, MdPersonAdd, MdPeople } from "react-icons/md";
+import { MdCalendarMonth, MdPeople } from "react-icons/md";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
 
 const menuItems = [
-  { label: "Agenda",                 icon: <MdCalendarMonth size={22} />, href: "/voluntarios/agenda"  },
-  { label: "Cadastrar Voluntário",   icon: <MdPersonAdd size={22} />,     href: "/voluntarios/cadastrar" },
-  { label: "Lista de Voluntários",   icon: <MdPeople size={22} />,        href: "/voluntarios/lista"   },
+  { label: "Agenda",               icon: <MdCalendarMonth size={22} />, href: "/voluntarios/agenda" },
+  { label: "Lista de Voluntários", icon: <MdPeople size={22} />,        href: "/voluntarios/lista" },
 ];
 
 export default function VoluntariosPage() {
@@ -18,7 +17,7 @@ export default function VoluntariosPage() {
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-hidden md:ml-56 pb-16 md:pb-0">
 
-      <Header showBack={true} />
+      <Header />
       <PawBackground />
 
       <main className="
