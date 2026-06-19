@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { MdSearch, MdEdit, MdDelete, MdAddCircleOutline } from "react-icons/md";
+import { MdSearch, MdEdit, MdDelete, MdAddCircleOutline, MdFileDownload } from "react-icons/md";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -15,11 +15,18 @@ import ConfirmModal from "@/components/ConfirmModal";
 export interface Animal {
   id: number;
   nome: string;
-  idade: string;
-  raca: string;
-  setor: string;
-  canil: string;
+  tipo?: string;
+  raca?: string;
+  idade?: string;
+  sexo?: string;
+  setor?: string;
+  canil?: string;
+  cor?: string;
+  temperamento?: string;
+  vacinacao?: string;
+  dataVacinacao?: string;
   foto?: string;
+  outros?: string;
 }
 
 interface AnimalListPageProps {
@@ -65,6 +72,26 @@ export default function AnimalListPage({
 
   const handleEditar = (animal: Animal) => {
     router.push(`${editarBase}?id=${animal.id}`);
+  };
+
+  const exportarCSV = () => {
+    const colunas = ["ID", "Nome", "Raça", "Idade", "Sexo", "Setor", "Canil", "Cor", "Temperamento", "Vacinação", "Data Vacinação", "Outros"];
+    const campos: (keyof Animal)[] = ["id", "nome", "raca", "idade", "sexo", "setor", "canil", "cor", "temperamento", "vacinacao", "dataVacinacao", "outros"];
+
+    const linhas = [
+      colunas.join(","),
+      ...animaisFiltrados.map((a) =>
+        campos.map((c) => `"${String(a[c] ?? "").replace(/"/g, '""')}"`).join(",")
+      ),
+    ];
+
+    const blob = new Blob(["﻿" + linhas.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${tipo === "cao" ? "caes" : "gatos"}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleConfirmarExclusao = async () => {
@@ -163,14 +190,26 @@ export default function AnimalListPage({
           {animaisFiltrados.length !== 1 ? "s" : ""}
         </p>
 
-        {/* Botão adicionar novo animal */}
-        <button
-          onClick={() => router.push(`${editarBase}?tipo=${tipo}`)}
-          className="w-full flex items-center justify-center gap-2 bg-[#2DB38B] text-white rounded-full px-6 py-3 text-sm font-semibold shadow-md hover:bg-[#25967A] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-        >
-          <MdAddCircleOutline size={20} />
-          Adicionar {tipo === "cao" ? "cão" : "gato"}
-        </button>
+        {/* Botões de ação */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => router.push(`${editarBase}?tipo=${tipo}`)}
+            className="flex-1 flex items-center justify-center gap-2 bg-[#2DB38B] text-white rounded-full px-6 py-3 text-sm font-semibold shadow-md hover:bg-[#25967A] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <MdAddCircleOutline size={20} />
+            Adicionar {tipo === "cao" ? "cão" : "gato"}
+          </button>
+
+          <button
+            onClick={exportarCSV}
+            disabled={animaisFiltrados.length === 0}
+            title="Exportar lista como CSV"
+            className="flex items-center justify-center gap-2 bg-white border-2 border-[#2DB38B] text-[#2DB38B] rounded-full px-4 py-3 text-sm font-semibold shadow-sm hover:bg-[#2DB38B] hover:text-white active:scale-[0.98] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <MdFileDownload size={20} />
+            CSV
+          </button>
+        </div>
 
       </main>
 
