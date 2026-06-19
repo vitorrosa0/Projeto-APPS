@@ -13,9 +13,6 @@ import AgendarVoluntarioModal from "./AgendarVoluntarioModal";
 import LembreteModal from "./LembreteModal";
 import { Agendamento, Lembrete, toDateKey } from "./types";
 
-// ---------------------------------------------------------------------------
-// Mock inicial — substituir pela API
-// ---------------------------------------------------------------------------
 const AGENDAMENTOS_MOCK: Agendamento[] = [
   { id: 1, data: "2025-10-11", voluntario: "Wilton Pereira", motivo: "Cuidados diários", horario: "09:00" },
   { id: 2, data: "2025-10-11", voluntario: "Daniela Pires",  motivo: "Banho",            horario: "13:00" },
@@ -23,9 +20,6 @@ const AGENDAMENTOS_MOCK: Agendamento[] = [
 
 const LEMBRETES_MOCK: Lembrete[] = [];
 
-// ---------------------------------------------------------------------------
-// Helpers de formatação
-// ---------------------------------------------------------------------------
 const MESES_PT = [
   "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
@@ -49,11 +43,9 @@ export default function AgendaVoluntariosPage() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>(AGENDAMENTOS_MOCK);
   const [lembretes, setLembretes] = useState<Lembrete[]>(LEMBRETES_MOCK);
 
-  // Sets para marcadores do calendário
   const datasComVoluntario = new Set(agendamentos.map((a) => a.data));
   const datasComLembrete = new Set(lembretes.map((l) => l.data));
 
-  // Agendamentos e lembrete do dia selecionado
   const agendamentosDoDia = agendamentos.filter((a) => a.data === diaSelecionado);
   const lembreteDoDia = lembretes.find((l) => l.data === diaSelecionado);
 
@@ -68,13 +60,11 @@ export default function AgendaVoluntariosPage() {
   };
 
   const handleSalvarAgendamento = (dados: Omit<Agendamento, "id">) => {
-    // TODO: integrar com API
     const novoId = agendamentos.length > 0 ? Math.max(...agendamentos.map((a) => a.id)) + 1 : 1;
     setAgendamentos((prev) => [...prev, { id: novoId, ...dados }]);
   };
 
   const handleSalvarLembrete = (texto: string) => {
-    // TODO: integrar com API
     if (!diaSelecionado) return;
     setLembretes((prev) => [
       ...prev.filter((l) => l.data !== diaSelecionado),
@@ -92,7 +82,6 @@ export default function AgendaVoluntariosPage() {
 
         <PageTitle>Calendário de Voluntários</PageTitle>
 
-        {/* Calendário */}
         <CalendarioVoluntarios
           ano={ano}
           mes={mes}
@@ -104,14 +93,11 @@ export default function AgendaVoluntariosPage() {
           onProximoMes={handleProximoMes}
         />
 
-        {/* Painel do dia selecionado */}
         {diaSelecionado && (
           <div className="flex flex-col gap-3">
 
-            {/* Agendamentos do dia */}
             <AgendamentoDiaList agendamentos={agendamentosDoDia} />
 
-            {/* Ações do dia */}
             <div className="flex gap-3">
               <button
                 onClick={() => setModalAberto("voluntario")}
@@ -140,7 +126,6 @@ export default function AgendaVoluntariosPage() {
               </button>
             </div>
 
-            {/* Lembrete do dia */}
             {lembreteDoDia && (
               <div className="bg-[#2DB38B]/10 border border-[#2DB38B]/30 rounded-xl px-4 py-3">
                 <p className="text-xs font-semibold text-[#2DB38B] mb-1">Lembrete:</p>
@@ -153,7 +138,6 @@ export default function AgendaVoluntariosPage() {
 
       </main>
 
-      {/* Modal de agendar voluntário */}
       {modalAberto === "voluntario" && diaSelecionado && (
         <AgendarVoluntarioModal
           data={diaSelecionado}
@@ -163,7 +147,6 @@ export default function AgendaVoluntariosPage() {
         />
       )}
 
-      {/* Modal de lembrete */}
       {modalAberto === "lembrete" && diaSelecionado && (
         <LembreteModal
           dataFormatada={formatarData(diaSelecionado)}
