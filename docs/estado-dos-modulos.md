@@ -21,19 +21,19 @@ As tabelas de estado (seção 2) estão divididas nas seguintes colunas:
 
 - **Frontend:** Telas de listagem (separada para cães/gatos) e modais construídos. Funcionalidade de exportação para CSV funcional. Faltam telas para registro de entrada/saída.
 - **Backend:** CRUD completo implementado (`/animais`), com filtros e integração ao Prisma (SQLite). Falta lógica e tabelas para histórico de abrigamento (entrada/saída).
-- **Integração:** Completamente integrado nas funcionalidades existentes (CRUD básico e listagem).
+- **Integração:** Parcialmente integrado. O CRUD básico funciona, mas a foto do formulário gera apenas preview local (não é enviada ao backend) e a busca falha com campos opcionais vazios.
 - **Testes:** **[PENDENTE]** Não há testes unitários, de integração ou E2E implementados até o momento.
 
 | Funcionalidade / Tela | Status de Implementação | Funcional e Integrado? | Problemas Conhecidos / Dependências |
 | :--- | :--- | :--- | :--- |
-| **Listagem e CRUD Básico** | Concluído | **Sim** | **[PENDENTE]** Validar com a ONG se os campos de cadastro são suficientes. |
+| **Listagem e CRUD Básico** | Concluído | **Parcial** | Upload de foto (apenas preview) e busca (erro com campos vazios) requerem correção. **[PENDENTE]** Validar campos com a ONG. |
 | **Exportação (CSV)** | Concluído | **Sim** (Recém-implementado) | Nenhuma dependência imediata. |
 | **Registro de Entrada/Saída** | Pendente | Não aplicável | Faltam telas, rotas e tabelas no banco de dados. |
 
 ### 2.2 Módulo: Colaboradores (e Voluntários)
 **Responsáveis (Subgrupo):** Lucas Tinoco, Lennon Rangel  
 
-- **Frontend:** Telas de listagem, cadastro e edição de colaboradores e voluntários concluídas. Visão de histórico de contribuições disponível.
+- **Frontend:** Telas de listagem, cadastro e edição de colaboradores e voluntários concluídas. Visão de histórico de contribuições disponível. Agenda de voluntários possui interface com calendário (dados locais).
 - **Backend:** Rotas e controllers de colaboradores e voluntários implementados. Rotas de registro de contribuições criadas.
 - **Integração:** Frontend se comunica corretamente com a API para criar/listar colaboradores e contribuições. Faltam integrações para a agenda de voluntários.
 - **Testes:** **[PENDENTE]** Não há testes unitários, de integração ou E2E implementados até o momento.
@@ -42,8 +42,8 @@ As tabelas de estado (seção 2) estão divididas nas seguintes colunas:
 | :--- | :--- | :--- | :--- |
 | **CRUD de Colaboradores** | Concluído | **Sim** | Nenhuma. |
 | **Histórico de Contribuições** | Concluído | **Sim** | **[PENDENTE]** Relacionar contribuições de colaboradores fixos com doações avulsas (Finanças). |
-| **Cadastro de Voluntários** | Parcial | **Não** (Requer revisão final) | **[PENDENTE]** Validar exatamente com a ONG as diferenças de perfil. |
-| **Agenda de Voluntários** | Pendente | Não aplicável | Falta interface de agenda (motivos e lembretes) e rotas da API. |
+| **Cadastro de Voluntários** | Concluído | **Sim** | **[PENDENTE]** Validar exatamente com a ONG as diferenças de perfil. |
+| **Agenda de Voluntários** | Frontend Estático (Mock) | **Não** | Interface criada com calendário e dados locais. Backend e integração pendentes. |
 
 ### 2.3 Módulo: Financeiro
 **Responsáveis (Subgrupo):** Allan Chang, Felipe Agapito  
