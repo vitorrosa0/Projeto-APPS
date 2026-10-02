@@ -72,7 +72,7 @@ Para garantir o avanço unificado do projeto, mapeamos os seguintes gargalos e d
 
 ### 3.2 Grupo Colaboradores (e Voluntários)
 - **Definir Perfis com a ONG:** Esclarecer as diferenças práticas entre um "Colaborador" (fixo) e um "Voluntário" (esporádico), focando no que a ONG precisa saber sobre cada um.
-- **Finalizar a Agenda de Voluntários:** A partir da validação de perfis, criar a interface e as rotas para marcação de presenças, atividades realizadas (banho, passeio) e lembretes.
+- **Finalizar a Agenda de Voluntários:** A partir da validação de perfis, integrar a interface existente ao backend e implementar as rotas e estruturas necessárias para persistir agendamentos, atividades realizadas (banho, passeio) e lembretes.
 - **Alinhamento com o Financeiro:** Definir em conjunto com o grupo Financeiro se a tabela `Contribuicao` continuará separada de `Doacao` ou se farão um modelo unificado de receitas no banco de dados.
 
 ### 3.3 Grupo Financeiro
