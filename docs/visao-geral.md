@@ -171,20 +171,7 @@ As tarefas de todas as frentes são acompanhadas no [Trello do projeto](https://
 
 ## 6. Decisões anteriores
 
-Decisões tomadas no primeiro ciclo de desenvolvimento que ajudam a entender o estado atual do código:
-
-| Decisão | Motivo / observação |
-|---|---|
-| Frontend em **Next.js + React + TypeScript + Tailwind CSS** | Familiaridade da equipe com as tecnologias |
-| Backend em **Node.js + Express**, organizado em rotas e controllers | Familiaridade da equipe com as tecnologias |
-| **Prisma** como ORM e **SQLite** como banco | SQLite simplifica o desenvolvimento local. O schema já indica os passos para migrar para **PostgreSQL** em produção |
-| Autenticação com **JWT** | Cadastro e login de usuários; há um usuário administrador padrão criado pelo seed para desenvolvimento |
-| Interface **mobile first** | Os usuários estão no dia a dia do abrigo. Menu inferior no celular e barra lateral no desktop |
-| Nomes em **português** no código (rotas, modelos, campos) | Mantém o vocabulário alinhado ao da ONG |
-| Estrutura de setores (A–I) e baias/canis do abrigo fixa no frontend | Reflete a organização física da SJPA. **[PENDENTE]** Confirmar se a estrutura está correta e atualizada |
-| Divisão do sistema em três módulos | Definida após conversas com a representante da ONG (ver seção 4) |
-
-- **[PENDENTE]** Onde o sistema será hospedado e quem será responsável pela manutenção após o fim do projeto.
+As decisões técnicas e de organização do projeto (tecnologias, estrutura, dados e integração entre módulos), com a situação de cada uma, estão no registro de [Decisões Técnicas](./decisoes-tecnicas.md).
 
 ---
 
