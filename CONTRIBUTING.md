@@ -119,7 +119,7 @@ git push origin animais/main
 
 - Os conflitos são resolvidos **na branch do grupo** que abriu a PR, nunca na `develop`.
 - Quem resolve o conflito testa o sistema antes do push (ver as validações da seção 6.3).
-- Quando o conflito envolve código de outro grupo, o grupo resolve **junto com um integrante desse grupo**. Na dúvida, prevalece o que já está na `develop`, porque esse código já foi revisado.
+- Quando o conflito envolve código de outro grupo, a resolução é **combinada com um integrante desse grupo**. Nenhuma alteração de outro grupo é descartada sem a concordância dele, e nenhuma alteração do próprio grupo é descartada só para encerrar o conflito. Se os grupos não chegarem a um acordo, a Documentação participa da conversa antes do push.
 
 **Passo a passo:**
 
@@ -136,8 +136,29 @@ git push origin animais/main
 |---|---|
 | `package-lock.json` | Resolva primeiro o `package.json`. Depois rode `npm install` na pasta afetada para gerar o lock novamente e adicione o arquivo gerado. Não edite o lock à mão. |
 | `backend/prisma/schema.prisma` | Mantenha os modelos e campos dos dois lados. Depois rode `npx prisma validate` e `npx prisma migrate dev` na pasta `backend`. |
-| `backend/prisma/migrations/` | Nunca edite nem apague uma migração que já está na `develop`. Se a sua migração ainda não integrada conflitar, apague só a sua, atualize a branch e gere de novo com `npx prisma migrate dev --name <descricao>`. |
+| `backend/prisma/migrations/` | Mantenha as pastas de migração dos dois lados e siga as regras de migrações logo abaixo. |
 | Arquivos compartilhados do frontend (`frontend/lib/api.ts`, `frontend/components/`, `frontend/app/layout.tsx`) | Mantenha as alterações dos dois grupos e confira na tela as páginas dos dois módulos. |
+
+**Migrações do Prisma**
+
+Uma migração que ainda não está na `develop` não é necessariamente só sua. Depois que ela é enviada ao GitHub, por exemplo na `<grupo>/main`, outros integrantes podem tê-la baixado e aplicado no banco local com `npx prisma migrate dev`. O Prisma registra cada migração aplicada, com o nome e o conteúdo, na tabela `_prisma_migrations` do banco. Se a pasta dessa migração for apagada ou alterada depois, o histórico do repositório deixa de bater com o do banco, e o Prisma pede para recriar o banco, o que apaga os dados locais.
+
+**Obrigatório**
+
+- Nunca edite nem apague uma migração que já está na `develop`, na `homolog` ou na `main`.
+- Recriar uma migração (apagar a pasta e gerar de novo) só é permitido quando ela **ainda não foi enviada ao GitHub**, ou seja, existe apenas no seu computador.
+- Se a migração já foi enviada para uma branch do grupo, não a recrie. Corrija o que for preciso com uma **nova migração** por cima, gerada com `npx prisma migrate dev --name <descricao>`.
+- **Exceção:** uma migração enviada apenas para uma branch do grupo pode ser recriada se **todos os integrantes que a baixaram concordarem**. Nesse caso, cada um faz cópia do seu banco local antes de atualizar a branch, porque o Prisma vai pedir para recriá-lo.
+
+**Passo a passo quando o merge da `develop` traz migrações novas:**
+
+1. Conclua o merge mantendo as pastas de migração dos dois lados. Resolva o `schema.prisma` como indicado na tabela acima.
+2. Faça uma cópia do arquivo do banco local indicado na `DATABASE_URL` (por exemplo, `dev.db`).
+3. Na pasta `backend`, rode `npx prisma migrate dev`. Ele aplica as migrações vindas da `develop` e, se o schema combinado ainda tiver diferenças, gera uma nova migração. Dê a ela um nome que indique o ajuste, por exemplo `--name ajusta-schema-apos-merge`.
+4. Se o Prisma pedir para recriar o banco (*reset*), **não confirme de imediato**. Esse pedido indica que uma migração já aplicada foi alterada ou apagada. Descubra qual foi e, se ela já estava no GitHub, restaure a versão original. Só confirme o *reset* quando a regra acima permitir e a cópia do banco estiver feita.
+5. Se uma nova migração foi gerada, faça um commit com ela seguindo a seção 4. Depois rode as validações da seção 6.3.
+
+**Por quê:** todos os bancos, locais e de homologação, precisam ter a mesma sequência de migrações que está no repositório. Corrigir com uma migração nova preserva essa sequência e os dados de quem já aplicou a anterior.
 
 **Recomendado:** para conflitos simples, de poucas linhas, o editor de conflitos do GitHub (*Resolve conflicts* na PR) pode ser usado, porque ele faz o mesmo merge da `develop` na branch do grupo. Para conflitos maiores, resolva localmente, onde dá para rodar o sistema.
 
