@@ -165,6 +165,8 @@ Dividida em três subgrupos, um por módulo. Todos têm as mesmas responsabilida
 4. Avisam o time de Documentação para avaliação.
 5. Após aprovação, o PR é mesclado na `develop`.
 
+As regras detalhadas desse fluxo (nomes de branches, padrão de commits, estratégia de merge, conteúdo e revisão das PRs) estão no [Guia de Contribuição](../CONTRIBUTING.md).
+
 As tarefas de todas as frentes são acompanhadas no [Trello do projeto](https://trello.com/b/ZVD1CGss/projeto-apps).
 
 ---
