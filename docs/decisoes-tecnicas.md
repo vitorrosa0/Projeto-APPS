@@ -102,7 +102,7 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 | **Status** | Proposta pendente |
 | **Decisão / prática** | **Proposta existente:** usar PostgreSQL em produção. O schema, o `prisma.config.ts` e o `src/prisma.js` trazem comentários com os passos de migração e sugestões de serviços gratuitos. Esses comentários são orientação, não decisão aprovada. |
 | **Justificativa** | Não registrada. Os comentários no código não explicam o motivo da recomendação. |
-| **Impactos** | Depende da hospedagem (DT-23). A troca de banco exige recriar as migrations para o novo provedor e testar os campos de texto descritos em DT-14. |
+| **Impactos** | Depende da hospedagem (DT-23). As migrations atuais foram geradas para SQLite e não podem ser aplicadas diretamente em outro provedor. A troca de banco exige um conjunto de migrations para o novo provedor e testes dos campos de texto descritos em DT-14. **Isso não autoriza apagar nem reescrever migrations já publicadas:** as regras de migrações do [Guia de Contribuição, seção 2.5](../CONTRIBUTING.md#25-resolver-conflitos) continuam valendo. Como gerar as migrations do novo provedor, o que fazer com o histórico em SQLite e como migrar os dados existentes são questões em aberto, que fazem parte desta proposta e precisam ser aprovadas antes da troca. |
 | **Validação** | Documentação e grupos de Desenvolvimento, junto com a definição de DT-23. |
 | **Cartão / PR** | [DOC — Documentação e padrões](https://trello.com/c/qqbdAPEF) (versão de homologação). |
 
@@ -162,8 +162,8 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 | **Decisão / prática** | **Proposta:** as regras do [Guia de Contribuição](../CONTRIBUTING.md). Branch de consolidação `<grupo>/main`, Conventional Commits e integração com merge commit. Este registro não repete as regras; o `CONTRIBUTING.md` é a referência. |
 | **Justificativa** | Está no próprio guia. Entre os motivos, a preservação da autoria individual para comprovação acadêmica. |
 | **Impactos** | Afeta todos os grupos. |
-| **Validação** | Subgrupos, conforme a seção 10 do `CONTRIBUTING.md`. Quando a PR do guia for integrada e os grupos confirmarem, esta entrada passa a Confirmada. |
-| **Cartão / PR** | PR do `CONTRIBUTING.md` (em revisão) |
+| **Validação** | Subgrupos, conforme a [seção 10 do `CONTRIBUTING.md`](../CONTRIBUTING.md#10-validação-com-os-subgrupos). O guia já foi integrado ([PR #5](https://github.com/vitorrosa0/Projeto-APPS/pull/5)), mas a integração não equivale à confirmação dos grupos: na seção 10, todos os grupos ainda constam como Pendente. Esta entrada só passa a Confirmada quando houver o registro da confirmação de cada grupo. |
+| **Cartão / PR** | [PR #5](https://github.com/vitorrosa0/Projeto-APPS/pull/5) (integrada) |
 
 ### DT-10 — Documentação versionada em `docs/`
 
@@ -310,10 +310,10 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 | Campo | Registro |
 |---|---|
 | **Status** | Prática atual |
-| **Decisão / prática** | API REST com JSON. O frontend faz todas as chamadas pela função `api()` de `frontend/lib/api.ts`, que usa `NEXT_PUBLIC_API_URL` (padrão `http://localhost:3001`) e lança um erro com a mensagem do campo `erro` quando a resposta não é bem-sucedida. O backend responde a erros com `{ "erro": "<mensagem>" }` e o status HTTP correspondente. O CORS aceita qualquer origem. |
-| **Justificativa** | Não registrada. |
-| **Impactos** | Um formato de erro único permite que todas as telas tratem erros da mesma forma. O CORS aberto precisa ser revisto antes da homologação, junto com DT-05. Não há documento dos contratos da API, que é uma atividade P0 ([Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0)). |
-| **Validação** | Documentação e grupos de Desenvolvimento, no documento de contratos da API. |
+| **Decisão / prática** | API REST com JSON. As telas de animais, colaboradores e voluntários fazem as chamadas pela função `api()` de `frontend/lib/api.ts`, que usa `NEXT_PUBLIC_API_URL` (padrão `http://localhost:3001`) e lança um erro com a mensagem do campo `erro` quando a resposta não é bem-sucedida. **As telas de login e cadastro são exceção:** usam `fetch()` diretamente (`frontend/app/(etapas)/login/page.tsx` e `frontend/app/(etapas)/cadastro/page.tsx`), com a URL `http://localhost:3001` fixa no próprio arquivo, e tratam o campo `erro` por conta própria. O backend responde a erros com `{ "erro": "<mensagem>" }` e o status HTTP correspondente. O CORS aceita qualquer origem. |
+| **Justificativa** | Não registrada. Também não há registro do motivo para login e cadastro não usarem `api()`. |
+| **Impactos** | Um formato de erro único permite que todas as telas tratem erros da mesma forma. Como login e cadastro não usam `api()` nem `NEXT_PUBLIC_API_URL`, definir essa variável em outro ambiente não muda o endereço usado por essas duas telas. Isso precisa ser corrigido antes da homologação. O CORS aberto precisa ser revisto antes da homologação, junto com DT-05. Não há documento dos contratos da API, que é uma atividade P0 ([Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0)). |
+| **Validação** | Documentação e grupos de Desenvolvimento, no documento de contratos da API. Decidir se login e cadastro passam a usar `api()`. |
 | **Cartão / PR** | [DOC — Documentação e padrões](https://trello.com/c/qqbdAPEF) |
 
 ---
@@ -334,6 +334,8 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 ---
 
 ## 6. Como registrar e mudar decisões
+
+> **Situação desta seção:** as regras de registro, aprovação, revisão e substituição abaixo são uma **proposta da Documentação** e aguardam validação da equipe, junto com o restante do registro (ver [seção 7](#7-validação-deste-registro)). Até essa validação, servem como orientação. Elas passam a ser exigidas nas revisões de PR depois de confirmadas pelos grupos.
 
 ### 6.1 Quando registrar
 
@@ -382,7 +384,9 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 
 **Obrigatório**
 
-- Uma entrada Confirmada **não é reescrita nem apagada**. Para mudar uma decisão, crie uma nova entrada com a linha `Substitui: DT-xx` e altere o status da antiga para `Substituída por DT-yy`, mantendo o texto original.
+- Uma entrada Confirmada **não é reescrita nem apagada**. Para mudar uma decisão, crie uma nova entrada com a linha `Substitui: DT-xx` e status **Proposta pendente**. A entrada antiga continua valendo, com o status inalterado, enquanto a nova estiver pendente.
+- O status da entrada antiga só muda para `Substituída por DT-yy` **depois que a nova entrada for aprovada** (seção 6.3) e passar a Confirmada, na mesma PR ou em seguida. O texto original da antiga é mantido.
+- Se a nova proposta for rejeitada, a entrada antiga continua como está, e a proposta é registrada no histórico como não aprovada.
 - Os IDs nunca são reutilizados.
 - Toda mudança de status é registrada no [histórico de alterações](#8-histórico-de-alterações).
 
@@ -426,7 +430,7 @@ Substitui: DT-04
 | ... | ... |
 ```
 
-Neste exemplo, o status da DT-04 passaria a `Substituída por DT-24`.
+Neste exemplo, a DT-24 já foi aprovada e está Confirmada. Só a partir disso o status da DT-04 passa a `Substituída por DT-24`. Enquanto a DT-24 estivesse como Proposta pendente, a DT-04 manteria o status que tinha.
 
 ---
 
@@ -449,3 +453,4 @@ As entradas foram montadas a partir dos documentos existentes e do código. Cada
 | Data | Alteração | Entradas |
 |---|---|---|
 | 02/10/2026 | Criação do registro a partir da Visão Geral, do estado dos módulos, das entregas e da leitura do código | DT-01 a DT-23 |
+| 10/10/2026 | Ajustes do code review: exceção de login e cadastro em DT-22, referência à PR #5 em DT-09, tratamento das migrations em DT-04, situação da seção 6 e momento da substituição na seção 6.5. Nenhum status alterado. | DT-04, DT-09, DT-22 |
