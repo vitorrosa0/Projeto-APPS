@@ -135,7 +135,7 @@ git push origin animais/main
 | Arquivo | Como resolver |
 |---|---|
 | `package-lock.json` | Resolva primeiro o `package.json`. Depois rode `npm install` na pasta afetada para gerar o lock novamente e adicione o arquivo gerado. Não edite o lock à mão. |
-| `backend/prisma/schema.prisma` | Mantenha os modelos e campos dos dois lados. Depois rode `npx prisma validate` e `npx prisma migrate dev` na pasta `backend`. |
+| `backend/prisma/schema.prisma` | Mantenha os modelos e campos dos dois lados. Depois rode `npx prisma validate` na pasta `backend`. Antes de executar `npx prisma migrate dev`, faça uma cópia do banco local e siga o passo a passo de migrações logo abaixo. |
 | `backend/prisma/migrations/` | Mantenha as pastas de migração dos dois lados e siga as regras de migrações logo abaixo. |
 | Arquivos compartilhados do frontend (`frontend/lib/api.ts`, `frontend/components/`, `frontend/app/layout.tsx`) | Mantenha as alterações dos dois grupos e confira na tela as páginas dos dois módulos. |
 
@@ -153,9 +153,9 @@ Uma migração que ainda não está na `develop` não é necessariamente só sua
 **Passo a passo quando o merge da `develop` traz migrações novas:**
 
 1. Conclua o merge mantendo as pastas de migração dos dois lados. Resolva o `schema.prisma` como indicado na tabela acima.
-2. Faça uma cópia do arquivo do banco local indicado na `DATABASE_URL` (por exemplo, `dev.db`).
+2. Faça uma cópia do arquivo do banco local indicado na `DATABASE_URL` (por exemplo, `dev.db`), antes da primeira execução de `npx prisma migrate dev`.
 3. Na pasta `backend`, rode `npx prisma migrate dev`. Ele aplica as migrações vindas da `develop` e, se o schema combinado ainda tiver diferenças, gera uma nova migração. Dê a ela um nome que indique o ajuste, por exemplo `--name ajusta-schema-apos-merge`.
-4. Se o Prisma pedir para recriar o banco (*reset*), **não confirme de imediato**. Esse pedido indica que uma migração já aplicada foi alterada ou apagada. Descubra qual foi e, se ela já estava no GitHub, restaure a versão original. Só confirme o *reset* quando a regra acima permitir e a cópia do banco estiver feita.
+4. Se o Prisma pedir para recriar o banco (*reset*), **não confirme de imediato**. Esse pedido pode indicar uma migração já aplicada que foi alterada ou apagada, ou uma divergência entre o schema do banco e o histórico de migrações, causada, por exemplo, por alterações manuais ou pelo uso de `prisma db push`. Investigue o motivo informado pelo Prisma. Se uma migração publicada foi alterada ou apagada, restaure a versão original, respeitando a exceção acima. Se houver alterações no banco fora das migrações, identifique o que precisa ser preservado e combine o tratamento com os envolvidos. Só confirme o *reset* depois de esclarecer a causa, verificar que o procedimento respeita as regras acima e fazer a cópia do banco.
 5. Se uma nova migração foi gerada, faça um commit com ela seguindo a seção 4. Depois rode as validações da seção 6.3.
 
 **Por quê:** todos os bancos, locais e de homologação, precisam ter a mesma sequência de migrações que está no repositório. Corrigir com uma migração nova preserva essa sequência e os dados de quem já aplicou a anterior.
