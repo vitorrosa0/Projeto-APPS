@@ -22,11 +22,11 @@ Quando uma regra tem exceções, elas estão listadas logo abaixo dela.
 
 1. **Tarefa:** a tarefa existe como cartão no [Trello do projeto](https://trello.com/b/ZVD1CGss/projeto-apps) e tem um responsável.
 2. **Desenvolvimento:** o subgrupo trabalha como preferir, em uma ou em várias branches (seção 3).
-3. **Consolidação:** o subgrupo junta os avanços na branch principal do grupo, `<grupo>/main`.
-4. **Pull request:** o subgrupo abre uma PR de `<grupo>/main` para `develop` e avisa a Documentação (seção 6).
+3. **Consolidação e conclusão das tarefas:** o subgrupo junta os avanços na branch principal do grupo, `<grupo>/main`, e encerra cada tarefa após cumprir seus critérios, revisão e validações aplicáveis (seção 7.5).
+4. **Pull request do épico:** quando todas as tarefas relacionadas ao épico estiverem concluídas, o subgrupo abre uma PR de `<grupo>/main` para `develop` e avisa a Documentação (seção 6).
 5. **Revisão:** a Documentação revisa e o subgrupo faz os ajustes pedidos (seção 7).
 6. **Integração:** com a PR aprovada, a Documentação faz o merge na `develop` (seção 5).
-7. **Encerramento:** o cartão do Trello recebe o link da PR integrada.
+7. **Encerramento do épico:** o cartão do épico recebe o link da PR integrada à `develop` e é concluído após a conferência de seus próprios critérios.
 
 ---
 
@@ -390,9 +390,9 @@ Os dois exemplos acima foram gerados simulando o fluxo deste guia em um reposit�
 
 ### 6.1 Quando abrir
 
-Abra a PR quando um conjunto de mudanças estiver funcionando de ponta a ponta e puder ser revisado sozinho. Um único cartão do Trello ou um grupo pequeno de cartões relacionados é um bom tamanho.
+Abra a PR de `<grupo>/main` para `develop` quando todas as tarefas relacionadas ao épico estiverem concluídas na branch do grupo e a entrega consolidada estiver pronta para revisão de ponta a ponta. Vincule o épico e as tarefas que compõem a entrega.
 
-**Recomendado:** prefira PRs menores e mais frequentes. Uma PR com centenas de arquivos é difícil de revisar e acumula conflitos.
+**Recomendado:** mantenha as PRs internas pequenas, com uma tarefa ou um conjunto relacionado de mudanças. Isso facilita a revisão antes da consolidação na `<grupo>/main`.
 
 **Recomendado:** se quiser retorno antes de terminar, abra a PR como **Draft**. A Documentação só faz a revisão formal quando a PR sai de Draft.
 
@@ -520,11 +520,16 @@ Antes e depois das telas alteradas (obrigatório se a PR muda alguma tela).
 
 ### 7.5 Integração e encerramento
 
+As tarefas comuns e o épico têm momentos diferentes de conclusão. Os critérios de aceite, as validações e as evidências de cada cartão continuam sendo exigidos conforme o [guia do Trello](docs/trello.md#8-critérios-de-conclusão-e-evidências).
+
 **Obrigatório**
 
-1. Com a PR aprovada e sem conflitos, um integrante da Documentação faz o merge com **Create a merge commit**.
-2. O grupo coloca o link da PR integrada no cartão do Trello e move o cartão para concluído.
-3. Se a branch for interna, o grupo pode apagá-la. A `<grupo>/main` **não** é apagada.
+1. **Tarefas comuns:** depois de cumpridos os critérios, a revisão e as validações aplicáveis, consolidar o trabalho na `<grupo>/main` e mover o cartão para `Concluído`. Registrar a PR interna integrada ou, quando o grupo trabalhar direto nessa branch, os commits e a evidência de revisão. A organização interna permanece livre (seção 3).
+2. **Épico:** depois de concluídas todas as tarefas relacionadas, abrir a PR de `<grupo>/main` para `develop`. Com a PR aprovada e sem conflitos, um integrante da Documentação faz o merge com **Create a merge commit**. Registrar o link no cartão do épico e concluí-lo após conferir seus próprios critérios e evidências.
+3. As promoções de `develop` para `homolog` e de `homolog` para `main` seguem a seção 2.1. A conclusão das tarefas na branch do grupo não autoriza integração direta dessa branch na `main`.
+4. Se a branch for interna, o grupo pode apagá-la depois da consolidação. A `<grupo>/main` **não** é apagada.
+
+**Por quê:** o cartão da tarefa registra o trabalho concluído dentro do grupo; o épico registra a entrega consolidada e sua integração entre os grupos.
 
 ---
 
@@ -543,9 +548,11 @@ Antes e depois das telas alteradas (obrigatório se a PR muda alguma tela).
 ## 9. Resumo rápido
 
 ```text
-Trello → branch do grupo (organização livre) → commits no padrão tipo(escopo): descrição
-      → merge da develop na <grupo>/main → validações → PR <grupo>/main → develop
-      → revisão da Documentação → ajustes com novos commits → merge commit → cartão concluído
+Tarefa → desenvolvimento, revisão e validações → consolidação na <grupo>/main
+       → tarefa concluída com evidências
+Todas as tarefas do épico concluídas → merge da develop na <grupo>/main → validações
+       → PR <grupo>/main para develop → revisão da Documentação → ajustes
+       → merge commit na develop → critérios e evidências conferidos → épico concluído
 ```
 
 ---
@@ -553,6 +560,8 @@ Trello → branch do grupo (organização livre) → commits no padrão tipo(esc
 ## 10. Validação com os subgrupos
 
 Este guia formaliza os acordos da seção 5 da [Visão Geral](docs/visao-geral.md). Os **nomes das branches** (seção 2) e a **estratégia de merge** (seção 5) foram definidos nesta versão e precisam ser confirmados pelos grupos.
+
+**Esclarecimento desta revisão (10/10/2026):** Lucas Ciampi definiu, na conversa de revisão da DOC-05, que as tarefas comuns são encerradas após consolidação na `<grupo>/main`, e o épico após a conclusão de suas tarefas e a integração da entrega consolidada. A alteração das seções 1, 6.1, 7.5 e 9 foi autorizada nessa conversa para distinguir os dois momentos. As validações dos subgrupos abaixo permanecem pendentes.
 
 | Grupo | Situação | Observações |
 |---|---|---|
