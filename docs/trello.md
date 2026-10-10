@@ -4,7 +4,7 @@ Este guia orienta a criação, o acompanhamento e a conclusão dos cartões no [
 
 **Situação:** primeira versão proposta na [DOC-05](https://trello.com/c/kYEQPWfz), com listas, etiquetas e modelo de cartão conferidos novamente em **10/10/2026**. As regras detalhadas abaixo ainda precisam ser validadas pela equipe e pelos subgrupos; não representam confirmação já obtida.
 
-O [Guia de Contribuição](../CONTRIBUTING.md) concentra as regras de branches, commits, PRs e merge. Em **10/10/2026**, a [DOC-04](https://trello.com/c/CCsrXka4) está na lista `Concluído`, e sua versão corrigida já foi incorporada à `documentacao/main` pela [PR #5](https://github.com/vitorrosa0/Projeto-APPS/pull/5). A conferência desta versão não identificou divergências no fluxo de revisão e integração. A validação dos subgrupos registrada no Guia de Contribuição continua pendente; o status do cartão não confirma essa validação.
+O [Guia de Contribuição](../CONTRIBUTING.md) concentra as regras de branches, commits, PRs e merge. Em **10/10/2026**, a [DOC-04](https://trello.com/c/CCsrXka4) está na lista `Concluído`, e sua versão corrigida já foi incorporada à `documentacao/main` pela [PR #5](https://github.com/vitorrosa0/Projeto-APPS/pull/5). Esse é o marco de consolidação da tarefa no grupo; a integração do épico em `develop` é uma etapa posterior. A conferência da DOC-04 e o esclarecimento desta revisão estão registrados na seção 9. A validação dos subgrupos registrada no Guia de Contribuição continua pendente; o status do cartão não confirma essa validação.
 
 ## 1. Como interpretar as orientações
 
@@ -39,7 +39,7 @@ A ANI-03 ainda é uma proposta registrada no épico; o exemplo de bug não press
 
 ### Identificação e tamanho
 
-**Obrigatório:** verificar os cartões existentes antes de criar outro para o mesmo resultado. Manter os identificadores já utilizados; o número automático do Trello não substitui o identificador do projeto. Por exemplo, a DOC-05 é o cartão nº 10 do quadro.
+**Obrigatório:** verificar os cartões existentes antes de criar outro para o mesmo resultado. Manter os identificadores já utilizados; o número automático do Trello não substitui o identificador do projeto, como `DOC-05`.
 
 **Recomendado:** usar um identificador da frente seguido de uma ação e um resultado: `DOC-05 — Documentar a organização das tarefas no Trello`. Os épicos já usam propostas de histórias com os prefixos `ANI`, `COL` e `FIN`; confirmar os próximos identificadores com o grupo para evitar repetição.
 
@@ -129,7 +129,7 @@ Exemplos:
 
 - DOC-05: `Documentação` + `Tarefa`.
 - Épico de animais: `Animais` + `Épico`.
-- Definir a ferramenta de testes dentro da DOC-11: essa avaliação é parte do trabalho, sem etiqueta de impedimento por esse motivo.
+- Definir a ferramenta de testes dentro da [DOC-11](https://trello.com/c/aiQAFtur): essa avaliação é parte do trabalho, sem etiqueta de impedimento por esse motivo.
 - Implementar receitas sem o modelo acordado entre os grupos: registrar a decisão necessária; usar `Aguardando decisão` e, se impedir a implementação, `Bloqueada`.
 
 **Recomendado:** reutilizar as etiquetas existentes. Propor novas etiquetas à Documentação quando as atuais não representarem uma necessidade recorrente; registrar a definição neste guia se a mudança for aprovada.
@@ -148,14 +148,18 @@ Backlog → Em andamento → Em revisão e testes → Concluído
 |---|---|---|
 | Backlog | Ideia, proposta ou trabalho ainda não iniciado. | Escopo entendido, campos mínimos preenchidos e alguém começa a execução. |
 | Em andamento | O responsável iniciou o trabalho. | Entrega disponível, verificações aplicáveis executadas, evidências acessíveis e revisor identificado. |
-| Em revisão e testes | Há uma versão pronta para avaliação, com PR quando aplicável. | Critérios aceitos, ajustes resolvidos e integração final realizada quando aplicável. |
+| Em revisão e testes | Há uma versão pronta para avaliação, com PR quando aplicável. | Critérios aceitos, ajustes resolvidos e consolidação na branch do grupo (tarefas comuns) ou integração em `develop` (épico), quando aplicável. |
 | Concluído | Todas as condições da seção 8 foram atendidas. | O cartão permanece como registro da entrega. |
 
 **Obrigatório:** o responsável mantém a lista coerente com a situação real. O revisor registra o resultado da avaliação na PR e/ou no cartão, com links entre eles. Abrir uma PR em rascunho para pedir opinião não significa que a entrega está pronta para revisão formal.
 
 **Obrigatório:** quando forem solicitadas correções bloqueantes, registrar quais critérios faltam e voltar a `Em andamento` ao iniciar os ajustes. Retornar a `Em revisão e testes` quando a nova versão estiver pronta. Sugestões opcionais devem ser identificadas e não impedem a conclusão por si só.
 
-**Obrigatório:** uma PR interna integrada à branch do grupo ainda não representa a integração final em `develop`. Se a entrega aguarda consolidação ou integração final, manter o cartão em `Em revisão e testes` e explicar a etapa pendente. Uma PR consolidada pode atender vários cartões, mas cada um precisa ter seus critérios e evidências conferidos.
+**Obrigatório:** concluir as tarefas comuns após cumprir seus critérios, revisão e validações aplicáveis e consolidar suas alterações na `<grupo>/main`, conforme a [seção 7.5 do Guia de Contribuição](../CONTRIBUTING.md#75-integração-e-encerramento). Enquanto uma tarefa aguarda essa consolidação, mantê-la em `Em revisão e testes`. A espera pela integração do épico em `develop` não reabre tarefas já concluídas no grupo.
+
+**Obrigatório:** o épico só segue para a PR de `<grupo>/main` para `develop` depois de concluídas todas as tarefas relacionadas. Durante a revisão e a espera pelo merge dessa PR, manter o épico em `Em revisão e testes`; concluí-lo após a integração e a conferência de seus próprios critérios e evidências. Uma PR pode atender vários cartões, mas cada um precisa ter seus critérios e evidências conferidos.
+
+**Por quê:** tarefas registram avanços consolidados no grupo, enquanto o épico acompanha a entrega completa e sua integração entre os grupos.
 
 **Exceção:** épicos podem ficar `Em andamento` enquanto seus desdobramentos percorrem listas diferentes. Só seguem para revisão e conclusão quando o resultado do épico pode ser avaliado como um todo. As correções urgentes previstas no Guia de Contribuição seguem suas regras próprias de integração, com os links registrados no cartão.
 
@@ -203,7 +207,7 @@ Próximo passo: [ação combinada; data, se houver]
 - Os critérios de aceite foram atendidos, ou o escopo foi ajustado com concordância e rastreabilidade conforme a seção 3.
 - A revisão e as validações necessárias estão registradas, incluindo a participação dos grupos ou da ONG quando exigida pelo cartão.
 - As verificações aplicáveis possuem resultados e limitações descritos. Não registrar como executado algo apenas planejado.
-- Alterações de código e documentação estão versionadas e integradas no destino final previsto pelo Guia de Contribuição, com os links das PRs.
+- Alterações de código e documentação estão versionadas no destino correspondente ao cartão: `<grupo>/main` para tarefas comuns e `develop` para o épico, conforme o Guia de Contribuição. Registrar as PRs integradas ou, no trabalho direto na branch do grupo, os commits e a evidência de revisão.
 - O documento ou resultado final pode ser acessado pelas referências do cartão.
 - A contribuição individual dos participantes e as capturas exigidas para comprovação acadêmica estão registradas ou vinculadas.
 - Não há impedimento ou decisão pendente que inviabilize o aceite.
@@ -216,7 +220,7 @@ Modelo de registro final, preenchido somente com informações verificadas:
 
 ```text
 Entrega: [resultado e link da versão final]
-PR(s): [links; indicar integração final ou justificar ausência]
+PR(s)/commits: [links; indicar consolidação no grupo ou integração do épico; justificar ausência]
 Revisão/validação: [quem avaliou, data e referência]
 Verificações: [o que foi conferido, resultados e limitações]
 Contribuições: [nome — contribuição efetiva de cada participante]
@@ -226,18 +230,22 @@ Pendências encaminhadas: [nenhuma ou links dos adiamentos aprovados]
 
 **Obrigatório para épicos e histórias:** conferir seus próprios critérios, além dos cartões associados. Concluir tarefas de frontend e backend separadamente não comprova que o fluxo funciona integrado. Trabalho retirado do recorte precisa de decisão registrada e destino no backlog.
 
+**Obrigatório para épicos:** registrar a conclusão de todas as tarefas relacionadas e a PR da entrega consolidada integrada à `develop`. Concluir os cartões filhos, por si só, não conclui o épico.
+
 **Exceção:** se um cartão foi concluído indevidamente, reabri-lo na etapa correspondente e explicar o critério pendente. Um defeito descoberto depois de uma entrega validada pode gerar um novo cartão de bug, vinculado à entrega original.
 
 ## 9. Manutenção e validação deste guia
 
 **Obrigatório:** alterações aprovadas nas listas, etiquetas ou regras de trabalho que afetem este guia devem incluir sua atualização na respectiva PR de documentação. A Documentação mantém o padrão e os responsáveis mantêm seus cartões atualizados.
 
-Antes da conclusão da DOC-05:
+**Conferência realizada em 10/10/2026:** a versão corrigida da DOC-04, incorporada à `documentacao/main` pela [PR #5](https://github.com/vitorrosa0/Projeto-APPS/pull/5), foi consultada. Na revisão da DOC-05, Lucas Ciampi esclareceu que tarefas comuns são concluídas na branch do grupo e o épico após a conclusão de suas tarefas e a integração da entrega consolidada. Esse esclarecimento motivou o ajuste deste guia e da [seção 7.5 do Guia de Contribuição](../CONTRIBUTING.md#75-integração-e-encerramento), autorizado na conversa de revisão. A revisão humana desses ajustes e a validação dos subgrupos continuam pendentes.
 
-- Conferir a versão corrigida da DOC-04 e alinhar o fluxo de revisão e integração.
+Antes da conclusão da DOC-05, ainda é necessário:
+
+- Revisar os ajustes desta entrega e sua compatibilidade com o Guia de Contribuição.
 - Validar com os grupos o modelo de cartão, as etiquetas, a movimentação e as evidências.
 - Registrar os ajustes solicitados e a confirmação efetiva, com data e referência.
-- Vincular à DOC-05 o documento, a PR integrada e as evidências de contribuição e validação.
+- Vincular à DOC-05 o documento, a PR integrada à `documentacao/main` e as evidências de contribuição e validação. A PR para `develop` será registrada no épico de Documentação quando suas tarefas estiverem concluídas.
 
 | Grupo | Situação | Data e referência da validação |
 |---|---|---|
