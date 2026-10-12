@@ -1,16 +1,38 @@
 # SJPA - Sistema de Gestão dos Animais
 
-Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão e proteção de animais, desenvolvida como parte das Práticas Extensionistas e Projeto Integrador.
+O **SJPA** é um sistema de gestão para uma ONG de proteção animal de Juiz de Fora. Ele reúne o cadastro dos animais abrigados, dos colaboradores e voluntários e o controle financeiro da instituição. É desenvolvido na disciplina Práticas de Extensão e Projeto Integrador da Uniacademia.
+
+Este repositório contém o frontend (`frontend/`), a API (`backend/`) e a documentação do projeto (`docs/`).
+
+---
+
+## Documentação
+
+O índice completo, com a situação de cada documento e a ordem de leitura sugerida para novos integrantes, desenvolvedores e revisores, está em [docs/README.md](docs/README.md).
+
+| Para | Leia |
+|---|---|
+| Entender o projeto, a ONG e a equipe | [Visão geral](docs/visao-geral.md) |
+| Saber o que já funciona e o que falta | [Estado dos módulos](docs/estado-dos-modulos.md) |
+| Ver prioridades do período | [Entregas e próximos passos](docs/entregas-e-proximos-passos.md) |
+| Contribuir com código ou documentação | [Guia de contribuição](CONTRIBUTING.md) e [organização no Trello](docs/trello.md) |
+| Consultar decisões técnicas e a arquitetura | [Decisões técnicas](docs/decisoes-tecnicas.md) e [arquitetura](docs/arquitetura.md) |
+| Configurar e seguir os padrões do frontend | [README do frontend](frontend/README.md) |
+| Configurar e seguir os padrões do backend | [README do backend](backend/README.md) |
+| Escrever e revisar testes | [Padrões de testes](docs/testes.md) |
+| Trabalhar com assistentes de IA | [AGENTS.md](AGENTS.md) e [uso de IA](docs/uso-de-ia.md) |
+
+Vários desses guias ainda aguardam validação dos subgrupos; a situação de cada um está no [índice](docs/README.md#1-documentos-do-projeto).
 
 ---
 
 ## Tecnologias
 
 ### Frontend
-- **Next.js 15+** (App Router)
+- **Next.js 16** (App Router)
 - **React 19**
 - **TypeScript**
-- **Tailwind CSS**
+- **Tailwind CSS 4**
 - **React Icons**
 
 ### Backend
@@ -22,21 +44,21 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 
 ---
 
-## Funcionalidades Implementadas
+## Módulos
 
-### Frontend
-- **Home:** Tela principal com visão geral do sistema.
-- **Login:** Autenticação de usuários cadastrados.
-- **Cadastro:** Registro de novos usuários com validação de campos.
-- **Recuperação de Senha:** Fluxo completo para solicitação de nova senha e confirmação de envio de link.
-- **Gestão de Animais:** Listagem e categorização (Cães/Gatos) de animais.
-- **Doações:** Listagem por mês e cadastro de novas doações.
-- **Colaboradores:** Listagem, cadastro e edição de colaboradores com histórico de contribuições.
-- **Interface Responsiva:** Otimizada para dispositivos móveis com menu inferior (`BottomNav`) e cabeçalho dinâmico.
+| Módulo | Escopo |
+|---|---|
+| Animais | Cadastro, listagem por tipo (cães e gatos) e exportação em CSV. |
+| Colaboradores e voluntários | Cadastro de colaboradores com histórico de contribuições, cadastro de voluntários e agenda. |
+| Financeiro | Doações, contribuições e despesas. |
 
-### Backend — API REST
+O sistema também tem cadastro, login e recuperação de senha, com interface *mobile first*. Parte das funcionalidades ainda é apenas interface com dados estáticos (agenda de voluntários e financeiro, por exemplo). O que está concluído, parcial ou pendente em cada módulo está no [estado dos módulos](docs/estado-dos-modulos.md).
 
-#### Animais (`/animais`)
+## API REST
+
+Resumo das rotas disponíveis no backend. Os padrões para criar ou alterar rotas estão no [README do backend](backend/README.md).
+
+### Animais (`/animais`)
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/animais` | Lista todos os animais (filtro opcional: `?tipo=cao` ou `?tipo=gato`) |
@@ -47,7 +69,7 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 
 **Campos do Animal:** `nome`, `tipo` (cao/gato), `raca`, `idade`, `setor`, `canil`
 
-#### Autenticação (`/auth`)
+### Autenticação (`/auth`)
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | POST | `/auth/register` | Cadastra um novo usuário (retorna token JWT) |
@@ -57,7 +79,7 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 
 > **Usuário padrão (criado pelo seed):** email `admin@sjpa.com` / senha `admin123`.
 
-#### Colaboradores (`/colaboradores`)
+### Colaboradores (`/colaboradores`)
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | GET | `/colaboradores` | Lista todos os colaboradores com última contribuição |
@@ -71,6 +93,17 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 **Campos do Colaborador:** `nome`, `email`, `telefone`, `dataAdesao`, `status` (Ativo/Inativo/Pausado), `informacoesAdicionais`
 
 **Campos da Contribuição:** `tipo` (Financeiro/Produto/Servico), `valor`, `data`
+
+### Voluntários (`/voluntarios`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/voluntarios` | Lista todos os voluntários |
+| GET | `/voluntarios/:id` | Busca um voluntário pelo ID |
+| POST | `/voluntarios` | Cadastra um novo voluntário |
+| PUT | `/voluntarios/:id` | Atualiza os dados de um voluntário |
+| DELETE | `/voluntarios/:id` | Remove um voluntário |
+
+**Campos do Voluntário:** `nome`, `email` (opcional), `telefone` (opcional), `informacoesAdicionais` (opcional)
 
 ---
 
@@ -97,6 +130,8 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
    ```
    http://localhost:3000
    ```
+
+Variáveis de ambiente, scripts de verificação e padrões de desenvolvimento do frontend estão no [README do frontend](frontend/README.md).
 
 ### Backend
 
@@ -152,3 +187,9 @@ Variáveis de ambiente, operações do dia a dia e padrões de desenvolvimento d
 - A navegação é gerida pelo hook `useRouter` do Next.js.
 - O banco de dados SQLite é gerado automaticamente na pasta `backend/` ao rodar as migrations.
 - A API roda na porta `3001` para não conflitar com o frontend Next.js na porta `3000`.
+
+---
+
+## Como Contribuir
+
+Antes de abrir uma branch ou PR, leia o [Guia de Contribuição](CONTRIBUTING.md). As tarefas são acompanhadas no [Trello do projeto](https://trello.com/b/ZVD1CGss/projeto-apps), conforme a [organização no Trello](docs/trello.md).

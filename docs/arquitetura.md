@@ -4,7 +4,7 @@ Este documento descreve a arquitetura geral do Projeto-APPS, incluindo a separa�
 
 Documento da [DOC-08](https://trello.com/c/MgZNb8qp), conferido em 10/10/2026 com o código atual, o [README](../README.md), a [visão geral](visao-geral.md), o [estado dos módulos](estado-dos-modulos.md) e as [entregas e próximos passos](entregas-e-proximos-passos.md).
 
-Os IDs de decisão citados abaixo (DT-XX) remetem ao [registro de decisões técnicas](decisoes-tecnicas.md) (DOC-06); a situação e a evidência de aprovação de cada decisão devem ser conferidas nele. O guia do backend (DOC-10) está em [backend/README.md](../backend/README.md). O guia do frontend (DOC-09, `frontend/README.md`) continua ausente nesta branch e deverá ser consultado quando disponível.
+Os IDs de decisão citados abaixo (DT-XX) remetem ao [registro de decisões técnicas](decisoes-tecnicas.md) (DOC-06); a situação e a evidência de aprovação de cada decisão devem ser conferidas nele. O guia do backend (DOC-10) está em [backend/README.md](../backend/README.md). O guia do frontend (DOC-09) está em [frontend/README.md](../frontend/README.md).
 
 As descrições de implementação indicam o comportamento observado, sem presumir aprovação de todas as práticas. As recomendações da seção 4.2 são sugestões para avaliação. A validação desta documentação e as evidências de conclusão estão pendentes, conforme a seção 5.
 
@@ -160,4 +160,4 @@ As correções documentais atendem ao pedido de revisão, mas não substituem a 
 
 Para concluir a tarefa, registrar no [cartão da DOC-08](https://trello.com/c/MgZNb8qp) ou na PR as validações aplicáveis, verificações e limitações, contribuições individuais e evidências acadêmicas. As contribuições devem indicar quem participou e o que realizou, conforme o [Guia de Contribuição](../CONTRIBUTING.md#45-autoria-e-contribuições-individuais). O cartão contém o link da [PR #7](https://github.com/vitorrosa0/Projeto-APPS/pull/7); sua aprovação, integração e a inclusão destas correções ainda precisam ser comprovadas.
 
-**Verificação documental:** conferir o conteúdo contra o código e as referências, os links e a formatação. Como esta entrega altera apenas documentação, testes da aplicação são dispensados pelo [Guia de Contribuição](../CONTRIBUTING.md#63-validações-antes-de-abrir). A disponibilidade da DOC-09 e o alinhamento com a versão integrada da DOC-06 devem ser reconferidos antes da conclusão.
+**Verificação documental:** conferir o conteúdo contra o código e as referências, os links e a formatação. Como esta entrega altera apenas documentação, testes da aplicação são dispensados pelo [Guia de Contribuição](../CONTRIBUTING.md#63-validações-antes-de-abrir). Os guias DOC-09 e DOC-10 foram integrados à `documentacao/main` ([PR #12](https://github.com/vitorrosa0/Projeto-APPS/pull/12) e [PR #10](https://github.com/vitorrosa0/Projeto-APPS/pull/10)); o alinhamento deste documento com eles e com a versão integrada da DOC-06 deve ser reconferido antes da conclusão.

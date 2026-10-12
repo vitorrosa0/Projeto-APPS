@@ -682,12 +682,14 @@ Problemas encontrados na verificação de 10/10/2026. Estão registrados para or
 | [docs/arquitetura.md](../docs/arquitetura.md) | Componentes, camadas, percurso de uma operação e limites dos módulos — DOC-08 |
 | [docs/trello.md](../docs/trello.md) | Organização dos cartões, critérios de conclusão e evidências — DOC-05 |
 | [docs/uso-de-ia.md](../docs/uso-de-ia.md) e [AGENTS.md](../AGENTS.md) | Orientações para o uso de assistentes de IA no projeto — DOC-07 |
-| Documento de testes | Estratégia, padrões e ferramenta de testes — [DOC-11](https://trello.com/c/aiQAFtur). **Ainda não existe.** |
+| [docs/testes.md](../docs/testes.md) | Padrões de testes e política de cobertura — DOC-11 |
+| [frontend/README.md](../frontend/README.md) | Execução e padrões do frontend — DOC-09 |
+| [docs/README.md](../docs/README.md) | Índice da documentação, com a situação de cada documento |
 
 **Alinhamento**
 
 - **Arquitetura (DOC-08):** conferida em 10/10/2026. As seções 1 e 3 deste documento descrevem as mesmas camadas e não divergem dela. Se a arquitetura mudar, a seção 3 é revisada na mesma PR.
-- **Testes (DOC-11):** pendente. Quando o documento de testes for integrado, revisar a seção 10 e a recomendação de funções de validação puras.
+- **Testes (DOC-11):** documento integrado em 12/10/2026 ([PR #11](https://github.com/vitorrosa0/Projeto-APPS/pull/11)). A revisão da seção 10 e da recomendação de funções de validação puras com base nele continua pendente.
 - Se houver divergência entre documentos, prevalece o que estiver registrado como decisão em [decisões técnicas](../docs/decisoes-tecnicas.md#66-evitar-divergência-entre-documentos), e este documento é ajustado.
 
 ---
@@ -715,6 +717,7 @@ Cada grupo registra a concordância ou os ajustes na PR deste documento ou no ca
 |---|---|---|
 | 10/10/2026 | 1 | Criação do documento e verificação do passo a passo de execução |
 | 12/10/2026 | 1.1 | Inclusão do guia de uso de IA (DOC-07) nos documentos relacionados; atualização das referências à DOC-10 na arquitetura e no guia de uso de IA. Ajustes da revisão: validação de tipo dos campos opcionais no exemplo da seção 5.2 e separação entre presença e tipo na regra e na lacuna L-07, com os casos reproduzidos na API em 12/10/2026 |
+| 12/10/2026 | 1.1 | Atualização dos documentos relacionados após a integração das DOC-09 e DOC-11 (índice da documentação) |
 
 ### 14.2 Contribuições
 
