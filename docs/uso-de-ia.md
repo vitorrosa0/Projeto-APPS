@@ -2,7 +2,7 @@
 
 Este guia define como a equipe utiliza assistentes de IA para desenvolver, documentar e revisar o SJPA. Seu objetivo é manter o trabalho dentro do escopo combinado, respeitar as decisões do projeto e tornar as alterações verificáveis.
 
-**Situação:** primeira versão proposta na [DOC-07](https://trello.com/c/OgekifSd), preparada em **09/10/2026** e atualizada em **10/10/2026**. A adoção pela equipe ainda depende de revisão e validação. A [visão geral](visao-geral.md) apresenta o contexto e os acordos existentes; o [registro de decisões técnicas](decisoes-tecnicas.md) é a fonte da situação de cada decisão. A integração de um documento não confirma automaticamente todas as propostas nele registradas.
+**Situação:** primeira versão proposta na [DOC-07](https://trello.com/c/OgekifSd), preparada em **09/10/2026** e atualizada em **12/10/2026**. A adoção pela equipe ainda depende de revisão e validação. A [visão geral](visao-geral.md) apresenta o contexto e os acordos existentes; o [registro de decisões técnicas](decisoes-tecnicas.md) é a fonte da situação de cada decisão. A integração de um documento não confirma automaticamente todas as propostas nele registradas.
 
 **Obrigatório**, neste guia, identifica uma regra proposta para adoção pela equipe. **Recomendado** indica uma prática útil que não bloqueia uma entrega por si só. **Exceção** explica quando a regra geral muda. Usar essas distinções também nas orientações e documentos produzidos com IA, com linguagem objetiva, justificativas e exemplos.
 
@@ -29,14 +29,14 @@ O ponto de entrada é o [AGENTS.md da raiz](../AGENTS.md). Ele direciona a leitu
 | Qualquer tarefa | Pedido/cartão, este guia e [visão geral](visao-geral.md) | Entender objetivo, limites, contexto e acordos. |
 | Alteração em um módulo | [Estado dos módulos](estado-dos-modulos.md) e código envolvido | Distinguir o que existe, o que está incompleto e o que depende de validação. |
 | Planejamento ou mudança de escopo | [Entregas e próximos passos](entregas-e-proximos-passos.md) | Conferir prioridades e propostas ainda não confirmadas. |
-| Decisão técnica, dados ou integração | [Decisões técnicas](decisoes-tecnicas.md) (DOC-06) e `docs/arquitetura.md` (DOC-08), quando disponível | Distinguir prática atual, decisão confirmada e proposta pendente; conferir limites entre componentes. |
+| Decisão técnica, dados ou integração | [Decisões técnicas](decisoes-tecnicas.md) (DOC-06) e [Arquitetura](arquitetura.md) (DOC-08) | Distinguir prática atual, decisão confirmada e proposta pendente; conferir limites entre componentes. |
 | Frontend | [frontend/AGENTS.md](../frontend/AGENTS.md), instruções específicas e `frontend/README.md` (DOC-09), quando disponível | Seguir a versão e os padrões da área. |
 | Backend | `backend/README.md` (DOC-10), quando disponível, e configuração/código envolvidos | Seguir padrões de API, persistência e execução. |
 | Testes e cobertura | `docs/testes.md` (DOC-11), quando disponível, e configuração real dos testes | Aplicar regras e metas aprovadas sem presumir ferramentas instaladas. |
-| Branches, commits e PRs | [CONTRIBUTING.md](../CONTRIBUTING.md), quando disponível | Aplicar o fluxo de contribuição sem duplicar suas regras neste guia. |
-| Cartões e evidências | `docs/trello.md` (DOC-05), quando disponível | Organizar dependências, revisão e conclusão. |
+| Branches, commits e PRs | [CONTRIBUTING.md](../CONTRIBUTING.md) | Aplicar o fluxo de contribuição sem duplicar suas regras neste guia, respeitando as validações pendentes. |
+| Cartões e evidências | [Organização das tarefas no Trello](trello.md) (DOC-05) | Organizar dependências, revisão e conclusão, respeitando as validações pendentes. |
 
-Na conferência de **10/10/2026**, esta branch contém o registro da DOC-06 e o `CONTRIBUTING.md` da DOC-04. Ambos mantêm validações da equipe pendentes. A DOC-11 está em andamento no Trello, mas `docs/testes.md` ainda não está disponível, assim como `docs/trello.md`, `docs/arquitetura.md` e os READMEs das áreas. Esse é um retrato da conferência: verificar os arquivos presentes e suas pendências em cada nova tarefa.
+Na conferência dos arquivos em **12/10/2026**, esta branch contém o registro da DOC-06, o `CONTRIBUTING.md` da DOC-04, o guia do Trello da DOC-05 e o documento de arquitetura da DOC-08. A presença dos arquivos não comprova a validação das propostas neles registradas. `docs/testes.md` e os READMEs das áreas ainda não estão disponíveis. Esse é um retrato da conferência: verificar os arquivos presentes e suas pendências em cada nova tarefa.
 
 Consultar os status e IDs da DOC-06, sem copiá-los para manter um segundo registro. Uma **Prática atual** pode continuar em uso nas mudanças rotineiras autorizadas; isso não a transforma em decisão **Confirmada**. Uma **Proposta pendente** não autoriza implementar uma escolha como definitiva. Decisões **Substituídas** servem de histórico; seguir a entrada que as substituiu.
 
@@ -49,19 +49,19 @@ Consultar os status e IDs da DOC-06, sem copiá-los para manter um segundo regis
 - Se o código e um documento divergirem, registrar o fato. O código demonstra o comportamento atual, mas não comprova que ele foi aprovado como regra.
 - Se duas fontes divergirem, indicar os trechos e seus efeitos. Encaminhar a decisão ao responsável, sem escolher silenciosamente a opção mais conveniente.
 
-**Exemplo:** a ausência da DOC-06 não impede corrigir uma busca que falha com campos opcionais vazios quando o comportamento esperado está definido. Ela também não autoriza escolher, por conta própria, como unificar doações e contribuições.
+**Exemplo:** a ausência de `docs/testes.md` (DOC-11) não impede corrigir uma busca que falha com campos opcionais vazios quando o comportamento esperado está definido e há verificações aplicáveis disponíveis. Ela também não autoriza apresentar uma ferramenta ou meta de cobertura como aprovada; informar as verificações executadas e as limitações.
 
 ## 3. Como fornecer as instruções à ferramenta
 
 **Obrigatório:** confirmar que a ferramenta tem acesso aos arquivos relevantes. Um link ou nome de arquivo não garante que seu conteúdo tenha sido lido. Se o assistente não acessar o repositório ou o Trello, fornecer os textos necessários e identificar sua origem e versão.
 
-| Uso | Procedimento |
+| Condição de acesso | Procedimento |
 |---|---|
-| Codex no repositório | Usar o `AGENTS.md` da raiz como entrada e pedir a leitura das referências da tarefa. Para frontend, incluir explicitamente as instruções locais; não presumir que iniciar na raiz carregue todo arquivo de subpasta. |
-| Ferramenta que utiliza `CLAUDE.md` | O repositório já contém `frontend/CLAUDE.md`, com a referência `@AGENTS.md`. Preservar esse arquivo e fornecer também o `AGENTS.md` da raiz e este guia. Confirmar o carregamento na ferramenta utilizada; a referência local não comprova acesso às orientações gerais. |
-| Outra IDE, extensão ou chat | Fornecer o ponto de entrada e os documentos relevantes pelo mecanismo de contexto da ferramenta ou anexar seus conteúdos. Solicitar a identificação das fontes consultadas. |
+| Acesso ao repositório | Usar o `AGENTS.md` da raiz como entrada e solicitar a leitura das referências da tarefa e das instruções específicas da área. Não presumir que todos os arquivos sejam carregados automaticamente. |
+| Contexto fornecido manualmente | Anexar ou colar o ponto de entrada e os documentos relevantes pelo mecanismo de contexto da ferramenta, identificando origem e versão. Solicitar a identificação das fontes consultadas. |
+| Referência inacessível | Informar qual conteúdo não pôde ser consultado e solicitar à pessoa responsável o texto necessário. Continuar apenas o trabalho que não depende da referência, conforme a seção 2. |
 
-Segundo a [documentação oficial do Codex sobre AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md), a descoberta segue a raiz do projeto até o diretório de trabalho, considerando instruções mais específicas. Isso justifica manter a entrada geral curta e solicitar as leituras relevantes. Não implica suporte idêntico nas demais ferramentas.
+Preservar os arquivos de instruções específicos já existentes. O nome do arquivo e uma referência nele não garantem seu carregamento na ferramenta utilizada; conferir quais conteúdos foram acessados e fornecer os que faltarem. Estas orientações se aplicam independentemente do modelo ou da ferramenta escolhida pela pessoa.
 
 **Recomendado:** ao iniciar uma sessão ou atualizar as instruções, pedir que a IA resuma o escopo, as referências acessadas e as decisões pendentes antes da implementação. Conferir se as referências citadas existem e se o resumo corresponde aos arquivos. Essa conferência ajuda a detectar contexto ausente, mas não garante obediência nem substitui a revisão do resultado.
 
@@ -161,7 +161,7 @@ Pendências: [decisões ou ajustes ainda necessários]
 
 **Obrigatório:** diferenciar arquivo escrito, verificação executada, revisão aprovada e PR integrada. Não marcar cartões como concluídos apenas porque a IA terminou a implementação. Registrar contribuições humanas efetivas; não inventar aprovação, execução ou participação para preencher evidências.
 
-As regras de PR e integração ficam no [Guia de Contribuição](../CONTRIBUTING.md). A organização das evidências e a movimentação dos cartões ficam em `docs/trello.md`, quando disponível. Referenciar esses guias e conferir os critérios do cartão, em vez de manter cópias conflitantes das regras.
+As regras de PR e integração ficam no [Guia de Contribuição](../CONTRIBUTING.md). A [seção 7 do guia do Trello](trello.md#7-relação-entre-cartão-branch-pr-e-documentação) orienta a ligação entre cartão, PR e documento versionado: registrar referências entre eles, indicar se a PR é interna ou de integração final e vincular as discussões e a versão revisada. Os critérios de conclusão e as evidências ficam na [seção 8](trello.md#8-critérios-de-conclusão-e-evidências). Referenciar esses guias e conferir os critérios do cartão, em vez de manter cópias conflitantes das regras.
 
 **Recomendado:** explicar brevemente o papel da IA na entrega e o que a pessoa conferiu. Não é necessário anexar toda a conversa: registrar decisões, alterações e evidências suficientes para a revisão.
 
@@ -174,9 +174,13 @@ As outras documentações não são pré-requisitos para iniciar esta tarefa. S�
 | [DOC-06 — Decisões técnicas](https://trello.com/c/FYrXygde) | [Registro disponível](decisoes-tecnicas.md), consultado nesta revisão. Usar seus status, IDs e processo de registro e substituição, respeitando as validações pendentes. |
 | [DOC-04 — Contribuição](https://trello.com/c/CCsrXka4) | [Guia disponível](../CONTRIBUTING.md), consultado nesta revisão. Seguir suas referências de revisão e integração, distinguindo os acordos existentes das regras ainda em validação pelos grupos. |
 | [DOC-11 — Testes](https://trello.com/c/aiQAFtur) | Alinhar a proteção dos critérios e o relato das verificações. Enquanto estiver pendente, não inventar ferramenta, comando ou meta; registrar o alinhamento futuro. |
-| DOC-05 e guias DOC-08 a DOC-10 | Complementam as leituras por tarefa. Incluir seus links locais quando disponíveis e confirmar compatibilidade na revisão. |
+| DOC-05 — Organização das tarefas no Trello | [Guia disponível](trello.md), consultado nesta revisão. Alinhar referências, conclusão e evidências com suas seções 7 e 8, respeitando as validações pendentes. |
+| DOC-08 — Arquitetura | [Documento disponível](arquitetura.md). Complementa as leituras técnicas por tarefa; conferir as orientações aplicáveis e suas pendências. |
+| Guias DOC-09 e DOC-10 | Complementam as leituras das áreas. Incluir seus links locais quando disponíveis e confirmar compatibilidade na revisão. |
 
-**Obrigatório para concluir a DOC-07:** revisar os arquivos, registrar as validações aplicáveis, resolver divergências que impeçam o uso, vincular a PR revisada e integrada e registrar contribuições individuais e comprovação acadêmica. Uma referência futura pode permanecer pendente se a limitação e o procedimento provisório estiverem claros e forem aceitos pelos revisores; não registrar essa dependência como resolvida sem conferência.
+**Obrigatório para concluir a DOC-07:** revisar os arquivos, registrar as validações aplicáveis, resolver divergências que impeçam o uso, consolidar a entrega na `documentacao/main` e vincular a PR interna revisada e integrada, as contribuições individuais e a comprovação acadêmica. Se o trabalho for feito diretamente na branch do grupo, registrar os commits e a evidência de revisão, conforme o guia do Trello e a seção 7.5 do Guia de Contribuição. A integração da entrega consolidada em `develop` é acompanhada no épico de Documentação. Uma referência futura pode permanecer pendente se a limitação e o procedimento provisório estiverem claros e forem aceitos pelos revisores; não registrar essa dependência como resolvida sem conferência.
+
+**Pendente de validação com os grupos:** confirmar que o procedimento da seção 3 funciona nas ferramentas efetivamente utilizadas pela equipe. Registrar, por grupo, a forma de fornecer o contexto, as referências que a IA conseguiu consultar, os resultados dos cenários aplicáveis e as limitações encontradas, com data e evidência. A validação não exige adotar uma ferramenta comum nem manter uma lista de modelos; deve demonstrar que as orientações são utilizáveis no contexto de cada grupo.
 
 Roteiro recomendado para a revisão humana, sem alterar código:
 
