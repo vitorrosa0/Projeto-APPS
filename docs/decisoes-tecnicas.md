@@ -122,11 +122,11 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 | Campo | Registro |
 |---|---|
 | **Status** | Proposta pendente |
-| **Decisão / prática** | **Prática atual:** não há testes automatizados. A validação é manual, e o frontend tem `npm run lint` e `npm run build`. **Proposta existente:** testes unitários e de integração para o fluxo de animais, com lint, testes e build executados antes da integração ([Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0)). A ferramenta de testes não foi escolhida. |
+| **Decisão / prática** | **Prática atual:** não há testes automatizados. A validação é manual, e o frontend tem `npm run lint` e `npm run build`. **Proposta existente:** testes unitários do backend e frontend e testes de integração do backend, conforme os [padrões de testes e política de cobertura](testes.md) (DOC-11), incluindo o fluxo de animais previsto nas [Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0). Vitest com React Testing Library é proposto para avaliação no frontend. A escolha do executor e das bibliotecas de testes do backend cabe à equipe de backend e permanece pendente, respeitando os padrões comuns e a compatibilidade com CommonJS. Ferramentas e metas de cobertura ainda não foram confirmadas nem implementadas. **Evolução futura:** automação E2E da interface, pipeline e avisos automáticos na PR, a tratar em tarefas e documentação próprias quando priorizados. |
 | **Justificativa** | Garantir a estabilidade do fluxo principal antes da homologação ([Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0)). |
 | **Impactos** | Enquanto não houver testes, as PRs dependem de validação manual descrita na própria PR. |
-| **Validação** | Documentação, com o grupo Animais. A escolha da ferramenta precisa ser registrada aqui quando for feita. |
-| **Cartão / PR** | [ANIMAIS — Gestão de animais](https://trello.com/c/brAqTdwD) |
+| **Validação** | A equipe de backend define suas ferramentas; os responsáveis pelo frontend avaliam a proposta de Vitest. Documentação e subgrupos afetados validam os padrões e metas, conforme a seção 9 da DOC-11. Registrar aqui as decisões quando confirmadas, com as evidências correspondentes. |
+| **Cartão / PR** | [DOC-11 — Padrões de testes e cobertura](https://trello.com/c/aiQAFtur); [ANIMAIS — Gestão de animais](https://trello.com/c/brAqTdwD) |
 
 ---
 
