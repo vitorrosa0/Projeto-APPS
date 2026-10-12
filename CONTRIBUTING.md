@@ -425,6 +425,7 @@ O que esta PR entrega e por quê. Uma ou duas frases.
 - [ ] Backend sobe com `npm run dev` sem erros
 - [ ] `npx prisma validate` e `npx prisma migrate dev` (se o schema mudou)
 - [ ] Testes automatizados (quando existirem)
+- [ ] Cobertura local da base e da versão da PR registrada pelo autor e pelo revisor — proposta da DOC-11, aplicável após validação e configuração; ver [guia de testes, seção 8](docs/testes.md#8-execução-e-evidências-na-pr)
 - [ ] Fluxo testado manualmente no navegador
 
 Marque somente o que foi executado. Se algo não se aplica ou não foi possível, explique.
@@ -454,7 +455,9 @@ Antes e depois das telas alteradas (obrigatório se a PR muda alguma tela).
 | `backend/prisma/` | `npx prisma validate` e `npx prisma migrate dev` sem erros. A migração gerada está no commit. |
 | Qualquer área com testes | Testes automatizados passando |
 
-**Exceção:** o projeto ainda não tem testes automatizados configurados. Enquanto isso, a validação manual do fluxo no navegador é obrigatória e precisa estar descrita em "Como testar". Quando os testes forem configurados, esta seção será atualizada.
+**Proposta pendente de validação (DOC-11):** os [padrões de testes e política de cobertura](docs/testes.md) complementam as validações acima. Após validação dos grupos e configuração das ferramentas, o autor e o revisor executam localmente a cobertura da base e da versão da PR e registram os resultados, SHAs e limitações conforme a [seção 8 do guia de testes](docs/testes.md#8-execução-e-evidências-na-pr). As metas, o tratamento do código existente e as exceções ficam no guia; sua presença no repositório não confirma sua adoção.
+
+**Exceção:** o projeto ainda não tem testes automatizados configurados. Enquanto isso, a validação manual do fluxo no navegador é obrigatória e precisa estar descrita em "Como testar". Registrar testes e cobertura como não executados, com o motivo, conforme a [exceção de ausência de infraestrutura da DOC-11](docs/testes.md#82-registro-das-evidências). Quando os testes forem configurados e as propostas validadas, atualizar a situação destas orientações.
 
 **Exceção:** PRs que alteram apenas documentação dispensam as validações de código. O autor confere os links e a formatação no preview do GitHub.
 
@@ -491,7 +494,7 @@ Antes e depois das telas alteradas (obrigatório se a PR muda alguma tela).
 - Se a descrição está completa (seção 6.2) e as validações foram executadas.
 - Se os commits e o título seguem a seção 4.
 - Se a funcionalidade atende ao cartão do Trello.
-- Se o código segue os padrões de desenvolvimento, testes e integração do projeto, quando estiverem documentados.
+- Se o código segue os padrões de desenvolvimento e integração documentados e os [padrões de testes](docs/testes.md), distinguindo propostas pendentes de regras validadas. A execução local de cobertura pelo autor e pelo revisor, sobre a base e a versão da PR, é proposta da DOC-11 e passa a ser exigida após validação e configuração, conforme sua [seção 8](docs/testes.md#8-execução-e-evidências-na-pr).
 - Se os documentos afetados foram atualizados (seção 6.4).
 - Se a PR não traz arquivos indevidos: `.env`, `node_modules`, bancos locais (`*.db`), arquivos pessoais.
 
