@@ -112,29 +112,36 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 
 3. Crie o arquivo `.env` na pasta `backend/` com a URL do banco:
    ```
-   DATABASE_URL="file:../dev.db"
+   DATABASE_URL="file:./dev.db"
    ```
-   > Esse passo é obrigatório: o `prisma migrate dev` exige a variável `DATABASE_URL`. O `.env` não é versionado (está no `.gitignore`), então cada desenvolvedor precisa criá-lo.
+   > Esse passo é obrigatório: o `prisma migrate dev` exige a variável `DATABASE_URL`. O `.env` não é versionado (está no `.gitignore`), então cada desenvolvedor precisa criá-lo. O caminho precisa ser `./dev.db`, porque a API sempre abre o arquivo `backend/dev.db`.
 
-4. Execute as migrations do banco de dados:
+4. Gere o cliente do Prisma:
+   ```
+   npx prisma generate
+   ```
+
+5. Execute as migrations do banco de dados:
    ```
    npm run migrate
    ```
 
-5. (Opcional) Crie o usuário admin padrão (`admin@sjpa.com` / `admin123`):
+6. (Opcional) Crie o usuário admin padrão (`admin@sjpa.com` / `admin123`):
    ```
    npm run seed
    ```
 
-6. Inicie o servidor:
+7. Inicie o servidor:
    ```
    npm run dev
    ```
 
-7. A API estará disponível em:
+8. A API estará disponível em:
    ```
    http://localhost:3001
    ```
+
+Variáveis de ambiente, operações do dia a dia e padrões de desenvolvimento do backend estão no [README do backend](backend/README.md).
 
 ---
 
