@@ -528,9 +528,10 @@ Para garantir consistência visual e comportamento uniforme nos formulários:
 - Eles já encapsulam o espaçamento do rótulo, foco com cor da identidade visual (`#2DB38B`), bordas e bordas arredondadas padrão.
 
 ```tsx
-// Adequado: reutiliza InputGroup com tipagem nativa extendida
+// Adequado: reutiliza InputGroup com tipagem nativa extendida e name vinculado ao label
 <InputGroup
   label="Nome do Animal"
+  name="nome"
   placeholder="Digite o nome"
   value={nome}
   onChange={(e) => setNome(e.target.value)}
@@ -584,13 +585,17 @@ Operações assíncronas (como carregar listagens ou submeter formulários) deve
 - **Evitar cascading renders:** Não chame `setCarregando(true)` de forma síncrona dentro do corpo de um `useEffect`. Essa prática viola a regra do React 19 / ESLint 9 (`react-hooks/set-state-in-effect`).
 
 ```tsx
-// Adequado: inicia carregando já como true
+// Adequado: inicia carregando já como true e trata falhas com .catch
 const [carregando, setCarregando] = useState(true);
+const [erro, setErro] = useState<string | null>(null);
 
 useEffect(() => {
   let ativo = true;
   api<Animal[]>("/animais")
     .then((dados) => { if (ativo) setAnimais(dados); })
+    .catch((err) => {
+      if (ativo) setErro(err instanceof Error ? err.message : "Erro ao carregar animais");
+    })
     .finally(() => { if (ativo) setCarregando(false); });
   return () => { ativo = false; };
 }, []);
