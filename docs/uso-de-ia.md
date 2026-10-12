@@ -32,11 +32,11 @@ O ponto de entrada é o [AGENTS.md da raiz](../AGENTS.md). Ele direciona a leitu
 | Decisão técnica, dados ou integração | [Decisões técnicas](decisoes-tecnicas.md) (DOC-06) e [Arquitetura](arquitetura.md) (DOC-08) | Distinguir prática atual, decisão confirmada e proposta pendente; conferir limites entre componentes. |
 | Frontend | [frontend/AGENTS.md](../frontend/AGENTS.md), instruções específicas e `frontend/README.md` (DOC-09), quando disponível | Seguir a versão e os padrões da área. |
 | Backend | [backend/README.md](../backend/README.md) (DOC-10) e configuração/código envolvidos | Seguir padrões de API, persistência e execução. |
-| Testes e cobertura | `docs/testes.md` (DOC-11), quando disponível, e configuração real dos testes | Aplicar regras e metas aprovadas sem presumir ferramentas instaladas. |
+| Testes e cobertura | [Padrões de testes e política de cobertura](testes.md) (DOC-11) e configuração real dos testes | Distinguir propostas de regras validadas e aplicar as aprovadas sem presumir ferramentas instaladas. |
 | Branches, commits e PRs | [CONTRIBUTING.md](../CONTRIBUTING.md) | Aplicar o fluxo de contribuição sem duplicar suas regras neste guia, respeitando as validações pendentes. |
 | Cartões e evidências | [Organização das tarefas no Trello](trello.md) (DOC-05) | Organizar dependências, revisão e conclusão, respeitando as validações pendentes. |
 
-Na conferência dos arquivos em **12/10/2026**, esta branch contém o registro da DOC-06, o `CONTRIBUTING.md` da DOC-04, o guia do Trello da DOC-05 e o documento de arquitetura da DOC-08. A presença dos arquivos não comprova a validação das propostas neles registradas. `docs/testes.md` e os READMEs das áreas ainda não estão disponíveis. Esse é um retrato da conferência: verificar os arquivos presentes e suas pendências em cada nova tarefa.
+Na conferência dos arquivos em **12/10/2026**, esta branch contém o registro da DOC-06, o `CONTRIBUTING.md` da DOC-04, o guia do Trello da DOC-05, o documento de arquitetura da DOC-08 e os [padrões de testes da DOC-11](testes.md). A presença dos arquivos não comprova a validação das propostas neles registradas. Os READMEs das áreas ainda não estão disponíveis. Esse é um retrato da conferência: verificar os arquivos presentes e suas pendências em cada nova tarefa.
 
 Consultar os status e IDs da DOC-06, sem copiá-los para manter um segundo registro. Uma **Prática atual** pode continuar em uso nas mudanças rotineiras autorizadas; isso não a transforma em decisão **Confirmada**. Uma **Proposta pendente** não autoriza implementar uma escolha como definitiva. Decisões **Substituídas** servem de histórico; seguir a entrada que as substituiu.
 
@@ -49,7 +49,7 @@ Consultar os status e IDs da DOC-06, sem copiá-los para manter um segundo regis
 - Se o código e um documento divergirem, registrar o fato. O código demonstra o comportamento atual, mas não comprova que ele foi aprovado como regra.
 - Se duas fontes divergirem, indicar os trechos e seus efeitos. Encaminhar a decisão ao responsável, sem escolher silenciosamente a opção mais conveniente.
 
-**Exemplo:** a ausência de `docs/testes.md` (DOC-11) não impede corrigir uma busca que falha com campos opcionais vazios quando o comportamento esperado está definido e há verificações aplicáveis disponíveis. Ela também não autoriza apresentar uma ferramenta ou meta de cobertura como aprovada; informar as verificações executadas e as limitações.
+**Exemplo:** em um checkout que ainda não contenha os [padrões de testes](testes.md) (DOC-11), a ausência do documento não impede corrigir uma busca que falha com campos opcionais vazios quando o comportamento esperado está definido e há verificações aplicáveis disponíveis. Ela também não autoriza apresentar uma ferramenta ou meta de cobertura como aprovada; informar as verificações executadas e as limitações. Nesta branch o documento está disponível, com propostas ainda pendentes de validação.
 
 ## 3. Como fornecer as instruções à ferramenta
 
@@ -133,13 +133,13 @@ Se o registro técnico não estiver acessível na branch da tarefa, usar o cart�
 
 ## 6. Verificações e proteção dos critérios de qualidade
 
-**Obrigatório:** escolher verificações proporcionais à alteração e compatíveis com os comandos realmente disponíveis. Consultar o Guia de Contribuição e o guia de testes quando disponível. Distinguir teste automatizado, verificação manual e análise do código; um não deve ser apresentado como execução do outro.
+**Obrigatório:** escolher verificações proporcionais à alteração e compatíveis com os comandos realmente disponíveis. Consultar o [Guia de Contribuição](../CONTRIBUTING.md#63-validações-antes-de-abrir) e os [padrões de testes](testes.md), conferindo a situação das propostas. Distinguir teste automatizado, verificação manual e análise do código; um não deve ser apresentado como execução do outro.
 
 **Obrigatório:** não reduzir metas, excluir arquivos da cobertura, remover asserções ou desativar testes para contornar falhas sem justificativa e decisão humana. A autorização para corrigir um bug não autoriza enfraquecer o teste que o revelou. Se o teste estiver errado, mostrar a divergência em relação ao comportamento aprovado e justificar sua correção.
 
 **Exceção:** ajustes de testes que acompanham uma mudança de comportamento já aprovada não exigem nova autorização apenas por alterarem asserções. A alteração precisa manter uma verificação efetiva do comportamento esperado e ser explicada ao revisor.
 
-Não definir percentuais ou instalar uma ferramenta como se fossem decisões já tomadas. A [DOC-11](https://trello.com/c/aiQAFtur) avaliará Vitest e a política de cobertura. O cartão prevê que autor e revisor executem localmente a cobertura sobre a versão da PR e registrem os resultados, quando a ferramenta estiver configurada. Não há exigência de pipeline nesta entrega.
+Não definir percentuais ou instalar uma ferramenta como se fossem decisões já tomadas. Os [padrões da DOC-11](testes.md) avaliam Vitest para frontend e backend, apresentam alternativas para o backend e propõem metas e adoção gradual de cobertura. Ferramentas, metas e responsabilidade pela escolha ainda dependem de validação conforme a DT-06. Após validação e configuração, a proposta prevê que autor e revisor meçam localmente a base e a versão da PR e registrem seus SHAs e resultados conforme a [seção 8](testes.md#8-execução-e-evidências-na-pr). Automação E2E, pipeline e avisos automáticos permanecem como evolução futura.
 
 **Obrigatório:** quando não puder executar uma verificação, informar o motivo e o que permanece sem confirmação. Não afirmar “testes passaram” porque nenhum teste existe ou porque o código apenas parece correto.
 
@@ -173,7 +173,7 @@ As outras documentações não são pré-requisitos para iniciar esta tarefa. S�
 |---|---|
 | [DOC-06 — Decisões técnicas](https://trello.com/c/FYrXygde) | [Registro disponível](decisoes-tecnicas.md), consultado nesta revisão. Usar seus status, IDs e processo de registro e substituição, respeitando as validações pendentes. |
 | [DOC-04 — Contribuição](https://trello.com/c/CCsrXka4) | [Guia disponível](../CONTRIBUTING.md), consultado nesta revisão. Seguir suas referências de revisão e integração, distinguindo os acordos existentes das regras ainda em validação pelos grupos. |
-| [DOC-11 — Testes](https://trello.com/c/aiQAFtur) | Alinhar a proteção dos critérios e o relato das verificações. Enquanto estiver pendente, não inventar ferramenta, comando ou meta; registrar o alinhamento futuro. |
+| [DOC-11 — Testes](https://trello.com/c/aiQAFtur) | [Documento disponível](testes.md), alinhado nesta revisão quanto à proteção dos critérios e ao relato das verificações. Ferramentas e política ainda são propostas: conferir sua validação e a infraestrutura real, sem inventar comandos ou resultados. |
 | DOC-05 — Organização das tarefas no Trello | [Guia disponível](trello.md), consultado nesta revisão. Alinhar referências, conclusão e evidências com suas seções 7 e 8, respeitando as validações pendentes. |
 | DOC-08 — Arquitetura | [Documento disponível](arquitetura.md). Complementa as leituras técnicas por tarefa; conferir as orientações aplicáveis e suas pendências. |
 | Guias DOC-09 e DOC-10 | Complementam as leituras das áreas. O [guia do backend](../backend/README.md) (DOC-10) está disponível; incluir o link local do guia do frontend (DOC-09) quando disponível e confirmar compatibilidade na revisão. |

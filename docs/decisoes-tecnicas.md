@@ -122,11 +122,12 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 | Campo | Registro |
 |---|---|
 | **Status** | Proposta pendente |
-| **Decisão / prática** | **Prática atual:** não há testes automatizados. A validação é manual, e o frontend tem `npm run lint` e `npm run build`. **Proposta existente:** testes unitários e de integração para o fluxo de animais, com lint, testes e build executados antes da integração ([Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0)). A ferramenta de testes não foi escolhida. |
+| **Decisão / prática** | **Prática atual:** não há testes automatizados. A validação é manual, e o frontend tem `npm run lint` e `npm run build`. **Proposta existente:** testes unitários do backend e frontend e testes de integração do backend, conforme os [padrões de testes e política de cobertura](testes.md) (DOC-11), incluindo o fluxo de animais previsto nas [Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0). Vitest com React Testing Library é proposto para avaliação no frontend; a DOC-11 também avalia Vitest, Jest e `node:test` para o backend, considerando CommonJS, isolamento e cobertura. **Proposta de responsabilidade:** os responsáveis pelo backend conduzem uma escolha coordenada para essa área; a alternativa é um executor comum às duas aplicações. Essa responsabilidade e a eventual adoção de executores diferentes ainda dependem de validação da Documentação e de todos os subgrupos afetados. Ferramentas e metas não foram confirmadas nem implementadas. **Evolução futura:** automação E2E da interface, pipeline e avisos automáticos na PR, a tratar em tarefas e documentação próprias quando priorizados. |
 | **Justificativa** | Garantir a estabilidade do fluxo principal antes da homologação ([Entregas, seção 5.1](./entregas-e-proximos-passos.md#51-atividades-de-prioridade-p0)). |
-| **Impactos** | Enquanto não houver testes, as PRs dependem de validação manual descrita na própria PR. |
-| **Validação** | Documentação, com o grupo Animais. A escolha da ferramenta precisa ser registrada aqui quando for feita. |
-| **Cartão / PR** | [ANIMAIS — Gestão de animais](https://trello.com/c/brAqTdwD) |
+| **Impactos** | Enquanto não houver testes, as PRs dependem de validação manual descrita na própria PR. Um executor comum reduz diferenças de uso; executores distintos podem facilitar a compatibilidade, mas aumentam manutenção e aprendizado. Isolamento dos controllers, aplicação HTTP e banco dependem da avaliação das propostas estruturais da DT-13. |
+| **Validação** | Pendente: Documentação e todos os subgrupos afetados precisam validar responsabilidade pela escolha, ferramentas, padrões e metas, conforme a seção 9 da DOC-11 e a seção 6.3 deste registro. Os responsáveis por cada área conduzem a avaliação técnica. Registrar decisões e evidências quando confirmadas. |
+| **Consulta registrada** | Em 12/10/2026, na conversa de revisão da DOC-11, Lucas Ciampi solicitou deixar a escolha do executor do backend com seus responsáveis. Nesta correção de code review, solicitou apresentar essa delegação como proposta pendente. Resultado: preferência registrada para avaliação; não há evidência de aprovação dos subgrupos, e o status permanece Proposta pendente. |
+| **Cartão / PR** | [DOC-11 — Padrões de testes e cobertura](https://trello.com/c/aiQAFtur); [ANIMAIS — Gestão de animais](https://trello.com/c/brAqTdwD) |
 
 ---
 
@@ -206,7 +207,9 @@ Leia antes a [Visão Geral do Projeto](./visao-geral.md). Para o estado de cada 
 | **Decisão / prática** | **Frontend:** rotas em `frontend/app/(etapas)/<modulo>/` (uma `page.tsx` por rota), componentes compartilhados em `frontend/components/` e acesso à API em `frontend/lib/api.ts`. **Backend:** `src/routes/` define os endpoints e `src/controllers/` concentra a validação, a regra de negócio e o acesso ao banco, sem uma camada separada de serviços. |
 | **Justificativa** | Não registrada. |
 | **Impactos** | Com as regras de negócio nos controllers, elas são mais difíceis de testar isoladamente (DT-06). A decisão sobre criar ou não uma camada de serviços deve ser tomada junto com a definição dos testes. |
-| **Validação** | Documentação e grupos de Desenvolvimento, no documento de arquitetura. |
+| **Propostas em avaliação (DOC-11)** | Separar a criação/exportação da aplicação Express de `listen`; permitir configuração/injeção de banco exclusivo de testes; isolar a persistência dos controllers por fábrica/injeção de dependência ou substituição compatível com CommonJS antes de carregar o módulo. São alternativas ainda não implementadas, detalhadas nos [padrões de testes, seção 4](testes.md#4-independência-dados-e-dependências) e na [arquitetura, seção 4.2](arquitetura.md#42-sugestões-para-proposta-de-evolução-cenário-futuro--produção). |
+| **Questões em aberto** | Criar ou não uma camada de serviços; escolher a estratégia de isolamento em conjunto com o executor (DT-06). A injeção proposta pode alterar construção/importação de controllers e rotas; separar a aplicação altera o ponto de inicialização, e a configuração do banco deve preservar a execução atual e impedir acesso dos testes a bancos de outros ambientes. Nenhuma proposta resolve essas escolhas por antecipação. |
+| **Validação** | Documentação e grupos de Desenvolvimento, no documento de arquitetura. As propostas da DOC-11 e a decisão sobre serviços permanecem pendentes de validação pelo processo da seção 6.3 antes de implementação estrutural. |
 | **Cartão / PR** | [DOC — Documentação e padrões](https://trello.com/c/qqbdAPEF) |
 
 ---
@@ -454,3 +457,4 @@ As entradas foram montadas a partir dos documentos existentes e do código. Cada
 |---|---|---|
 | 02/10/2026 | Criação do registro a partir da Visão Geral, do estado dos módulos, das entregas e da leitura do código | DT-01 a DT-23 |
 | 10/10/2026 | Ajustes do code review: exceção de login e cadastro em DT-22, referência à PR #5 em DT-09, tratamento das migrations em DT-04, situação da seção 6 e momento da substituição na seção 6.5. Nenhum status alterado. | DT-04, DT-09, DT-22 |
+| 12/10/2026 | Alinhamento com a DOC-11 e seu code review: avaliação de executores nas duas áreas, proposta de responsabilidade pela escolha, registro da consulta e impactos de isolamento HTTP, banco e controllers. A decisão sobre serviços permanece pendente. Nenhum status alterado. | DT-06, DT-13 |
