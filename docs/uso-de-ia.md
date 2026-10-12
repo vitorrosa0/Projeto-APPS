@@ -31,7 +31,7 @@ O ponto de entrada é o [AGENTS.md da raiz](../AGENTS.md). Ele direciona a leitu
 | Planejamento ou mudança de escopo | [Entregas e próximos passos](entregas-e-proximos-passos.md) | Conferir prioridades e propostas ainda não confirmadas. |
 | Decisão técnica, dados ou integração | [Decisões técnicas](decisoes-tecnicas.md) (DOC-06) e [Arquitetura](arquitetura.md) (DOC-08) | Distinguir prática atual, decisão confirmada e proposta pendente; conferir limites entre componentes. |
 | Frontend | [frontend/AGENTS.md](../frontend/AGENTS.md), instruções específicas e `frontend/README.md` (DOC-09), quando disponível | Seguir a versão e os padrões da área. |
-| Backend | `backend/README.md` (DOC-10), quando disponível, e configuração/código envolvidos | Seguir padrões de API, persistência e execução. |
+| Backend | [backend/README.md](../backend/README.md) (DOC-10) e configuração/código envolvidos | Seguir padrões de API, persistência e execução. |
 | Testes e cobertura | `docs/testes.md` (DOC-11), quando disponível, e configuração real dos testes | Aplicar regras e metas aprovadas sem presumir ferramentas instaladas. |
 | Branches, commits e PRs | [CONTRIBUTING.md](../CONTRIBUTING.md) | Aplicar o fluxo de contribuição sem duplicar suas regras neste guia, respeitando as validações pendentes. |
 | Cartões e evidências | [Organização das tarefas no Trello](trello.md) (DOC-05) | Organizar dependências, revisão e conclusão, respeitando as validações pendentes. |
@@ -176,7 +176,7 @@ As outras documentações não são pré-requisitos para iniciar esta tarefa. S�
 | [DOC-11 — Testes](https://trello.com/c/aiQAFtur) | Alinhar a proteção dos critérios e o relato das verificações. Enquanto estiver pendente, não inventar ferramenta, comando ou meta; registrar o alinhamento futuro. |
 | DOC-05 — Organização das tarefas no Trello | [Guia disponível](trello.md), consultado nesta revisão. Alinhar referências, conclusão e evidências com suas seções 7 e 8, respeitando as validações pendentes. |
 | DOC-08 — Arquitetura | [Documento disponível](arquitetura.md). Complementa as leituras técnicas por tarefa; conferir as orientações aplicáveis e suas pendências. |
-| Guias DOC-09 e DOC-10 | Complementam as leituras das áreas. Incluir seus links locais quando disponíveis e confirmar compatibilidade na revisão. |
+| Guias DOC-09 e DOC-10 | Complementam as leituras das áreas. O [guia do backend](../backend/README.md) (DOC-10) está disponível; incluir o link local do guia do frontend (DOC-09) quando disponível e confirmar compatibilidade na revisão. |
 
 **Obrigatório para concluir a DOC-07:** revisar os arquivos, registrar as validações aplicáveis, resolver divergências que impeçam o uso, consolidar a entrega na `documentacao/main` e vincular a PR interna revisada e integrada, as contribuições individuais e a comprovação acadêmica. Se o trabalho for feito diretamente na branch do grupo, registrar os commits e a evidência de revisão, conforme o guia do Trello e a seção 7.5 do Guia de Contribuição. A integração da entrega consolidada em `develop` é acompanhada no épico de Documentação. Uma referência futura pode permanecer pendente se a limitação e o procedimento provisório estiverem claros e forem aceitos pelos revisores; não registrar essa dependência como resolvida sem conferência.
 
