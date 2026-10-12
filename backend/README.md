@@ -6,7 +6,7 @@ Ele vale para todos os subgrupos que alteram a pasta `backend/` (Animais, Colabo
 
 Documento da DOC-10. A visão geral das camadas e o percurso de uma requisição estão na [arquitetura do sistema](../docs/arquitetura.md) (DOC-08); este documento detalha **como** escrever e executar o código do backend. Os IDs de decisão citados (DT-XX) remetem ao [registro de decisões técnicas](../docs/decisoes-tecnicas.md) (DOC-06), onde deve ser conferida a situação de cada decisão.
 
-> **Situação:** versão 1, proposta pela Documentação em 10/10/2026, a partir da leitura do código e da execução do passo a passo descrita na [seção 2.6](#26-verificação-do-passo-a-passo). Os padrões ainda precisam ser validados pelos subgrupos (ver [seção 13](#13-validação-com-os-subgrupos)).
+> **Situação:** versão 1.1. Proposta pela Documentação em 10/10/2026, a partir da leitura do código e da execução do passo a passo descrita na [seção 2.6](#26-verificação-do-passo-a-passo). Os padrões ainda precisam ser validados pelos subgrupos (ver [seção 13](#13-validação-com-os-subgrupos)).
 
 ## Como ler este documento
 
@@ -667,6 +667,7 @@ Problemas encontrados na verificação de 10/10/2026. Estão registrados para or
 | [docs/decisoes-tecnicas.md](../docs/decisoes-tecnicas.md) | Situação de cada decisão (IDs `DT-XX` citados aqui) — DOC-06 |
 | [docs/arquitetura.md](../docs/arquitetura.md) | Componentes, camadas, percurso de uma operação e limites dos módulos — DOC-08 |
 | [docs/trello.md](../docs/trello.md) | Organização dos cartões, critérios de conclusão e evidências — DOC-05 |
+| [docs/uso-de-ia.md](../docs/uso-de-ia.md) e [AGENTS.md](../AGENTS.md) | Orientações para o uso de assistentes de IA no projeto — DOC-07 |
 | Documento de testes | Estratégia, padrões e ferramenta de testes — [DOC-11](https://trello.com/c/aiQAFtur). **Ainda não existe.** |
 
 **Alinhamento**
@@ -699,6 +700,7 @@ Cada grupo registra a concordância ou os ajustes na PR deste documento ou no ca
 | Data | Versão | Alteração |
 |---|---|---|
 | 10/10/2026 | 1 | Criação do documento e verificação do passo a passo de execução |
+| 12/10/2026 | 1.1 | Inclusão do guia de uso de IA (DOC-07) nos documentos relacionados; atualização das referências à DOC-10 na arquitetura e no guia de uso de IA |
 
 ### 14.2 Contribuições
 
