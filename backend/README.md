@@ -310,7 +310,8 @@ Valide, nesta ordem:
 
 **Obrigatório**
 
-- Não usar a checagem "falsy" (`if (!campo)`) para campos que podem receber `0` ou `false`. Ela trata `0` como ausente (lacuna [L-07](#11-lacunas-conhecidas)).
+- Validar **presença** e **tipo** em passos separados. A checagem "falsy" (`if (!campo)`) não serve para nenhum dos dois: trata `0` e `false` como ausentes e deixa passar valores do tipo errado, como um número em um campo de texto. Trocar só a checagem de presença não resolve; o tipo precisa ser conferido à parte (lacuna [L-07](#11-lacunas-conhecidas)).
+- Todo campo permitido, **obrigatório ou opcional**, tem o tipo conferido antes de chegar ao Prisma. Um campo opcional enviado com tipo errado responde `400`, e não `500` (lacuna [L-02](#11-lacunas-conhecidas)).
 - Na atualização (`PUT`), campos obrigatórios enviados **vazios** são rejeitados. Hoje é possível apagar o nome de um animal com `{ "nome": "" }` (lacuna [L-08](#11-lacunas-conhecidas)).
 - Gravar no banco **somente os campos permitidos**, listados explicitamente. Nunca passe `req.body` direto para o Prisma.
 - Listas de valores permitidos ficam em uma constante no topo do controller e são usadas no `criar` e no `atualizar`.
@@ -318,7 +319,7 @@ Valide, nesta ordem:
 
 **Por quê** da lista de campos permitidos: sem ela, o cliente pode enviar campos que não deveria controlar, como `id`, `createdAt` ou, no caso do usuário, `senhaHash`.
 
-Exemplo **adequado**, que reúne as regras (lista fechada em constante, campos permitidos, checagem sem "falsy"):
+Exemplo **adequado**, que reúne as regras (lista fechada em constante, campos permitidos, presença sem "falsy" e tipo de todos os campos enviados):
 
 ```js
 const TIPOS_ANIMAL = ["cao", "gato"];
@@ -331,12 +332,18 @@ function vazio(valor) {
 async function criar(req, res, next) {
   try {
     const body = req.body ?? {};
+    // 1. Presença dos obrigatórios
     if (vazio(body.nome) || vazio(body.tipo)) {
       return res.status(400).json({ erro: "Nome e tipo são obrigatórios" });
     }
-    if (typeof body.nome !== "string") {
-      return res.status(400).json({ erro: "Nome deve ser um texto" });
+    // 2. Tipo de todos os campos enviados, inclusive os opcionais
+    for (const campo of CAMPOS_ANIMAL) {
+      const valor = body[campo];
+      if (valor !== undefined && valor !== null && typeof valor !== "string") {
+        return res.status(400).json({ erro: `O campo ${campo} deve ser um texto` });
+      }
     }
+    // 3. Valores permitidos
     if (!TIPOS_ANIMAL.includes(body.tipo)) {
       return res.status(400).json({ erro: "Tipo deve ser 'cao' ou 'gato'" });
     }
@@ -345,6 +352,8 @@ async function criar(req, res, next) {
   } catch (e) { next(e); }
 }
 ```
+
+No `Animal`, todos os campos permitidos são `String` no schema, por isso uma única checagem de tipo cobre todos. Em recursos com campos de tipos diferentes, confira cada campo com o tipo declarado no `schema.prisma`. No `atualizar`, aplique as mesmas checagens aos campos enviados.
 
 Validação do ID da URL:
 
@@ -361,13 +370,18 @@ Exemplos **inadequados**:
 // 1. Repassa o corpo inteiro: o cliente pode gravar qualquer campo
 await prisma.animal.create({ data: req.body });
 
-// 2. Rejeita valor 0 como se estivesse ausente
+// 2. Presença pela checagem "falsy" e nenhum controle de tipo (situação atual das contribuições):
+//    rejeita 0 como ausente e deixa 10 (número) chegar ao Prisma em um campo String → 500
 if (!tipo || !valor || !data) { ... }
 
-// 3. ID sem validação: GET /animais/abc vira erro 500
+// 3. Tipo conferido só nos obrigatórios: { "raca": 123 } chega ao Prisma → 500
+if (typeof nome !== "string") { ... }
+await prisma.animal.create({ data: extrairDados(req.body) });
+
+// 4. ID sem validação: GET /animais/abc vira erro 500
 const animal = await prisma.animal.findUnique({ where: { id: Number(req.params.id) } });
 
-// 4. Lista de valores repetida e diferente entre criar e atualizar
+// 5. Lista de valores repetida e diferente entre criar e atualizar
 if (!["cao", "gato"].includes(tipo)) { ... }        // em criar
 if (!["cao", "gato", "outro"].includes(tipo)) { ... } // em atualizar
 ```
@@ -636,12 +650,12 @@ Problemas encontrados na verificação de 10/10/2026. Estão registrados para or
 | ID | Lacuna | Como reproduzir | Comportamento esperado pelos padrões | Seção |
 |---|---|---|---|---|
 | L-01 | A aplicação abre o arquivo fixo `backend/dev.db` e ignora a `DATABASE_URL`, que só a CLI do Prisma usa | Usar `DATABASE_URL="file:../dev.db"` e rodar o seed | Aplicação e migrations usam o mesmo banco, configurado em um só lugar (DT-03) | 2.3 |
-| L-02 | Erros inesperados devolvem `err.message`, que nos erros do Prisma inclui trecho do código e caminho dos arquivos | `POST /animais` com `{"nome":123,"tipo":"cao"}` | `400` para tipo inválido; `500` com mensagem genérica para erros reais | 5, 7.1 |
+| L-02 | Erros inesperados devolvem `err.message`, que nos erros do Prisma inclui trecho do código e caminho dos arquivos | `POST /animais` com `{"nome":123,"tipo":"cao"}` ou com um opcional de tipo errado, como `{"nome":"Rex","tipo":"cao","raca":123}` | `400` para tipo inválido; `500` com mensagem genérica para erros reais | 5, 7.1 |
 | L-03 | JSON malformado responde `500` | `POST /animais` com corpo `{bad json` | `400` | 7.1 |
 | L-04 | Rota inexistente responde uma página HTML, não JSON | `GET /rota-inexistente` | `404` com `{ erro }` | 7.1 |
 | L-05 | `PUT /colaboradores/:id` com e-mail de outro colaborador responde `500` | Atualizar o colaborador 2 com o e-mail do 1 | `409`, como no `POST` | 7.2 |
 | L-06 | As rotas de dados não exigem autenticação; o cadastro de usuário é aberto; `JWT_SECRET` tem valor padrão no código | `GET /colaboradores` sem token | Proteção definida em DT-05 | 9 |
-| L-07 | `POST /colaboradores/:id/contribuicoes` rejeita `valor` igual a `0` como ausente | Corpo com `"valor": 0` | Validar presença sem checagem "falsy" | 5.2 |
+| L-07 | `POST /colaboradores/:id/contribuicoes` confere `tipo`, `valor` e `data` só pela checagem "falsy" e não confere o tipo de `valor` e `data`. Como `Contribuicao.valor` é `String` no schema: `"0"` é aceito (`201`); `0` numérico é rejeitado como ausente (`400`, "Tipo, valor e data são obrigatórios"); `10` numérico chega ao Prisma e responde `500` | Corpos com `"valor": "0"`, `"valor": 0` e `"valor": 10` | Presença validada sem checagem "falsy" **e** tipo validado à parte: `valor` e `data` como texto, conforme o schema atual, com `400` e mensagem de tipo. Remover só a checagem "falsy" não basta. O formato aceito para o valor depende da DT-14 | 5.2 |
 | L-08 | `PUT` aceita campo obrigatório vazio | `PUT /animais/1` com `{"nome":""}` → `200` | `400` | 5.2 |
 | L-09 | ID não numérico na URL responde `500` | `GET /animais/abc` | `400` | 5.1 |
 | L-10 | Requisição sem corpo responde `500` | `POST /animais` sem corpo | `400` | 5.1 |
@@ -700,7 +714,7 @@ Cada grupo registra a concordância ou os ajustes na PR deste documento ou no ca
 | Data | Versão | Alteração |
 |---|---|---|
 | 10/10/2026 | 1 | Criação do documento e verificação do passo a passo de execução |
-| 12/10/2026 | 1.1 | Inclusão do guia de uso de IA (DOC-07) nos documentos relacionados; atualização das referências à DOC-10 na arquitetura e no guia de uso de IA |
+| 12/10/2026 | 1.1 | Inclusão do guia de uso de IA (DOC-07) nos documentos relacionados; atualização das referências à DOC-10 na arquitetura e no guia de uso de IA. Ajustes da revisão: validação de tipo dos campos opcionais no exemplo da seção 5.2 e separação entre presença e tipo na regra e na lacuna L-07, com os casos reproduzidos na API em 12/10/2026 |
 
 ### 14.2 Contribuições
 
