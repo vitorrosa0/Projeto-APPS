@@ -52,7 +52,7 @@ Vários desses guias ainda aguardam validação dos subgrupos; a situação de c
 | Colaboradores e voluntários | Cadastro de colaboradores com histórico de contribuições, cadastro de voluntários e agenda. |
 | Financeiro | Doações, contribuições e despesas. |
 
-O sistema também tem cadastro, login e recuperação de senha, com interface *mobile first*. Parte das funcionalidades ainda é apenas interface com dados estáticos (agenda de voluntários e financeiro, por exemplo). O que está concluído, parcial ou pendente em cada módulo está no [estado dos módulos](docs/estado-dos-modulos.md).
+O sistema também tem cadastro e login, com interface *mobile first*. A recuperação de senha possui apenas telas: não há envio de e-mail nem redefinição de senha implementados. Parte das funcionalidades ainda é apenas interface com dados estáticos (agenda de voluntários e financeiro, por exemplo). O que está concluído, parcial ou pendente em cada módulo está no [estado dos módulos](docs/estado-dos-modulos.md).
 
 ## API REST
 

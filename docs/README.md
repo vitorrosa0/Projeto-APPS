@@ -4,13 +4,13 @@ Este é o índice da documentação do projeto. Ele indica onde está cada docum
 
 A apresentação geral do sistema e a primeira execução estão no [README principal](../README.md).
 
-> **Situação:** versão 1.1. Criado pela Documentação em 11/10/2026 e revisado em 12/10/2026, após a integração das DOC-04 a DOC-11 na `documentacao/main` (PRs #5 a #12). Todos os documentos listados estão integrados; a validação do conteúdo pelos subgrupos continua pendente em vários deles (ver [seção 4](#4-pendências-conhecidas-da-documentação)).
+> **Situação:** versão 1.2. Criado pela Documentação em 11/10/2026 e revisado em 12/10/2026, após a integração das DOC-04 a DOC-11 na `documentacao/main` (PRs #5 a #12), com correções do CR da DOC-12 em 13/10/2026. Todos os documentos listados estão integrados; a validação do conteúdo pelos subgrupos continua pendente em vários deles (ver [seção 4](#4-pendências-conhecidas-da-documentação)). As regras de manutenção deste índice são propostas para revisão; sua inclusão não comprova aprovação pela equipe.
 
 ## Como ler este índice
 
 | Marcação | Significado |
 |---|---|
-| **Obrigatório** | Regra para manter o índice coerente. A PR que não cumprir a regra não é aprovada. |
+| **Obrigatório** | Critério proposto para manter o índice coerente, a ser exigido após validação pela equipe. |
 | **Recomendado** | Boa prática. O revisor pode sugerir, mas não bloqueia a PR por isso. |
 | **Exceção** | Situação em que a regra geral muda, com o tratamento descrito. |
 
@@ -40,7 +40,7 @@ Situação de cada documento nas tabelas da seção 1:
 |---|---|---|---|
 | [Guia de contribuição](../CONTRIBUTING.md) | DOC-04 | Branches, Conventional Commits, estratégia de merge, conteúdo e revisão das PRs para a `develop`. | Integrado ([PR #5](https://github.com/vitorrosa0/Projeto-APPS/pull/5)). Validação dos subgrupos pendente. |
 | [Organização no Trello](trello.md) | DOC-05 | Tipos de cartão, modelo de cartão, etiquetas, listas, dependências e critérios de conclusão. | Integrado ([PR #8](https://github.com/vitorrosa0/Projeto-APPS/pull/8)). Validação da equipe pendente. |
-| [Decisões técnicas](decisoes-tecnicas.md) | DOC-06 | Registro das decisões (DT-01 a DT-24) com status, justificativa e como propor ou mudar uma decisão. Fonte única da situação de cada decisão. | Integrado ([PR #6](https://github.com/vitorrosa0/Projeto-APPS/pull/6)). Validação dos grupos pendente. |
+| [Decisões técnicas](decisoes-tecnicas.md) | DOC-06 | Registro das decisões (DT-01 a DT-23) com status, justificativa e como propor ou mudar uma decisão. Fonte única da situação de cada decisão. | Integrado ([PR #6](https://github.com/vitorrosa0/Projeto-APPS/pull/6)). Validação dos grupos pendente. |
 | [Uso de IA](uso-de-ia.md) e [AGENTS.md](../AGENTS.md) | DOC-07 | Como a equipe usa assistentes de IA para desenvolver, documentar e revisar. O `AGENTS.md` é o ponto de entrada das instruções para esses assistentes. | Integrado ([PR #9](https://github.com/vitorrosa0/Projeto-APPS/pull/9)). Adoção pela equipe pendente. |
 
 ### 1.3 Técnicos
@@ -62,7 +62,7 @@ Situação de cada documento nas tabelas da seção 1:
 
 ## 2. Trilhas de leitura
 
-As trilhas indicam a ordem sugerida. A leitura é **Recomendada**; as regras que cada documento marca como obrigatórias continuam valendo independentemente da trilha.
+As trilhas indicam a ordem sugerida. A leitura é **Recomendada**. Interpretar as regras de cada documento conforme sua situação e suas condições de validação e aplicação. A marcação **Obrigatório** e a integração do arquivo não tornam uma proposta aprovada; quando o documento exigir validação ou infraestrutura, respeitar essas condições antes de exigir a regra nas revisões.
 
 ### 2.1 Novos integrantes
 
@@ -184,3 +184,4 @@ As contribuições individuais, o link da PR integrada e as capturas para compro
 |---|---|
 | 11/10/2026 | Criação do índice com os documentos integrados até a PR #8 e marcação das DOC-07, DOC-09, DOC-10 e DOC-11 como não integradas. Revisão do README principal. |
 | 12/10/2026 | Revisão final após a integração das DOC-07, DOC-09, DOC-10 e DOC-11 (PRs #9 a #12): situações, trilhas e tabela de referência atualizadas; referências desatualizadas corrigidas na arquitetura, no uso de IA e no README do backend. README principal atualizado. |
+| 13/10/2026 | Correções do CR da DOC-12: distinção entre propostas e obrigações validadas, intervalo de decisões corrigido para DT-01 a DT-23, limitação da recuperação de senha no README principal e alinhamento dos guias das áreas quanto à DOC-11, aos IDs de decisões, às verificações do frontend e à exceção documental. Contrato de DELETE corrigido no guia do frontend, política de testes substituída por referências à DOC-11 e integração da PR #7 registrada na arquitetura com base no histórico local. Revisão humana e integração destas correções pendentes. |
