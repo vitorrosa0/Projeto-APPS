@@ -6,7 +6,7 @@ Ele vale para todos os subgrupos que alteram a pasta `backend/` (Animais, Colabo
 
 Documento da DOC-10. A visão geral das camadas e o percurso de uma requisição estão na [arquitetura do sistema](../docs/arquitetura.md) (DOC-08); este documento detalha **como** escrever e executar o código do backend. Os IDs de decisão citados (DT-XX) remetem ao [registro de decisões técnicas](../docs/decisoes-tecnicas.md) (DOC-06), onde deve ser conferida a situação de cada decisão.
 
-> **Situação:** versão 1.1. Proposta pela Documentação em 10/10/2026, a partir da leitura do código e da execução do passo a passo descrita na [seção 2.6](#26-verificação-do-passo-a-passo). Os padrões ainda precisam ser validados pelos subgrupos (ver [seção 13](#13-validação-com-os-subgrupos)).
+> **Situação:** versão 1.2. Proposta pela Documentação em 10/10/2026, a partir da leitura do código e da execução do passo a passo descrita na [seção 2.6](#26-verificação-do-passo-a-passo), com correções documentais em 13/10/2026. Os padrões ainda precisam ser validados pelos subgrupos (ver [seção 13](#13-validação-com-os-subgrupos)).
 
 ## Como ler este documento
 
@@ -618,11 +618,13 @@ A proteção das rotas muda o contrato com o frontend e deve ser feita em uma ú
 
 ## 10. Testes e validação antes da PR
 
-**Situação atual:** o backend não tem testes automatizados nem ferramenta de testes escolhida (DT-06). A estratégia, os padrões de testes e a escolha da ferramenta fazem parte da [DOC-11](https://trello.com/c/aiQAFtur), que **ainda não foi iniciada**. Quando o documento de testes for integrado, esta seção será revista para apontar para ele.
+**Situação atual:** o backend não tem testes automatizados nem ferramenta de testes escolhida (DT-06). Os [padrões de testes e política de cobertura](../docs/testes.md) da DOC-11 estão disponíveis e foram integrados à `documentacao/main` pela [PR #11](https://github.com/vitorrosa0/Projeto-APPS/pull/11). As ferramentas, metas e propostas estruturais continuam pendentes de validação e implementação; a integração do documento não confirma sua adoção. Consultar a DOC-11 para os padrões propostos e as condições de aplicação.
 
 Enquanto não houver testes, vale o [CONTRIBUTING, seção 6.3](../CONTRIBUTING.md#63-validações-antes-de-abrir).
 
-**Obrigatório** em toda PR que altera `backend/`:
+**Exceção documental:** PRs exclusivamente de documentação dispensam as verificações da aplicação abaixo, conforme o [Guia de Contribuição, seção 6.3](../CONTRIBUTING.md#63-validações-antes-de-abrir). Conferir conteúdo, links e formatação no preview do GitHub e registrar as verificações ou limitações na PR.
+
+**Obrigatório** em toda PR que altera código ou configuração da aplicação em `backend/`:
 
 - `npm run dev` sobe sem erros.
 - Cada rota criada ou alterada foi chamada pelo menos uma vez, no caso de sucesso **e** em pelo menos um caso de erro (campo obrigatório ausente, ID inexistente).
@@ -682,12 +684,14 @@ Problemas encontrados na verificação de 10/10/2026. Estão registrados para or
 | [docs/arquitetura.md](../docs/arquitetura.md) | Componentes, camadas, percurso de uma operação e limites dos módulos — DOC-08 |
 | [docs/trello.md](../docs/trello.md) | Organização dos cartões, critérios de conclusão e evidências — DOC-05 |
 | [docs/uso-de-ia.md](../docs/uso-de-ia.md) e [AGENTS.md](../AGENTS.md) | Orientações para o uso de assistentes de IA no projeto — DOC-07 |
-| Documento de testes | Estratégia, padrões e ferramenta de testes — [DOC-11](https://trello.com/c/aiQAFtur). **Ainda não existe.** |
+| [docs/testes.md](../docs/testes.md) | Padrões de testes e política de cobertura — DOC-11 |
+| [frontend/README.md](../frontend/README.md) | Execução e padrões do frontend — DOC-09 |
+| [docs/README.md](../docs/README.md) | Índice da documentação, com a situação de cada documento |
 
 **Alinhamento**
 
 - **Arquitetura (DOC-08):** conferida em 10/10/2026. As seções 1 e 3 deste documento descrevem as mesmas camadas e não divergem dela. Se a arquitetura mudar, a seção 3 é revisada na mesma PR.
-- **Testes (DOC-11):** pendente. Quando o documento de testes for integrado, revisar a seção 10 e a recomendação de funções de validação puras.
+- **Testes (DOC-11):** documento integrado em 12/10/2026 ([PR #11](https://github.com/vitorrosa0/Projeto-APPS/pull/11)). A seção 10 foi alinhada em 13/10/2026 quanto à disponibilidade do documento e às condições de adoção. A recomendação de funções de validação puras é compatível com os cenários unitários da DOC-11; ela não resolve as propostas de isolamento dos controllers, aplicação HTTP e banco, nem a decisão sobre serviços (DT-06 e DT-13). A validação dessas propostas pelos grupos e a implementação da infraestrutura continuam pendentes.
 - Se houver divergência entre documentos, prevalece o que estiver registrado como decisão em [decisões técnicas](../docs/decisoes-tecnicas.md#66-evitar-divergência-entre-documentos), e este documento é ajustado.
 
 ---
@@ -715,6 +719,8 @@ Cada grupo registra a concordância ou os ajustes na PR deste documento ou no ca
 |---|---|---|
 | 10/10/2026 | 1 | Criação do documento e verificação do passo a passo de execução |
 | 12/10/2026 | 1.1 | Inclusão do guia de uso de IA (DOC-07) nos documentos relacionados; atualização das referências à DOC-10 na arquitetura e no guia de uso de IA. Ajustes da revisão: validação de tipo dos campos opcionais no exemplo da seção 5.2 e separação entre presença e tipo na regra e na lacuna L-07, com os casos reproduzidos na API em 12/10/2026 |
+| 12/10/2026 | 1.1 | Atualização dos documentos relacionados após a integração das DOC-09 e DOC-11 (índice da documentação) |
+| 13/10/2026 | 1.2 | Correções do CR da DOC-12: atualização da seção 10 e do registro de alinhamento com a DOC-11; exceção documental explicitada conforme a seção 6.3 do Guia de Contribuição, preservando as pendências de validação e infraestrutura. Revisão humana e integração destas correções pendentes. |
 
 ### 14.2 Contribuições
 

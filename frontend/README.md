@@ -6,7 +6,7 @@ Ele vale para todos os subgrupos que alteram a pasta `frontend/` (Animais, Colab
 
 Documento da **DOC-09**. A visão arquitetural do sistema, o percurso de ponta a ponta e as dependências compartilhadas estão na [arquitetura do sistema](../docs/arquitetura.md). Este documento detalha **como** configurar, executar e padronizar o código do frontend. Os IDs de decisão citados (DT-XX) remetem ao [registro de decisões técnicas](../docs/decisoes-tecnicas.md), onde deve ser conferida a situação de cada decisão.
 
-> **Situação:** versão 1, proposta pela Documentação em 12/10/2026, a partir da inspeção do código e da execução do passo a passo descrita na [seção 2.6](#26-verificação-do-passo-a-passo). Os padrões ainda precisam ser validados pelos subgrupos (ver [seção 10](#10-validação-com-os-subgrupos)).
+> **Situação:** versão 1.1, proposta pela Documentação em 12/10/2026, a partir da inspeção do código e da execução do passo a passo descrita na [seção 2.6](#26-verificação-do-passo-a-passo), com correções documentais em 13/10/2026. Os padrões ainda precisam ser validados pelos subgrupos (ver [seção 10](#10-validação-com-os-subgrupos)).
 
 ## Como ler este documento
 
@@ -19,7 +19,7 @@ Documento da **DOC-09**. A visão arquitetural do sistema, o percurso de ponta a
 
 Quando uma regra tem exceções, elas aparecem logo abaixo dela. As falhas e inconsistências encontradas no código atual são registradas com identificadores de lacunas (`LF-01`, `LF-02`...), permitindo rastreabilidade sem bloquear a entrega documental.
 
-**Código existente:** as regras obrigatórias valem para código **novo ou alterado**. Uma PR não é bloqueada por uma lacuna antiga em arquivo que ela não modificou.
+**Código existente:** os padrões de escrita de código valem para código **novo ou alterado**. Uma lacuna antiga em arquivo não modificado não exige, por si só, adequação a esses padrões na mesma PR. Isso não dispensa as verificações globais de lint e build da [seção 7.2](#72-validações-obrigatórias-atuais-antes-de-abrir-pull-request), conforme o Guia de Contribuição.
 
 ---
 
@@ -73,7 +73,7 @@ Quando uma regra tem exceções, elas aparecem logo abaixo dela. As falhas e inc
 | Porta padrão | `3000` (o backend Express roda na porta `3001`) |
 | Comunicação com API | Utilitário centralizado `lib/api.ts` (REST com JSON) |
 
-As decisões técnicas relativas à interface e sua stack constam no [registro de decisões técnicas](../docs/decisoes-tecnicas.md) (DT-01: Next.js com App Router; DT-04: Tailwind CSS; DT-05: TypeScript; DT-23: App Router).
+As decisões técnicas relativas à interface e sua stack constam na DT-01 do [registro de decisões técnicas](../docs/decisoes-tecnicas.md): Next.js com App Router, React, TypeScript e Tailwind CSS.
 
 ```text
 frontend/
@@ -191,7 +191,7 @@ Em **12/10/2026**, a Documentação executou a verificação do ambiente e de to
 
 ### 3.1 Páginas e rotas (App Router)
 
-O projeto adota o **Next.js App Router** (DT-01, DT-23). Todas as rotas públicas da aplicação residem dentro do route group `app/(etapas)/`, permitindo agrupar as etapas e fluxos do sistema sem adicionar o segmento `(etapas)` à URL do navegador.
+O projeto adota o **Next.js App Router** (DT-01). Todas as rotas públicas da aplicação residem dentro do route group `app/(etapas)/`, permitindo agrupar as etapas e fluxos do sistema sem adicionar o segmento `(etapas)` à URL do navegador.
 
 #### Estrutura de arquivos e convenções de rotas
 
@@ -294,7 +294,7 @@ A pasta `components/` centraliza a biblioteca de componentes visuais do sistema.
 
 ### 3.3 Tipos TypeScript
 
-O projeto utiliza TypeScript estrito para assegurar robustez na troca de dados entre interface e backend (DT-05).
+O projeto utiliza TypeScript estrito para assegurar robustez na troca de dados entre interface e backend (DT-01).
 
 #### Situação atual e lacuna de dispersão (`LF-02`)
 
@@ -373,12 +373,14 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
    });
    ```
 
-3. **Exclusão DELETE (retorno 204 sem corpo):**
+3. **Exclusão DELETE (retorno atual `200` com `{ mensagem }`):**
    ```typescript
-   await api<void>(`/animais/${id}`, {
+   const resposta = await api<{ mensagem: string }>(`/animais/${id}`, {
      method: "DELETE",
    });
    ```
+
+   As rotas de remoção de animais, colaboradores e voluntários retornam JSON com a mensagem de sucesso, conforme o [guia do backend, seção 6](../backend/README.md#6-respostas-e-códigos-http). O tratamento de `204` no utilitário permite respostas sem corpo, mas não descreve o contrato atual dessas rotas.
 
 #### Regras e diretrizes
 
@@ -651,7 +653,7 @@ Exemplo **adequado**:
 
 ### 5.3 Validação de formulários
 
-A validação do frontend atua como primeira barreira para proporcionar retorno imediato ao usuário, mas não substitui a validação do backend (DT-12).
+A validação do frontend atua como primeira barreira para proporcionar retorno imediato ao usuário, mas não substitui a validação do backend, conforme a [arquitetura, seção 1.2](../docs/arquitetura.md#12-backend-api-e-regras-de-negócio).
 
 #### Regras de validação no cliente
 
@@ -906,55 +908,43 @@ import Image from "next/image";
 
 ### 7.1 Estratégia de testes e diretrizes
 
-A estratégia de testes do sistema foi formalizada no documento [Padrões de Testes e Política de Cobertura](../docs/testes.md), elaborado em 12/10/2026. 
+A estratégia e a política de testes estão propostas nos [Padrões de Testes e Política de Cobertura](../docs/testes.md) (DOC-11). A validação dos grupos e a infraestrutura correspondente continuam pendentes; a integração do documento não confirma sua adoção.
 
 **Situação atual:** O frontend atualmente não possui dependências de testes instaladas nem scripts de teste no `package.json` (DT-06). A infraestrutura de testes será configurada em tarefas posteriores de implementação.
 
-#### Padrões definidos para o frontend:
+Consultar a DOC-11 para cada assunto, sem manter uma segunda cópia da política neste guia:
 
-1. **Ferramenta proposta:** Avaliação e adoção de **Vitest com React Testing Library** e ambiente simulado DOM (`jsdom`), seguindo as diretrizes oficiais do Next.js (App Router).
-2. **Escopo dos testes unitários de interface:**
-   - Testar utilitários puros (`lib/api.ts` inclusive) com simulação controlada do `fetch`.
-   - Testar validações síncronas de formulários e montagem dos dados enviados (payloads).
-   - Testar hooks customizados e componentes com comportamento interativo, cobrindo os quatro estados essenciais: **carregamento**, **sucesso**, **vazio** e **erro**.
-3. **Boas práticas de teste no React:**
-   - Procurar elementos na tela por papel semântico e nome acessível (`getByRole`, `findByRole`), simulando as ações do usuário real.
-   - Evitar asserções acopladas a detalhes internos de implementação, classes CSS do Tailwind ou snapshots extensos.
-   - Automação de interface de ponta a ponta (E2E) com navegador real fica como evolução futura; o roteiro manual continua necessário.
-4. **Organização de arquivos de teste:**
-   ```text
-   frontend/lib/api.test.ts                 # junto da função testada
-   frontend/components/NomeDoComponente.test.tsx
-   frontend/app/(etapas)/animais/cadastrar/page.test.tsx
-   frontend/tests/helpers/                 # mocks e apoio compartilhado
-   ```
-5. **Metas de cobertura mínimas propostas:**
-   - Linhas: **80%**
-   - Instruções (statements): **80%**
-   - Funções: **80%**
-   - Ramificações (branches): **70%**
-6. **Comandos futuros (a serem adicionados ao `package.json`):**
-   - `npm run test`: Executa os testes uma vez via Vitest.
-   - `npm run test:coverage`: Gera o relatório de cobertura.
+| Assunto | Referência na DOC-11 |
+|---|---|
+| Escrita e organização dos arquivos | [Seção 3 — Escrita e organização](../docs/testes.md#3-escrita-e-organização) |
+| Isolamento de API, navegação e outras dependências | [Seção 4 — Independência, dados e dependências](../docs/testes.md#4-independência-dados-e-dependências) |
+| Cenários e prioridades do frontend | [Seção 5.1 — Prioridades por camada](../docs/testes.md#51-prioridades-por-camada) |
+| Ferramentas avaliadas e comandos dependentes de configuração | [Seção 6 — Ferramentas e comandos](../docs/testes.md#6-ferramentas-e-comandos) |
+| Metas, escopo do relatório e adoção gradual | [Seção 7 — Política de cobertura](../docs/testes.md#7-política-de-cobertura) |
+| Execução e evidências do autor e do revisor | [Seção 8 — Execução e evidências na PR](../docs/testes.md#8-execução-e-evidências-na-pr) |
 
 ---
 
 ### 7.2 Validações obrigatórias atuais antes de abrir Pull Request
 
-Enquanto a infraestrutura do Vitest estiver pendente de implementação pelos subgrupos, aplicam-se estritamente as validações do [Guia de Contribuição, seção 6.3](../CONTRIBUTING.md#63-validações-antes-de-abrir).
+Enquanto a infraestrutura de testes estiver pendente de implementação pelos subgrupos, aplicam-se as validações do [Guia de Contribuição, seção 6.3](../CONTRIBUTING.md#63-validações-antes-de-abrir).
 
-**Obrigatório** em toda PR que alterar a pasta `frontend/`:
+**Exceção documental:** PRs exclusivamente de documentação dispensam as verificações da aplicação abaixo, conforme a seção 6.3 do Guia de Contribuição. Conferir conteúdo, links e formatação no preview do GitHub e registrar as verificações ou limitações na PR.
+
+**Obrigatório** em toda PR que alterar código ou configuração da aplicação em `frontend/`:
 
 1. **Execução local sem quebras:**
    - O comando `npm run dev` deve iniciar o servidor sem erros de compilação ou de importação.
 2. **Checagem de tipagem estrita:**
    - Executar `npx tsc --noEmit` na pasta `frontend/` e certificar-se de que os arquivos alterados pela PR não introduzem novos erros de compilação TypeScript (atenção especial a campos opcionais e `TS18048`).
 3. **Verificação de lint:**
-   - Executar `npm run lint` e garantir que o código novo ou alterado **não introduz novos erros** do ESLint (em especial `react-hooks/set-state-in-effect` ou tags `<img>` sem otimização). Erros preexistentes em arquivos não modificados pela PR não bloqueiam a aprovação da entrega (ver [seção 8, Lacunas conhecidas](#8-lacunas-conhecidas)).
-4. **Verificação funcional manual:**
+   - Executar `npm run lint` na pasta `frontend/`, sem erros, conforme o Guia de Contribuição. As lacunas preexistentes da [seção 8](#8-lacunas-conhecidas) devem ser registradas; sua existência não dispensa o resultado exigido pela seção 6.3 do guia.
+4. **Build de produção:**
+   - Executar `npm run build` na pasta `frontend/`, sem erros, conforme o Guia de Contribuição. Iniciar o servidor de desenvolvimento ou executar `npx tsc --noEmit` não substitui essa verificação.
+5. **Verificação funcional manual:**
    - O desenvolvedor deve testar visualmente no navegador a tela ou componente alterado em resolução móvel (simulando tela de celular com DevTools) e em resolução desktop.
    - Testar o fluxo de sucesso e pelo menos um cenário de exceção (ex.: erro de validação ou resposta de erro da API).
-5. **Seção "Como testar" na descrição da PR:**
+6. **Seção "Como testar" na descrição da PR:**
    - Registrar no corpo da PR os passos exatos para que os revisores da Documentação reproduzam a validação visual e funcional no navegador.
 
 ---
@@ -983,7 +973,7 @@ Inconsistências e limitações identificadas durante a inspeção do código e 
 | [Visão Geral do Projeto](../docs/visao-geral.md) | Contexto do sistema, objetivos institucionais, público-alvo e histórico do projeto. |
 | [Guia de Contribuição](../CONTRIBUTING.md) | Regras de branches, convenções de commits, abertura de PRs e fluxo de revisão. |
 | [Arquitetura do Sistema](../docs/arquitetura.md) | Visão das camadas de software, limites de módulos e percurso de ponta a ponta da requisição. |
-| [Registro de Decisões Técnicas](../docs/decisoes-tecnicas.md) | Registro formal das decisões de arquitetura e tecnologia (DT-01 a DT-24). |
+| [Registro de Decisões Técnicas](../docs/decisoes-tecnicas.md) | Registro formal das decisões de arquitetura e tecnologia (DT-01 a DT-23). |
 | [Estado dos Módulos](../docs/estado-dos-modulos.md) | Diagnóstico detalhado de maturidade de cada módulo funcional. |
 | [Entregas e Próximos Passos](../docs/entregas-e-proximos-passos.md) | Planejamento e prioridades definidas para os ciclos de desenvolvimento. |
 | [Guia do Backend](../backend/README.md) | Padrões para rotas, controllers, validação e persistência Prisma. |
@@ -993,7 +983,7 @@ Inconsistências e limitações identificadas durante a inspeção do código e 
 
 - **Arquitetura ([arquitetura.md](../docs/arquitetura.md)):** As camadas, limites de responsabilidade e o percurso descritos neste documento estão estritamente alinhados à arquitetura do sistema. Se uma refatoração alterar as fronteiras do frontend, ambos os documentos devem ser atualizados na mesma PR.
 - **Backend ([backend/README.md](../backend/README.md)):** As portas padrão (3000 vs 3001) e o formato das requisições e respostas estão alinhados ao guia de desenvolvimento do backend.
-- **Testes ([testes.md](../docs/testes.md)):** A organização dos arquivos de testes e a avaliação de Vitest + React Testing Library adotadas na seção 7 seguem fielmente a proposta do documento de testes.
+- **Testes ([testes.md](../docs/testes.md)):** A seção 7.1 aponta para a DOC-11 como referência da política, organização, ferramentas e comandos propostos, sem duplicá-los. A validação e a configuração da infraestrutura continuam pendentes.
 - **Decisões Técnicas ([decisoes-tecnicas.md](../docs/decisoes-tecnicas.md)):** Prevalece sempre o que estiver registrado no registro formal de decisões técnicas. Havendo divergência, aplica-se a regra de resolução de divergências do projeto ([decisões técnicas, seção 6.6](../docs/decisoes-tecnicas.md#66-evitar-divergência-entre-documentos)).
 
 ---
@@ -1030,6 +1020,7 @@ Os padrões estabelecidos neste guia foram extraídos a partir da inspeção do 
 | Data | Versão | Autor principal | Descrição das alterações |
 |---|---|---|---|
 | 12/10/2026 | 1.0 | Gustavo Amaral | Elaboração inicial dos padrões de desenvolvimento do frontend, incluindo verificação prática de comandos, mapeamento de rotas, componentes, tipos, chamadas à API, responsividade, acessibilidade e levantamento das lacunas conhecidas. |
+| 13/10/2026 | 1.1 | — | Correções do CR da DOC-12 com apoio de IA, a pedido de Lucas Ciampi: IDs de decisões e referência à validação do backend corrigidos; lint, build e exceção documental alinhados à seção 6.3 do Guia de Contribuição; contrato de DELETE corrigido; política de testes substituída por referências à DOC-11. Revisão humana e integração destas correções pendentes. |
 
 ### 11.2 Contribuições
 
