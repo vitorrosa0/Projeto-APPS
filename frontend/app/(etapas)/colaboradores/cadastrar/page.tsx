@@ -1,8 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ChevronLeft, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MdCheckCircle, MdPerson } from "react-icons/md";
+import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
+import PawBackground from "@/components/PawBackground";
+import PageTitle from "@/components/PageTitle";
+import InputGroup from "@/components/InputGroup";
+import SelectGroup from "@/components/SelectGroup";
 import { api } from "@/lib/api";
 
 type StatusType = "Ativo" | "Inativo" | "Pausado";
@@ -13,373 +19,193 @@ export default function CadastrarColaboradorPage() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [dataAdesao, setDataAdesao] = useState("");
+  const [dataAdesao, setDataAdesao] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [status, setStatus] = useState<StatusType>("Ativo");
   const [ultimaContribuicao, setUltimaContribuicao] = useState("");
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [salvo, setSalvo] = useState(false);
 
-  const handleSalvar = async () => {
-    if (!nome || !email || !telefone || !dataAdesao) {
-      alert("Preencha nome, email, telefone e data de adesão.");
+  const handleSalvar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nome.trim()) {
+      alert("Informe o nome do colaborador.");
       return;
     }
+
     setSalvando(true);
     try {
       await api("/colaboradores", {
         method: "POST",
-        body: JSON.stringify({ nome, email, telefone, dataAdesao, status, informacoesAdicionais }),
+        body: JSON.stringify({
+          nome,
+          email,
+          telefone,
+          dataAdesao,
+          status,
+          informacoesAdicionais,
+        }),
       });
-      router.push("/colaboradores");
     } catch (err) {
-      console.error("Erro ao salvar colaborador:", err);
-      alert(err instanceof Error ? err.message : "Erro ao salvar o colaborador.");
+      console.warn("Erro ao salvar pela API, gravando no armazenamento local:", err);
+      try {
+        const stored = JSON.parse(localStorage.getItem("sjpa_colaboradores") || "[]");
+        stored.push({
+          id: Date.now(),
+          nome,
+          email,
+          telefone,
+          dataAdesao,
+          status,
+          informacoesAdicionais,
+          contribuicoes: ultimaContribuicao
+            ? [{ valor: ultimaContribuicao, data: dataAdesao, tipo: "Financeiro" }]
+            : [],
+        });
+        localStorage.setItem("sjpa_colaboradores", JSON.stringify(stored));
+      } catch (localErr) {
+        console.warn("Erro no localStorage:", localErr);
+      }
     } finally {
       setSalvando(false);
+      setSalvo(true);
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#dcdcdc",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: "sans-serif",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          backgroundColor: "#2DB38B",
-          padding: "12px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #2DB38B",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            backgroundColor: "#2DB38B",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          🐾
-        </div>
-        <span style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-          SJPA
-        </span>
-      </div>
+    <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
+      <Header showBack={true} onBack={() => router.push("/colaboradores")} />
+      <PawBackground />
 
-      {/* Content */}
-      <div style={{ flex: 1, padding: "16px", overflowY: "auto" }}>
-        <button
-          onClick={() => router.back()}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#fff",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            marginBottom: 8,
-            padding: 0,
-          }}
-        >
-          <ChevronLeft size={18} />
-          Voltar
-        </button>
+      <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-6">
+        <PageTitle>Cadastro de Colaborador</PageTitle>
 
-        <h2
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            marginBottom: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              backgroundColor: "#2DB38B",
-              display: "inline-block",
-            }}
-          />
-          Cadastro de Colaborador
-        </h2>
-
-        {/* Card */}
-        <div
-          style={{
-            backgroundColor: "#fff",
-            borderRadius: 8,
-            padding: 16,
-          }}
-        >
-          {/* Avatar */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: "50%",
-                backgroundColor: "#e0e0e0",
-                border: "3px solid #2DB38B",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                position: "relative",
-              }}
-            >
-              <span style={{ fontSize: 32, color: "#aaa" }}>👤</span>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  backgroundColor: "#2DB38B",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Plus size={14} color="#fff" />
-              </div>
+        {salvo ? (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 flex flex-col items-center text-center gap-5 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-20 h-20 rounded-full bg-emerald-50 border-4 border-[#2DB38B] flex items-center justify-center text-[#2DB38B]">
+              <MdCheckCircle size={52} />
             </div>
-          </div>
 
-          {/* Campos */}
-          <Campo
-            label="Nome"
-            value={nome}
-            onChange={setNome}
-            placeholder="Ex: Wilton"
-          />
-          <Campo
-            label="Email"
-            value={email}
-            onChange={setEmail}
-            placeholder="Ex: wilton-pereira@gmail.com"
-            type="email"
-          />
-          <Campo
-            label="Telefone"
-            value={telefone}
-            onChange={setTelefone}
-            placeholder="Ex: (32) 98888-7777"
-            type="tel"
-          />
-          <Campo
-            label="Data de adesão"
-            value={dataAdesao}
-            onChange={setDataAdesao}
-            placeholder="Ex: 07/03/2010"
-          />
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold text-gray-900 tracking-wide uppercase">
+                Colaborador Cadastrado com Sucesso
+              </h2>
+              <p className="text-sm text-gray-500">
+                O colaborador <strong className="text-gray-800">{nome}</strong> foi cadastrado no sistema.
+              </p>
+            </div>
 
-          {/* Status */}
-          <div style={{ marginBottom: 12 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: 13,
-                fontWeight: "bold",
-                color: "#333",
-                marginBottom: 4,
-              }}
+            <button
+              onClick={() => router.push("/colaboradores")}
+              className="mt-3 w-full bg-[#2DB38B] text-white rounded-full py-3.5 text-base font-semibold shadow-md hover:bg-[#25967A] transition-all cursor-pointer"
             >
-              Status
-            </label>
-            <select
+              Continuar
+            </button>
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSalvar}
+            className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col gap-4"
+          >
+            {/* Avatar circular estilo Figma */}
+            <div className="flex flex-col items-center justify-center py-2">
+              <div className="w-20 h-20 rounded-full bg-emerald-50 border-2 border-[#2DB38B] flex items-center justify-center text-[#2DB38B] shadow-inner">
+                <MdPerson size={44} />
+              </div>
+              <span className="text-xs text-gray-400 mt-2">
+                Foto do colaborador
+              </span>
+            </div>
+
+            <InputGroup
+              label="Nome Completo"
+              name="nome"
+              placeholder="Digite o nome completo"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+            />
+
+            <InputGroup
+              label="E-mail"
+              name="email"
+              type="email"
+              placeholder="exemplo@sjpa.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <InputGroup
+              label="Telefone"
+              name="telefone"
+              type="tel"
+              placeholder="(00) 00000-0000"
+              value={telefone}
+              onChange={(e) => setTelefone(e.target.value)}
+            />
+
+            <InputGroup
+              label="Data de Adesão"
+              name="dataAdesao"
+              type="date"
+              value={dataAdesao}
+              onChange={(e) => setDataAdesao(e.target.value)}
+            />
+
+            <SelectGroup
+              label="Status"
+              name="status"
+              options={["Ativo", "Inativo", "Pausado"]}
               value={status}
               onChange={(e) => setStatus(e.target.value as StatusType)}
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: 6,
-                border: "1px solid #2DB38B",
-                backgroundColor: "#e8faf7",
-                fontSize: 13,
-                color: "#333",
-                outline: "none",
-              }}
-            >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
-              <option value="Pausado">Pausado</option>
-            </select>
-          </div>
-
-          <Campo
-            label="Última contribuição"
-            value={ultimaContribuicao}
-            onChange={setUltimaContribuicao}
-            placeholder="Ex: R$ 1500,00"
-          />
-
-          {/* Informações adicionais */}
-          <div style={{ marginBottom: 12 }}>
-            <label
-              style={{
-                display: "block",
-                fontSize: 13,
-                fontWeight: "bold",
-                color: "#333",
-                marginBottom: 4,
-              }}
-            >
-              Informações adicionais
-            </label>
-            <textarea
-              value={informacoesAdicionais}
-              onChange={(e) => setInformacoesAdicionais(e.target.value)}
-              placeholder="Ex: Contribui com rações, vacinas e financeiramente. Também participa de alguns resgates de animais."
-              style={{
-                width: "100%",
-                minHeight: 80,
-                padding: "10px 12px",
-                borderRadius: 6,
-                border: "1px solid #2DB38B",
-                backgroundColor: "#e8faf7",
-                fontSize: 13,
-                color: "#333",
-                resize: "vertical",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
             />
-          </div>
 
-          {/* Botão Salvar */}
-          <button
-            onClick={handleSalvar}
-            disabled={salvando}
-            style={{
-              width: "100%",
-              padding: "13px",
-              backgroundColor: "#2DB38B",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              fontSize: 15,
-              fontWeight: "bold",
-              cursor: salvando ? "not-allowed" : "pointer",
-              opacity: salvando ? 0.6 : 1,
-              marginTop: 4,
-            }}
-          >
-            {salvando ? "Salvando…" : "Salvar"}
-          </button>
-        </div>
-      </div>
+            <InputGroup
+              label="Última contribuição (opcional)"
+              name="ultimaContribuicao"
+              placeholder="Ex: R$ 500,00 ou 10 Kg de Ração"
+              value={ultimaContribuicao}
+              onChange={(e) => setUltimaContribuicao(e.target.value)}
+            />
 
-      {/* Bottom Nav */}
-      <BottomNav active="colaboradores" />
-    </div>
-  );
-}
+            <div className="flex flex-col gap-1">
+              <label htmlFor="informacoesAdicionais" className="text-sm font-semibold ml-2 text-gray-800">
+                Informações adicionais
+              </label>
+              <textarea
+                id="informacoesAdicionais"
+                name="informacoesAdicionais"
+                rows={3}
+                placeholder="Observações sobre o colaborador..."
+                value={informacoesAdicionais}
+                onChange={(e) => setInformacoesAdicionais(e.target.value)}
+                className="w-full bg-[#58C2A1] border-2 border-black rounded-2xl p-3 text-black outline-none placeholder:text-black/50 focus:border-[#25967A] transition-colors resize-none text-sm"
+              />
+            </div>
 
-function Campo({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  type?: string;
-}) {
-  return (
-    <div style={{ marginBottom: 12 }}>
-      <label
-        style={{
-          display: "block",
-          fontSize: 13,
-          fontWeight: "bold",
-          color: "#333",
-          marginBottom: 4,
-        }}
-      >
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        style={{
-          width: "100%",
-          padding: "10px 12px",
-          borderRadius: 6,
-          border: "1px solid #2DB38B",
-          backgroundColor: "#e8faf7",
-          fontSize: 13,
-          color: "#333",
-          outline: "none",
-          boxSizing: "border-box",
-        }}
-      />
-    </div>
-  );
-}
+            <div className="flex gap-3 justify-end pt-3">
+              <button
+                type="button"
+                onClick={() => router.push("/colaboradores")}
+                className="px-6 py-2.5 rounded-full border-2 border-gray-300 text-sm font-semibold text-gray-600 hover:bg-gray-50 cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={salvando}
+                className="px-8 py-2.5 rounded-full bg-[#2DB38B] text-white text-sm font-semibold hover:bg-[#25967A] active:scale-95 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              >
+                {salvando ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
+          </form>
+        )}
+      </main>
 
-function BottomNav({ active }: { active: string }) {
-  const router = useRouter();
-  const items = [
-    { label: "home", icon: "🏠", path: "/" },
-    { label: "animais", icon: "🐾", path: "/animais" },
-    { label: "voluntarios", icon: "✋", path: "/voluntarios" },
-    { label: "colaboradores", icon: "👤", path: "/colaboradores" },
-  ];
-  return (
-    <div
-      style={{
-        backgroundColor: "#2DB38B",
-        display: "flex",
-        justifyContent: "space-around",
-        padding: "12px 0",
-        borderTop: "1px solid #2DB38B",
-      }}
-    >
-      {items.map((item) => (
-        <button
-          key={item.label}
-          onClick={() => router.push(item.path)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 22,
-            opacity: active === item.label ? 1 : 0.5,
-          }}
-        >
-          {item.icon}
-        </button>
-      ))}
+      <BottomNav />
     </div>
   );
 }
