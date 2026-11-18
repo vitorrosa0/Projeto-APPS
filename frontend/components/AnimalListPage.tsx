@@ -63,10 +63,10 @@ export default function AnimalListPage({
     if (!termo) return animais;
     return animais.filter(
       (a) =>
-        a.nome.toLowerCase().includes(termo) ||
-        a.raca.toLowerCase().includes(termo) ||
-        a.setor.toLowerCase().includes(termo) ||
-        a.canil.toLowerCase().includes(termo)
+        a.nome?.toLowerCase().includes(termo) ||
+        a.raca?.toLowerCase().includes(termo) ||
+        a.setor?.toLowerCase().includes(termo) ||
+        a.canil?.toLowerCase().includes(termo)
     );
   }, [animais, busca]);
 
