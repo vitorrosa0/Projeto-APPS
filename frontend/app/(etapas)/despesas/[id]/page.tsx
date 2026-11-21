@@ -1,97 +1,59 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { MdAdd } from "react-icons/md";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
 import NovaDespesaModal, { DadosDespesa } from "@/components/NovaDespesaModal";
+import { api } from "@/lib/api";
 
-interface DespesaItem {
+interface DespesaApi {
   id: number;
   categoria: string;
-  valor: number;
-}
-
-const DESPESAS_MOCK_BASE: Record<string, DespesaItem[]> = {
-  Janeiro: [
-    { id: 1, categoria: "Ração para gato", valor: 350.0 },
-    { id: 2, categoria: "Ração para cachorro", valor: 750.0 },
-    { id: 3, categoria: "Vacina para gato", valor: 200.0 },
-    { id: 4, categoria: "Vacina para cachorro", valor: 500.0 },
-    { id: 5, categoria: "Remédios em geral", valor: 150.0 },
-    { id: 6, categoria: "Gastos com reformas no canil", valor: 1000.0 },
-  ],
-  Fevereiro: [
-    { id: 1, categoria: "Ração para cães", valor: 820.0 },
-    { id: 2, categoria: "Ração para gatos", valor: 390.0 },
-    { id: 3, categoria: "Remédios e antibióticos", valor: 260.0 },
-    { id: 4, categoria: "Despesas com energia", valor: 410.0 },
-    { id: 5, categoria: "Despesas com água", valor: 190.0 },
-  ],
-  Março: [
-    { id: 1, categoria: "Ração para cães", valor: 780.0 },
-    { id: 2, categoria: "Ração para gatos", valor: 360.0 },
-    { id: 3, categoria: "Vacinas V10", valor: 450.0 },
-    { id: 4, categoria: "Material de limpeza", valor: 220.0 },
-  ],
-};
-
-function parseValorMoeda(valorStr: string): number {
-  const limpo = valorStr.replace(/[^\d,-]/g, "").replace(",", ".");
-  const num = parseFloat(limpo);
-  return isNaN(num) ? 0 : num;
+  valor: string;
+  descricao?: string | null;
+  data: string;
 }
 
 export default function DetalhesDespesasPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
   const mesParam = searchParams.get("mes") ?? "Janeiro";
+  const mesNum = params.id as string;
 
-  const [despesas, setDespesas] = useState<DespesaItem[]>([]);
+  const [despesas, setDespesas] = useState<DespesaApi[]>([]);
   const [modalAberto, setModalAberto] = useState(false);
 
+  const carregarDespesas = () => {
+    const ano = new Date().getFullYear();
+    api<DespesaApi[]>(`/despesas?mes=${mesNum}&ano=${ano}`)
+      .then((data) => setDespesas(data))
+      .catch((e) => console.error("Erro ao carregar despesas:", e));
+  };
+
   useEffect(() => {
-    // Carrega despesas mock do mês ou itens padrão
-    const mock = DESPESAS_MOCK_BASE[mesParam] || [
-      { id: 1, categoria: "Ração para cachorro", valor: 650.0 },
-      { id: 2, categoria: "Ração para gato", valor: 300.0 },
-      { id: 3, categoria: "Remédios em geral", valor: 180.0 },
-      { id: 4, categoria: "Despesas com energia", valor: 390.0 },
-    ];
+    carregarDespesas();
+  }, [mesNum]);
 
-    // Carrega também despesas adicionadas dinamicamente
+  const totalGeral = despesas.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0);
+
+  const handleSalvarDespesa = async (dados: DadosDespesa) => {
     try {
-      const stored = JSON.parse(localStorage.getItem("sjpa_despesas") || "[]");
-      const extras = stored.map((item: any, idx: number) => ({
-        id: item.id || 100 + idx,
-        categoria: item.tipo,
-        valor: parseValorMoeda(item.valor),
-      }));
-      setDespesas([...mock, ...extras]);
-    } catch {
-      setDespesas(mock);
-    }
-  }, [mesParam]);
-
-  const totalGeral = despesas.reduce((acc, curr) => acc + curr.valor, 0);
-
-  const handleSalvarDespesa = (dados: DadosDespesa) => {
-    const novoValor = parseValorMoeda(dados.valor);
-    const novoItem: DespesaItem = {
-      id: Date.now(),
-      categoria: dados.tipo,
-      valor: novoValor,
-    };
-    setDespesas((prev) => [...prev, novoItem]);
-
-    try {
-      const stored = JSON.parse(localStorage.getItem("sjpa_despesas") || "[]");
-      stored.push({ id: novoItem.id, ...dados });
-      localStorage.setItem("sjpa_despesas", JSON.stringify(stored));
+      await api("/despesas", {
+        method: "POST",
+        body: JSON.stringify({
+          categoria: dados.tipo,
+          valor: dados.valor,
+          descricao: dados.descricao,
+          data: dados.data,
+        }),
+      });
+      carregarDespesas();
     } catch (e) {
-      console.warn("Erro ao salvar:", e);
+      console.error("Erro ao salvar despesa:", e);
     }
   };
 
@@ -102,48 +64,45 @@ export default function DetalhesDespesasPage() {
 
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-6">
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {/* Header do Card */}
           <div className="px-4 py-4 border-b border-gray-100 text-center bg-gray-50/50">
             <h2 className="text-base font-bold text-gray-800">
               Despesas do mês de {mesParam}
             </h2>
           </div>
 
-          {/* Lista de itens */}
           <div className="divide-y divide-gray-100">
-            {despesas.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between px-5 py-3 hover:bg-gray-50/50 transition-colors"
-              >
-                <span className="text-sm font-medium text-gray-700">
-                  {item.categoria}
-                </span>
-                <span className="text-sm font-bold text-gray-900">
-                  {item.valor.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                </span>
-              </div>
-            ))}
+            {despesas.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-8">
+                Nenhuma despesa registrada neste mês.
+              </p>
+            ) : (
+              despesas.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between px-5 py-3 hover:bg-gray-50/50 transition-colors"
+                >
+                  <span className="text-sm font-medium text-gray-700">{item.categoria}</span>
+                  <span className="text-sm font-bold text-gray-900">
+                    {parseFloat(item.valor).toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
 
-          {/* Total Geral */}
           <div className="border-t-2 border-gray-200 px-5 py-4 bg-[#2DB38B]/10 flex items-center justify-between">
             <span className="text-sm font-bold text-gray-800 uppercase tracking-wide">
               Total Geral
             </span>
             <span className="text-base font-extrabold text-[#25967A]">
-              {totalGeral.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              {totalGeral.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </span>
           </div>
         </div>
 
-        {/* Botão Nova Despesa */}
         <button
           onClick={() => setModalAberto(true)}
           className="

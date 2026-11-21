@@ -87,3 +87,24 @@ model Contribuicao {
   data          String
   createdAt     DateTime    @default(now())
 }
+
+model Doacao {
+  id        Int      @id @default(autoincrement())
+  tipo      String   // "dinheiro" | "item"
+  valor     String?  // preenchido quando tipo = "dinheiro"
+  descricao String?  // preenchido quando tipo = "item"
+  doador    String?
+  data      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Despesa {
+  id        Int      @id @default(autoincrement())
+  categoria String   // "Alimentacao" | "Veterinario" | "Medicamentos" | "Infraestrutura" | "Outros"
+  valor     String
+  descricao String?
+  data      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
