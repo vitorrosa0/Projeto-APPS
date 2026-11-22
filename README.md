@@ -30,7 +30,9 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 - **Cadastro:** Registro de novos usuários com validação de campos.
 - **Recuperação de Senha:** Fluxo completo para solicitação de nova senha e confirmação de envio de link.
 - **Gestão de Animais:** Listagem e categorização (Cães/Gatos) de animais.
-- **Doações:** Listagem por mês e cadastro de novas doações.
+- **Doações:** Listagem por mês e cadastro de novas doações (integrado com API).
+- **Despesas:** Listagem por mês e cadastro de novas despesas (integrado com API).
+- **Financeiro:** Resumo consolidado de receitas, despesas e saldo com filtro por período.
 - **Colaboradores:** Listagem, cadastro e edição de colaboradores com histórico de contribuições.
 - **Interface Responsiva:** Otimizada para dispositivos móveis com menu inferior (`BottomNav`) e cabeçalho dinâmico.
 
@@ -71,6 +73,50 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 **Campos do Colaborador:** `nome`, `email`, `telefone`, `dataAdesao`, `status` (Ativo/Inativo/Pausado), `informacoesAdicionais`
 
 **Campos da Contribuição:** `tipo` (Financeiro/Produto/Servico), `valor`, `data`
+
+#### Doações (`/doacoes`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/doacoes` | Lista todas as doações (filtro opcional: `?mes=11&ano=2026`) |
+| GET | `/doacoes/:id` | Busca uma doação pelo ID |
+| POST | `/doacoes` | Cadastra uma nova doação |
+| PUT | `/doacoes/:id` | Atualiza os dados de uma doação |
+| DELETE | `/doacoes/:id` | Remove uma doação |
+
+**Campos da Doação:** `tipo` (dinheiro/item — obrigatório), `valor` (obrigatório quando tipo=dinheiro), `descricao` (obrigatório quando tipo=item), `doador` (opcional), `data` (obrigatório, formato YYYY-MM-DD)
+
+#### Despesas (`/despesas`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/despesas` | Lista todas as despesas (filtro opcional: `?mes=11&ano=2026`) |
+| GET | `/despesas/:id` | Busca uma despesa pelo ID |
+| POST | `/despesas` | Cadastra uma nova despesa |
+| PUT | `/despesas/:id` | Atualiza os dados de uma despesa |
+| DELETE | `/despesas/:id` | Remove uma despesa |
+
+**Campos da Despesa:** `categoria` (obrigatório), `valor` (obrigatório), `descricao` (opcional), `data` (obrigatório, formato YYYY-MM-DD)
+
+#### Resumo Financeiro (`/financeiro`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/financeiro/resumo` | Retorna resumo consolidado de receitas, despesas e saldo (filtro opcional: `?mes=11&ano=2026`) |
+
+**Resposta do resumo:**
+```json
+{
+  "periodo": { "mes": "11", "ano": "2026" },
+  "receitas": {
+    "total": 300.00,
+    "doacoesDinheiro": { "total": 200.00, "registros": [...] },
+    "contribuicoesColaboradores": { "total": 100.00, "registros": [...] }
+  },
+  "itensDoados": [...],
+  "despesas": { "total": 150.00, "registros": [...] },
+  "saldo": 150.00
+}
+```
+
+> As receitas somam doações em dinheiro + contribuições financeiras de colaboradores, sem duplicação. Doações de itens físicos são listadas separadamente em `itensDoados` e não entram no total financeiro.
 
 ---
 

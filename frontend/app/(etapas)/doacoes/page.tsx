@@ -9,6 +9,7 @@ import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import MonthRow from "@/components/MonthRow";
 import NovaDoacaoModal, { DadosDoacao } from "@/components/NovaDoacaoModal";
+import { api } from "@/lib/api";
 
 const MESES_DO_ANO = [
   "Janeiro", "Fevereiro", "Março", "Abril",
@@ -36,9 +37,22 @@ export default function DoacoesPage() {
     router.push(`/doacoes/${index + 1}?mes=${encodeURIComponent(mes)}`);
   };
 
-  const handleSalvarDoacao = (dados: DadosDoacao) => {
-    // TODO: integrar com API/backend
-    console.log("Nova doação salva:", dados);
+  const handleSalvarDoacao = async (dados: DadosDoacao) => {
+    const hoje = new Date().toISOString().split("T")[0];
+    const isItem = dados.tipo === "Alimentos" || dados.tipo === "Produtos";
+    try {
+      await api("/doacoes", {
+        method: "POST",
+        body: JSON.stringify({
+          tipo: isItem ? "item" : "dinheiro",
+          valor: isItem ? undefined : dados.valor,
+          descricao: isItem ? dados.itens : undefined,
+          data: hoje,
+        }),
+      });
+    } catch (e) {
+      console.error("Erro ao salvar doação:", e);
+    }
   };
 
   return (

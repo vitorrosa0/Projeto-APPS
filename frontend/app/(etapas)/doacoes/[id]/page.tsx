@@ -1,15 +1,21 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSearchParams, useParams } from "next/navigation";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
 import DoacaoRow from "@/components/DoacaoRow";
 import TotalDoacoes from "@/components/TotalDoacoes";
+import { api } from "@/lib/api";
 
-interface Item {
-  nome: string;
-  quantidade: number;
+interface DoacaoApi {
+  id: number;
+  tipo: "dinheiro" | "item";
+  valor?: string | null;
+  descricao?: string | null;
+  doador?: string | null;
+  data: string;
 }
 
 interface Doacao {
@@ -17,35 +23,36 @@ interface Doacao {
   tipo: "Financeira" | "Produtos" | "Alimentos";
   valor?: string;
   quantidade?: number;
-  itens?: Item[];
+  itens?: { nome: string; quantidade: number }[];
 }
 
-const DOACOES_MOCK: Doacao[] = [
-  { id: 1, tipo: "Financeira", valor: "R$ 500,00" },
-  { id: 2, tipo: "Financeira", valor: "R$ 700,00" },
-  {
-    id: 3,
+function mapearDoacao(d: DoacaoApi): Doacao {
+  if (d.tipo === "dinheiro") {
+    const num = parseFloat(d.valor ?? "0");
+    return {
+      id: d.id,
+      tipo: "Financeira",
+      valor: num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+    };
+  }
+  return {
+    id: d.id,
     tipo: "Produtos",
-    quantidade: 30,
-    itens: [
-      { nome: "Sabonete",      quantidade: 10 },
-      { nome: "Shampoo",       quantidade: 2  },
-      { nome: "Condicionador", quantidade: 3  },
-      { nome: "Lâmpada",       quantidade: 5  },
-      { nome: "Cama",          quantidade: 10 },
-    ],
-  },
-];
+    quantidade: 1,
+    itens: [{ nome: d.descricao ?? "Item doado", quantidade: 1 }],
+  };
+}
 
 function calcularTotalFinanceiro(doacoes: Doacao[]): string {
   const total = doacoes
     .filter((d) => d.tipo === "Financeira")
     .reduce((acc, d) => {
-      const numero = parseFloat(d.valor?.replace("R$ ", "").replace(",", ".") ?? "0");
-      return acc + numero;
+      const num = parseFloat(
+        d.valor?.replace("R$ ", "").replace("R$ ", "").replace(/\./g, "").replace(",", ".") ?? "0"
+      );
+      return acc + num;
     }, 0);
-
-  return `R$ ${total.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  return total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 function calcularTotalProdutos(doacoes: Doacao[]): number {
@@ -56,10 +63,18 @@ function calcularTotalProdutos(doacoes: Doacao[]): number {
 
 export default function DetalhesDoacoesPage() {
   const searchParams = useSearchParams();
+  const params = useParams();
   const mes = searchParams.get("mes") ?? "Mês";
+  const mesNum = params.id as string;
 
-  // TODO: buscar doacoes da API filtrando pelo mês
-  const doacoes = DOACOES_MOCK;
+  const [doacoes, setDoacoes] = useState<Doacao[]>([]);
+
+  useEffect(() => {
+    const ano = new Date().getFullYear();
+    api<DoacaoApi[]>(`/doacoes?mes=${mesNum}&ano=${ano}`)
+      .then((data) => setDoacoes(data.map(mapearDoacao)))
+      .catch((e) => console.error("Erro ao carregar doações:", e));
+  }, [mesNum]);
 
   const totalFinanceiro = calcularTotalFinanceiro(doacoes);
   const totalProdutos = calcularTotalProdutos(doacoes);
@@ -80,15 +95,21 @@ export default function DetalhesDoacoesPage() {
             </h2>
           </div>
 
-          {doacoes.map((doacao) => (
-            <DoacaoRow
-              key={doacao.id}
-              tipo={doacao.tipo}
-              valor={doacao.valor}
-              quantidade={doacao.quantidade}
-              itens={doacao.itens}
-            />
-          ))}
+          {doacoes.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">
+              Nenhuma doação registrada neste mês.
+            </p>
+          ) : (
+            doacoes.map((doacao) => (
+              <DoacaoRow
+                key={doacao.id}
+                tipo={doacao.tipo}
+                valor={doacao.valor}
+                quantidade={doacao.quantidade}
+                itens={doacao.itens}
+              />
+            ))
+          )}
 
           <div className="px-4 pb-4">
             <TotalDoacoes

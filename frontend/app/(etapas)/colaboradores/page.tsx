@@ -2,285 +2,229 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Pencil, MinusCircle } from "lucide-react";
+import { MdEdit, MdRemoveCircle, MdAdd } from "react-icons/md";
+import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
+import PawBackground from "@/components/PawBackground";
+import PageTitle from "@/components/PageTitle";
+import ConfirmModal from "@/components/ConfirmModal";
 import { api } from "@/lib/api";
 
-type StatusType = "Ativo" | "Inativo" | "Pausado";
+export type StatusType = "Ativo" | "Inativo" | "Pausado";
 
-interface Contribuicao {
+export interface Contribuicao {
   valor: string;
   data: string;
+  tipo?: string;
 }
 
-interface Colaborador {
+export interface Colaborador {
   id: number;
   nome: string;
+  email?: string;
+  telefone?: string;
   status: StatusType;
   dataAdesao: string;
+  informacoesAdicionais?: string;
   contribuicoes?: Contribuicao[];
 }
 
-const statusColor: Record<StatusType, string> = {
-  Ativo: "#4CAF50",
-  Inativo: "#F44336",
-  Pausado: "#FF9800",
+const statusIndicator: Record<StatusType, { color: string; label: string }> = {
+  Ativo: { color: "#4CAF50", label: "Ativo" },
+  Inativo: { color: "#F44336", label: "Inativo" },
+  Pausado: { color: "#FF9800", label: "Pausado" },
 };
+
+const COLABORADORES_MOCK: Colaborador[] = [
+  {
+    id: 1,
+    nome: "Lucas Silva",
+    email: "lucas.silva@sjpa.com",
+    telefone: "(11) 98765-4321",
+    status: "Ativo",
+    dataAdesao: "10/04/2023",
+    contribuicoes: [{ valor: "R$ 500,00", data: "10/05/2024", tipo: "Financeiro" }],
+  },
+  {
+    id: 2,
+    nome: "Maria Clara",
+    email: "maria.clara@sjpa.com",
+    telefone: "(11) 97654-3210",
+    status: "Inativo",
+    dataAdesao: "15/07/2023",
+    contribuicoes: [{ valor: "10 Kg de Ração", data: "12/03/2024", tipo: "Produto" }],
+  },
+  {
+    id: 3,
+    nome: "Julio César",
+    email: "julio.cesar@sjpa.com",
+    telefone: "(11) 96543-2109",
+    status: "Pausado",
+    dataAdesao: "20/01/2024",
+    contribuicoes: [{ valor: "R$ 150,00", data: "15/02/2024", tipo: "Financeiro" }],
+  },
+];
 
 export default function ColaboradoresPage() {
   const router = useRouter();
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>(COLABORADORES_MOCK);
+  const [colaboradorParaExcluir, setColaboradorParaExcluir] = useState<Colaborador | null>(null);
 
   useEffect(() => {
     api<Colaborador[]>("/colaboradores")
-      .then(setColaboradores)
-      .catch((err) => console.error("Erro ao carregar colaboradores:", err));
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setColaboradores(data);
+        } else {
+          // Se não houver colaboradores do backend, verifica localStorage ou mantém mock
+          const local = localStorage.getItem("sjpa_colaboradores");
+          if (local) {
+            setColaboradores(JSON.parse(local));
+          } else {
+            localStorage.setItem("sjpa_colaboradores", JSON.stringify(COLABORADORES_MOCK));
+          }
+        }
+      })
+      .catch((err) => {
+        console.warn("Backend não alcançado, usando armazenamento local:", err);
+        const local = localStorage.getItem("sjpa_colaboradores");
+        if (local) {
+          setColaboradores(JSON.parse(local));
+        } else {
+          localStorage.setItem("sjpa_colaboradores", JSON.stringify(COLABORADORES_MOCK));
+        }
+      });
   }, []);
 
-  const handleRemover = async (id: number) => {
-    if (!confirm("Tem certeza que deseja excluir este colaborador?")) return;
+  const handleConfirmarExclusao = async () => {
+    if (!colaboradorParaExcluir) return;
+    const id = colaboradorParaExcluir.id;
     try {
       await api(`/colaboradores/${id}`, { method: "DELETE" });
-      setColaboradores((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
-      console.error("Erro ao excluir:", err);
-      alert(err instanceof Error ? err.message : "Erro ao excluir.");
+      console.warn("Erro ao excluir na API:", err);
     }
+    const atualizados = colaboradores.filter((c) => c.id !== id);
+    setColaboradores(atualizados);
+    try {
+      localStorage.setItem("sjpa_colaboradores", JSON.stringify(atualizados));
+    } catch (e) {
+      console.warn("Erro ao salvar local:", e);
+    }
+    setColaboradorParaExcluir(null);
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#dcdcdc",
-        display: "flex",
-        flexDirection: "column",
-        fontFamily: "sans-serif",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          backgroundColor: "#2DB38B",
-          padding: "12px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid #2e2e4e",
-        }}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            backgroundColor: "#2DB38B",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          🐾
-        </div>
-        <span style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
-          SJPA
-        </span>
-      </div>
+    <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
+      <Header showBack={true} onBack={() => router.push("/home")} />
+      <PawBackground />
 
-      {/* Content */}
-      <div style={{ flex: 1, padding: "16px", overflowY: "auto" }}>
-        <h2
-          style={{
-            color: "#fff",
-            fontSize: 20,
-            marginBottom: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              backgroundColor: "#2DB38B",
-              display: "inline-block",
-            }}
-          />
-          Colaboradores
-        </h2>
+      <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">
+        <PageTitle>Colaboradores</PageTitle>
 
-        {/* Lista */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {colaboradores.map((col) => (
-            <div
-              key={col.id}
-              style={{
-                backgroundColor: "white",
-                borderRadius: 8,
-                padding: "12px 16px",
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              {/* Avatar */}
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "50%",
-                  backgroundColor: "#e0e0e0",
-                  flexShrink: 0,
-                }}
-              />
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden divide-y divide-gray-100">
+          {colaboradores.length > 0 ? (
+            colaboradores.map((col) => {
+              const statusInfo = statusIndicator[col.status] || statusIndicator.Ativo;
+              const ultimaContrib = col.contribuicoes?.[0]?.valor ?? "—";
 
-              {/* Info */}
-              <div style={{ flex: 1 }}>
+              return (
                 <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    marginBottom: 2,
-                  }}
+                  key={col.id}
+                  onClick={() => router.push(`/colaboradores/${col.id}`)}
+                  className="flex items-center justify-between gap-3 px-4 py-3.5 hover:bg-gray-50/60 transition-colors cursor-pointer"
                 >
-                  <span
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: statusColor[col.status],
-                      display: "inline-block",
-                    }}
-                  />
-                  <span style={{ fontSize: 12, color: "#555" }}>
-                    {col.status}
-                  </span>
-                </div>
-                <div style={{ fontSize: 13, color: "#333" }}>
-                  Adesão: {col.dataAdesao}
-                </div>
-                <div style={{ fontSize: 13, color: "#333" }}>
-                  Última contribuição:
-                </div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: col.contribuicoes?.[0] ? "#4dd0b8" : "#555",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {col.contribuicoes?.[0]?.valor ?? "0"}
-                </div>
-              </div>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-full bg-emerald-50 border border-[#2DB38B]/30 flex items-center justify-center flex-shrink-0 text-[#2DB38B] font-bold text-sm">
+                      {col.nome
+                        .split(" ")
+                        .map((parte) => parte[0])
+                        .slice(0, 2)
+                        .join("")}
+                    </div>
 
-              {/* Nome label */}
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "#555",
-                  minWidth: 40,
-                  textAlign: "center",
-                }}
-              >
-                {col.nome}
-              </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-bold text-gray-900 leading-tight truncate">
+                        {col.nome}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-xs text-gray-600 font-medium">
+                        <span
+                          className="w-2 h-2 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: statusInfo.color }}
+                        />
+                        <span>{statusInfo.label}</span>
+                        <span className="text-gray-400">·</span>
+                        <span className="truncate">Adesão: {col.dataAdesao}</span>
+                      </div>
+                      <span className="text-xs text-gray-400 truncate">
+                        Última contribuição:{" "}
+                        <span className="font-semibold text-[#2DB38B]">
+                          {ultimaContrib}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Actions */}
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  onClick={() =>
-                    router.push(`/colaboradores/${col.id}/editar`)
-                  }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#4dd0b8",
-                  }}
-                >
-                  <Pencil size={18} />
-                </button>
-                <button
-                  onClick={() => handleRemover(col.id)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#f44336",
-                  }}
-                >
-                  <MinusCircle size={18} />
-                </button>
-              </div>
+                  <div
+                    className="flex items-center gap-2 flex-shrink-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <button
+                      onClick={() => router.push(`/colaboradores/${col.id}/editar`)}
+                      aria-label={`Editar ${col.nome}`}
+                      className="text-[#2DB38B] hover:text-[#25967A] active:scale-90 transition-all cursor-pointer bg-transparent border-none p-1"
+                    >
+                      <MdEdit size={22} />
+                    </button>
+
+                    <button
+                      onClick={() => setColaboradorParaExcluir(col)}
+                      aria-label={`Excluir ${col.nome}`}
+                      className="text-[#2DB38B] hover:text-red-500 active:scale-90 transition-all cursor-pointer bg-transparent border-none p-1"
+                    >
+                      <MdRemoveCircle size={22} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="py-12 text-center text-sm text-gray-400">
+              Nenhum colaborador encontrado.
             </div>
-          ))}
+          )}
         </div>
 
-        {/* Botão Cadastrar */}
         <button
           onClick={() => router.push("/colaboradores/cadastrar")}
-          style={{
-            marginTop: 24,
-            width: "100%",
-            padding: "14px",
-            backgroundColor: "#2DB38B",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            fontSize: 16,
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-          }}
+          className="
+            w-full flex items-center justify-between
+            bg-[#2DB38B] text-white
+            rounded-full px-6 py-3.5
+            text-base font-semibold shadow-md
+            hover:scale-[1.03] hover:shadow-lg
+            active:scale-[0.98]
+            transition-all duration-150 cursor-pointer
+          "
         >
-          Cadastrar <span style={{ fontSize: 20 }}>+</span>
+          <span className="flex-1 text-center">Cadastrar</span>
+          <MdAdd size={22} />
         </button>
-      </div>
+      </main>
 
-      {/* Bottom Nav */}
-      <BottomNav active="colaboradores" />
-    </div>
-  );
-}
+      {/* Modal de confirmação de exclusão */}
+      {colaboradorParaExcluir && (
+        <ConfirmModal
+          titulo="Excluir Colaborador"
+          mensagem={`Tem certeza que deseja excluir o colaborador ${colaboradorParaExcluir.nome}?`}
+          labelConfirmar="Excluir"
+          labelCancelar="Cancelar"
+          onConfirm={handleConfirmarExclusao}
+          onCancel={() => setColaboradorParaExcluir(null)}
+        />
+      )}
 
-function BottomNav({ active }: { active: string }) {
-  const router = useRouter();
-  const items = [
-    { label: "home", icon: "🏠", path: "/" },
-    { label: "animais", icon: "🐾", path: "/animais" },
-    { label: "voluntarios", icon: "✋", path: "/voluntarios" },
-    { label: "colaboradores", icon: "👤", path: "/colaboradores" },
-  ];
-  return (
-    <div
-      style={{
-        backgroundColor: "#2DB38B",
-        display: "flex",
-        justifyContent: "space-around",
-        padding: "12px 0",
-        borderTop: "1px solid #2e2e4e",
-      }}
-    >
-      {items.map((item) => (
-        <button
-          key={item.label}
-          onClick={() => router.push(item.path)}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 22,
-            opacity: active === item.label ? 1 : 0.5,
-          }}
-        >
-          {item.icon}
-        </button>
-      ))}
+      <BottomNav />
     </div>
   );
 }
