@@ -40,6 +40,8 @@ export default function DetalhesColaboradorPage() {
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("");
   const [contribuicoes, setContribuicoes] = useState<Contribuicao[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [carregado, setCarregado] = useState(false);
+  const [erro, setErro] = useState("");
 
   // Modal nova contribuição
   const [showModalContrib, setShowModalContrib] = useState(false);
@@ -47,47 +49,41 @@ export default function DetalhesColaboradorPage() {
   const [valorContrib, setValorContrib] = useState("");
   const [dataContrib, setDataContrib] = useState(new Date().toISOString().split("T")[0]);
   const [salvandoContrib, setSalvandoContrib] = useState(false);
+  const [erroContribuicao, setErroContribuicao] = useState("");
 
   // Modal confirmação exclusão
   const [showModalExcluir, setShowModalExcluir] = useState(false);
 
-  const carregar = useCallback(() => {
-    if (!id) return;
+  const carregar = useCallback(async () => {
     setCarregando(true);
-    api<{
-      nome: string;
-      email: string;
-      telefone: string;
-      dataAdesao: string;
-      status: StatusType;
-      informacoesAdicionais: string | null;
-      contribuicoes: Contribuicao[];
-    }>(`/colaboradores/${id}`)
-      .then((c) => {
-        setNome(c.nome);
-        setEmail(c.email);
-        setTelefone(c.telefone);
-        setDataAdesao(c.dataAdesao);
-        setStatus(c.status);
-        setInformacoesAdicionais(c.informacoesAdicionais ?? "");
-        setContribuicoes(c.contribuicoes ?? []);
-      })
-      .catch((err) => {
-        console.warn("Erro ao buscar da API, usando fallback:", err);
-        // Fallback mock caso API offline
-        setNome("Colaborador " + id);
-        setEmail("colaborador@sjpa.com");
-        setTelefone("(11) 98765-4321");
-        setDataAdesao("15/01/2023");
-        setStatus("Ativo");
-        setInformacoesAdicionais("Colaborador frequente com rações e apoio financeiro.");
-        setContribuicoes([
-          { valor: "R$ 150,00", data: "10/05/2024", tipo: "Financeiro" },
-          { valor: "15 Kg de Ração", data: "12/04/2024", tipo: "Produto" },
-          { valor: "R$ 200,00", data: "15/03/2024", tipo: "Financeiro" },
-        ]);
-      })
-      .finally(() => setCarregando(false));
+    setErro("");
+    try {
+      const colaborador = await api<{
+        nome: string;
+        email: string | null;
+        telefone: string | null;
+        dataAdesao: string;
+        status: StatusType;
+        informacoesAdicionais: string | null;
+        contribuicoes: Contribuicao[];
+      }>(`/colaboradores/${id}`);
+      setNome(colaborador.nome);
+      setEmail(colaborador.email ?? "");
+      setTelefone(colaborador.telefone ?? "");
+      setDataAdesao(colaborador.dataAdesao);
+      setStatus(colaborador.status);
+      setInformacoesAdicionais(colaborador.informacoesAdicionais ?? "");
+      setContribuicoes(colaborador.contribuicoes ?? []);
+      setCarregado(true);
+    } catch (err) {
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível carregar o colaborador."
+      );
+    } finally {
+      setCarregando(false);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -100,6 +96,7 @@ export default function DetalhesColaboradorPage() {
       return;
     }
     setSalvandoContrib(true);
+    setErroContribuicao("");
     try {
       await api(`/colaboradores/${id}/contribuicoes`, {
         method: "POST",
@@ -111,27 +108,31 @@ export default function DetalhesColaboradorPage() {
       });
       setShowModalContrib(false);
       setValorContrib("");
-      carregar();
-    } catch {
-      // Fallback local
-      setContribuicoes((prev) => [
-        { valor: valorContrib, data: dataContrib, tipo: tipoContrib },
-        ...prev,
-      ]);
-      setShowModalContrib(false);
-      setValorContrib("");
+      await carregar();
+    } catch (err) {
+      setErroContribuicao(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar a contribuição."
+      );
     } finally {
       setSalvandoContrib(false);
     }
   };
 
   const handleExcluir = async () => {
+    setErro("");
     try {
       await api(`/colaboradores/${id}`, { method: "DELETE" });
+      router.push("/colaboradores");
     } catch (err) {
-      console.warn("Erro ao excluir pela API:", err);
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível excluir o colaborador."
+      );
+      setShowModalExcluir(false);
     }
-    router.push("/colaboradores");
   };
 
   const ultimaContribuicao = contribuicoes[0]?.valor ?? "Nenhuma";
@@ -145,6 +146,26 @@ export default function DetalhesColaboradorPage() {
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-6">
         <PageTitle>Colaborador</PageTitle>
 
+        {carregando ? (
+          <p className="text-center text-sm text-gray-500">Carregando colaborador...</p>
+        ) : !carregado ? (
+          <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p>{erro || "Não foi possível carregar o colaborador."}</p>
+            <button
+              type="button"
+              onClick={() => void carregar()}
+              className="mt-2 font-semibold underline"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        ) : (
+          <>
+        {erro && (
+          <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+            {erro}
+          </p>
+        )}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col gap-4">
           {/* Foto e Cabeçalho */}
           <div className="flex items-center gap-4 border-b border-gray-100 pb-4">
@@ -248,6 +269,8 @@ export default function DetalhesColaboradorPage() {
             </button>
           </div>
         </div>
+          </>
+        )}
       </main>
 
       {/* Modal Nova Contribuição */}
@@ -270,6 +293,12 @@ export default function DetalhesColaboradorPage() {
                 <MdClose size={20} />
               </button>
             </div>
+
+            {erroContribuicao && (
+              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {erroContribuicao}
+              </p>
+            )}
 
             <SelectGroup
               label="Tipo de contribuição"

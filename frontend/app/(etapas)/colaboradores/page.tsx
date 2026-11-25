@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MdEdit, MdRemoveCircle, MdAdd } from "react-icons/md";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -21,11 +21,11 @@ export interface Contribuicao {
 export interface Colaborador {
   id: number;
   nome: string;
-  email?: string;
-  telefone?: string;
+  email?: string | null;
+  telefone?: string | null;
   status: StatusType;
   dataAdesao: string;
-  informacoesAdicionais?: string;
+  informacoesAdicionais?: string | null;
   contribuicoes?: Contribuicao[];
 }
 
@@ -35,83 +35,53 @@ const statusIndicator: Record<StatusType, { color: string; label: string }> = {
   Pausado: { color: "#FF9800", label: "Pausado" },
 };
 
-const COLABORADORES_MOCK: Colaborador[] = [
-  {
-    id: 1,
-    nome: "Lucas Silva",
-    email: "lucas.silva@sjpa.com",
-    telefone: "(11) 98765-4321",
-    status: "Ativo",
-    dataAdesao: "10/04/2023",
-    contribuicoes: [{ valor: "R$ 500,00", data: "10/05/2024", tipo: "Financeiro" }],
-  },
-  {
-    id: 2,
-    nome: "Maria Clara",
-    email: "maria.clara@sjpa.com",
-    telefone: "(11) 97654-3210",
-    status: "Inativo",
-    dataAdesao: "15/07/2023",
-    contribuicoes: [{ valor: "10 Kg de Ração", data: "12/03/2024", tipo: "Produto" }],
-  },
-  {
-    id: 3,
-    nome: "Julio César",
-    email: "julio.cesar@sjpa.com",
-    telefone: "(11) 96543-2109",
-    status: "Pausado",
-    dataAdesao: "20/01/2024",
-    contribuicoes: [{ valor: "R$ 150,00", data: "15/02/2024", tipo: "Financeiro" }],
-  },
-];
-
 export default function ColaboradoresPage() {
   const router = useRouter();
-  const [colaboradores, setColaboradores] = useState<Colaborador[]>(COLABORADORES_MOCK);
+  const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
   const [colaboradorParaExcluir, setColaboradorParaExcluir] = useState<Colaborador | null>(null);
 
-  useEffect(() => {
-    api<Colaborador[]>("/colaboradores")
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setColaboradores(data);
-        } else {
-          // Se não houver colaboradores do backend, verifica localStorage ou mantém mock
-          const local = localStorage.getItem("sjpa_colaboradores");
-          if (local) {
-            setColaboradores(JSON.parse(local));
-          } else {
-            localStorage.setItem("sjpa_colaboradores", JSON.stringify(COLABORADORES_MOCK));
-          }
-        }
-      })
-      .catch((err) => {
-        console.warn("Backend não alcançado, usando armazenamento local:", err);
-        const local = localStorage.getItem("sjpa_colaboradores");
-        if (local) {
-          setColaboradores(JSON.parse(local));
-        } else {
-          localStorage.setItem("sjpa_colaboradores", JSON.stringify(COLABORADORES_MOCK));
-        }
-      });
+  const carregar = useCallback(async () => {
+    setCarregando(true);
+    setErro("");
+    try {
+      const data = await api<Colaborador[]>("/colaboradores");
+      if (!Array.isArray(data)) {
+        throw new Error("A resposta da API de colaboradores é inválida.");
+      }
+      setColaboradores(data);
+    } catch (err) {
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível carregar os colaboradores."
+      );
+    } finally {
+      setCarregando(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void carregar();
+  }, [carregar]);
 
   const handleConfirmarExclusao = async () => {
     if (!colaboradorParaExcluir) return;
     const id = colaboradorParaExcluir.id;
+    setErro("");
     try {
       await api(`/colaboradores/${id}`, { method: "DELETE" });
+      setColaboradores((atualizados) => atualizados.filter((c) => c.id !== id));
+      setColaboradorParaExcluir(null);
     } catch (err) {
-      console.warn("Erro ao excluir na API:", err);
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível excluir o colaborador."
+      );
+      setColaboradorParaExcluir(null);
     }
-    const atualizados = colaboradores.filter((c) => c.id !== id);
-    setColaboradores(atualizados);
-    try {
-      localStorage.setItem("sjpa_colaboradores", JSON.stringify(atualizados));
-    } catch (e) {
-      console.warn("Erro ao salvar local:", e);
-    }
-    setColaboradorParaExcluir(null);
   };
 
   return (
@@ -122,8 +92,27 @@ export default function ColaboradoresPage() {
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">
         <PageTitle>Colaboradores</PageTitle>
 
+        {erro && (
+          <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p>{erro}</p>
+            {colaboradores.length === 0 && (
+              <button
+                type="button"
+                onClick={() => void carregar()}
+                className="mt-2 font-semibold underline"
+              >
+                Tentar novamente
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden divide-y divide-gray-100">
-          {colaboradores.length > 0 ? (
+          {carregando ? (
+            <div className="py-12 text-center text-sm text-gray-400">
+              Carregando colaboradores...
+            </div>
+          ) : colaboradores.length > 0 ? (
             colaboradores.map((col) => {
               const statusInfo = statusIndicator[col.status] || statusIndicator.Ativo;
               const ultimaContrib = col.contribuicoes?.[0]?.valor ?? "—";
@@ -188,11 +177,11 @@ export default function ColaboradoresPage() {
                 </div>
               );
             })
-          ) : (
+          ) : !erro ? (
             <div className="py-12 text-center text-sm text-gray-400">
               Nenhum colaborador encontrado.
             </div>
-          )}
+          ) : null}
         </div>
 
         <button

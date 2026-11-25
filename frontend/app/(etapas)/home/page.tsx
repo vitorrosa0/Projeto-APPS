@@ -9,6 +9,7 @@ import {
   MdAttachMoney,
   MdVolunteerActivism,
   MdFavorite,
+  MdBadge,
 } from "react-icons/md";
 
 
@@ -18,6 +19,7 @@ const menuItems = [
   { label: "Despesas",      icon: <MdAttachMoney size={22} />,       href: "/despesas" },
   { label: "Doações",       icon: <MdFavorite size={22} />,          href: "/doacoes" },
   { label: "Voluntários",   icon: <MdVolunteerActivism size={22} />, href: "/voluntarios" },
+  { label: "Funcionários",  icon: <MdBadge size={22} />,             href: "/funcionarios" },
 ];
 
 const pawPositions = [

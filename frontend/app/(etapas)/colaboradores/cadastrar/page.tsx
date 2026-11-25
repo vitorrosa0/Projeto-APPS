@@ -27,6 +27,7 @@ export default function CadastrarColaboradorPage() {
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [salvo, setSalvo] = useState(false);
+  const [erro, setErro] = useState("");
 
   const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +37,7 @@ export default function CadastrarColaboradorPage() {
     }
 
     setSalvando(true);
+    setErro("");
     try {
       await api("/colaboradores", {
         method: "POST",
@@ -45,32 +47,19 @@ export default function CadastrarColaboradorPage() {
           telefone,
           dataAdesao,
           status,
+          ultimaContribuicao,
           informacoesAdicionais,
         }),
       });
+      setSalvo(true);
     } catch (err) {
-      console.warn("Erro ao salvar pela API, gravando no armazenamento local:", err);
-      try {
-        const stored = JSON.parse(localStorage.getItem("sjpa_colaboradores") || "[]");
-        stored.push({
-          id: Date.now(),
-          nome,
-          email,
-          telefone,
-          dataAdesao,
-          status,
-          informacoesAdicionais,
-          contribuicoes: ultimaContribuicao
-            ? [{ valor: ultimaContribuicao, data: dataAdesao, tipo: "Financeiro" }]
-            : [],
-        });
-        localStorage.setItem("sjpa_colaboradores", JSON.stringify(stored));
-      } catch (localErr) {
-        console.warn("Erro no localStorage:", localErr);
-      }
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível cadastrar o colaborador. Tente novamente."
+      );
     } finally {
       setSalvando(false);
-      setSalvo(true);
     }
   };
 
@@ -109,6 +98,12 @@ export default function CadastrarColaboradorPage() {
             onSubmit={handleSalvar}
             className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col gap-4"
           >
+            {erro && (
+              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {erro}
+              </p>
+            )}
+
             {/* Avatar circular estilo Figma */}
             <div className="flex flex-col items-center justify-center py-2">
               <div className="w-20 h-20 rounded-full bg-emerald-50 border-2 border-[#2DB38B] flex items-center justify-center text-[#2DB38B] shadow-inner">
@@ -152,6 +147,7 @@ export default function CadastrarColaboradorPage() {
               type="date"
               value={dataAdesao}
               onChange={(e) => setDataAdesao(e.target.value)}
+              required
             />
 
             <SelectGroup
