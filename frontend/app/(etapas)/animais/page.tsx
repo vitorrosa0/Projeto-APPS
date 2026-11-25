@@ -7,8 +7,9 @@ import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 
 const animalItems = [
-  { label: "Cães",  icon: <PiDogFill size={24} />, href: "/animais/caes" },
-  { label: "Gatos", icon: <PiCatFill size={24} />, href: "/animais/gatos" },
+  { label: "Cães",          icon: <PiDogFill size={24} />, href: "/animais/caes" },
+  { label: "Gatos",         icon: <PiCatFill size={24} />, href: "/animais/gatos" },
+  { label: "Cadastrar Pet", icon: <MdPets size={24} />,    href: "/animais/cadastrar" },
 ];
 
 const pawPositions = [
@@ -52,7 +53,7 @@ export default function Animais() {
             key={item.label}
             onClick={() => router.push(item.href)}
             className="
-              w-full flex items-center justify-between
+              w-full flex items-center justify-between gap-4
               bg-[#2DB38B] text-white
               rounded-full px-6 py-3.5
               text-base font-semibold
