@@ -64,6 +64,7 @@ model Colaborador {
   status                String         @default("Ativo")
   informacoesAdicionais String?
   contribuicoes         Contribuicao[]
+  doacoes               Doacao[]
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
 }
@@ -86,4 +87,34 @@ model Contribuicao {
   valor         String
   data          String
   createdAt     DateTime    @default(now())
+}
+
+model Doacao {
+  id            Int          @id @default(autoincrement())
+  tipo          String
+  valorCentavos Int?
+  data          String
+  colaboradorId Int?
+  colaborador   Colaborador? @relation(fields: [colaboradorId], references: [id], onDelete: SetNull)
+  doadorNome    String?
+  observacoes   String?
+  itens         DoacaoItem[]
+  createdAt     DateTime     @default(now())
+}
+
+model DoacaoItem {
+  id         Int    @id @default(autoincrement())
+  doacaoId   Int
+  doacao     Doacao @relation(fields: [doacaoId], references: [id], onDelete: Cascade)
+  nome       String
+  quantidade Int
+}
+
+model Despesa {
+  id            Int      @id @default(autoincrement())
+  categoria     String
+  valorCentavos Int
+  data          String
+  descricao     String?
+  createdAt     DateTime @default(now())
 }
