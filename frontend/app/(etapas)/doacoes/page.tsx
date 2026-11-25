@@ -9,6 +9,8 @@ import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import MonthRow from "@/components/MonthRow";
 import NovaDoacaoModal, { DadosDoacao } from "@/components/NovaDoacaoModal";
+import { api } from "@/lib/api";
+import { reaisParaCentavos } from "@/lib/dinheiro";
 
 const MESES_DO_ANO = [
   "Janeiro", "Fevereiro", "Março", "Abril",
@@ -36,9 +38,20 @@ export default function DoacoesPage() {
     router.push(`/doacoes/${index + 1}?mes=${encodeURIComponent(mes)}`);
   };
 
-  const handleSalvarDoacao = (dados: DadosDoacao) => {
-    // TODO: integrar com API/backend
-    console.log("Nova doação salva:", dados);
+  const handleSalvarDoacao = async (dados: DadosDoacao) => {
+    const valorCentavos = dados.tipo === "Dinheiro" ? reaisParaCentavos(dados.valor ?? "") : undefined;
+    if (dados.tipo === "Dinheiro" && !valorCentavos) {
+      throw new Error("Informe um valor válido para a doação.");
+    }
+    await api("/doacoes", {
+      method: "POST",
+      body: JSON.stringify({
+        tipo: dados.tipo,
+        data: dados.data,
+        valorCentavos,
+        itens: dados.itens,
+      }),
+    });
   };
 
   return (

@@ -14,7 +14,7 @@ export default function TotalDoacoes({ totalFinanceiro, totalProdutos }: TotalDo
       </div>
 
       <div className="flex justify-between text-sm text-gray-700 px-2 mt-0.5">
-        <span className="font-semibold">Produtos:</span>
+        <span className="font-semibold">Itens (unidades, não somadas ao dinheiro):</span>
         <span className="font-semibold">{totalProdutos}</span>
       </div>
     </div>

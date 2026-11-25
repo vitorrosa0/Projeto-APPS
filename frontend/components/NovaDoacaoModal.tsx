@@ -3,43 +3,55 @@
 import { useState } from "react";
 import { MdAdd, MdClose } from "react-icons/md";
 import SelectGroup from "@/components/SelectGroup";
+import InputGroup from "@/components/InputGroup";
 import DoacaoFinanceiraForm from "@/components/DoacaoFinanceiraForm";
-import DoacaoItensForm from "@/components/DoacaoItensForm";
+import DoacaoItensForm, { LinhaItem } from "@/components/DoacaoItensForm";
 
-type TipoDoacao = "Alimentos" | "Financeira" | "Produtos" | "";
+type TipoDoacao = "Dinheiro" | "Item" | "";
+
+export interface DadosDoacao {
+  tipo: "Dinheiro" | "Item";
+  data: string;
+  valor?: string;
+  itens?: { nome: string; quantidade: number }[];
+}
 
 interface NovaDoacaoModalProps {
   onClose: () => void;
-  onSalvar: (dados: DadosDoacao) => void;
+  onSalvar: (dados: DadosDoacao) => Promise<void>;
 }
 
-export interface DadosDoacao {
-  tipo: TipoDoacao;
-  itens?: string;
-  valor?: string;
-}
-
-const TIPOS_DOACAO = ["Alimentos", "Financeira", "Produtos"];
-
-function isItens(tipo: TipoDoacao): boolean {
-  return tipo === "Alimentos" || tipo === "Produtos";
-}
+const TIPOS_DOACAO = ["Dinheiro", "Item"];
+const LINHA_VAZIA: LinhaItem = { nome: "", quantidade: "" };
 
 export default function NovaDoacaoModal({ onClose, onSalvar }: NovaDoacaoModalProps) {
   const [tipo, setTipo] = useState<TipoDoacao>("");
-  const [itens, setItens] = useState("");
+  const [itens, setItens] = useState<LinhaItem[]>([{ ...LINHA_VAZIA }]);
   const [valor, setValor] = useState("");
+  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
+  const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
-  const handleSalvar = () => {
+  const itensValidos = itens.every((i) => i.nome.trim() !== "" && Number(i.quantidade) > 0);
+  const podeSalvar = tipo === "Dinheiro" ? valor.trim() !== "" : tipo === "Item" && itensValidos;
+
+  const handleSalvar = async () => {
     if (!tipo) return;
-    onSalvar({
-      tipo,
-      ...(isItens(tipo) ? { itens } : { valor }),
-    });
-    onClose();
+    setSalvando(true);
+    setErro("");
+    try {
+      await onSalvar(
+        tipo === "Dinheiro"
+          ? { tipo, data, valor }
+          : { tipo, data, itens: itens.map((i) => ({ nome: i.nome.trim(), quantidade: Number(i.quantidade) })) }
+      );
+      onClose();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Não foi possível salvar a doação.");
+    } finally {
+      setSalvando(false);
+    }
   };
-
-  const podeSalvar = tipo !== "" && (isItens(tipo) ? itens.trim() !== "" : valor.trim() !== "");
 
   return (
     <div
@@ -47,11 +59,9 @@ export default function NovaDoacaoModal({ onClose, onSalvar }: NovaDoacaoModalPr
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 flex flex-col gap-4"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-
-        {/* Cabeçalho */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MdAdd size={20} className="text-[#2DB38B]" />
@@ -66,10 +76,7 @@ export default function NovaDoacaoModal({ onClose, onSalvar }: NovaDoacaoModalPr
           </button>
         </div>
 
-        {/* Formulário */}
         <div className="flex flex-col gap-4">
-
-          {/* Select de tipo */}
           <div className="flex flex-col gap-1">
             <span className="text-sm font-semibold text-gray-700">Tipo de doação:</span>
             <SelectGroup
@@ -79,26 +86,33 @@ export default function NovaDoacaoModal({ onClose, onSalvar }: NovaDoacaoModalPr
               value={tipo}
               onChange={(e) => {
                 setTipo(e.target.value as TipoDoacao);
-                setItens("");
+                setItens([{ ...LINHA_VAZIA }]);
                 setValor("");
+                setErro("");
               }}
             />
           </div>
 
-          {/* Formulário dinâmico conforme tipo */}
           {tipo !== "" && (
-            isItens(tipo)
-              ? <DoacaoItensForm itens={itens} onChange={setItens} />
-              : <DoacaoFinanceiraForm valor={valor} onChange={setValor} />
+            <InputGroup
+              label="Data da doação"
+              name="data"
+              type="date"
+              value={data}
+              onChange={(e) => setData(e.target.value)}
+            />
           )}
 
+          {tipo === "Dinheiro" && <DoacaoFinanceiraForm valor={valor} onChange={setValor} />}
+          {tipo === "Item" && <DoacaoItensForm itens={itens} onChange={setItens} />}
         </div>
 
-        {/* Botão salvar */}
+        {erro && <p className="text-sm text-red-600">{erro}</p>}
+
         {tipo !== "" && (
           <button
             onClick={handleSalvar}
-            disabled={!podeSalvar}
+            disabled={!podeSalvar || salvando}
             className="
               w-full py-3 rounded-full
               bg-[#2DB38B] text-white font-semibold text-sm
@@ -107,10 +121,9 @@ export default function NovaDoacaoModal({ onClose, onSalvar }: NovaDoacaoModalPr
               disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100
             "
           >
-            Salvar
+            {salvando ? "Salvando..." : "Salvar"}
           </button>
         )}
-
       </div>
     </div>
   );
