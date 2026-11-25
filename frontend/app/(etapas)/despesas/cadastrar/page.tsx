@@ -11,13 +11,14 @@ import InputGroup from "@/components/InputGroup";
 import SelectGroup from "@/components/SelectGroup";
 import { CATEGORIAS_DESPESA } from "@/components/NovaDespesaModal";
 import { criarDespesa } from "@/lib/despesas";
+import { hojeLocal } from "@/lib/data";
 
 export default function CadastrarDespesaPage() {
   const router = useRouter();
 
   const [tipo, setTipo] = useState("");
   const [valor, setValor] = useState("");
-  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
+  const [data, setData] = useState(hojeLocal());
   const [descricao, setDescricao] = useState("");
   const [salvo, setSalvo] = useState(false);
   const [erro, setErro] = useState("");

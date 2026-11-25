@@ -11,6 +11,7 @@ import ConfirmModal from "@/components/ConfirmModal";
 import SelectGroup from "@/components/SelectGroup";
 import InputGroup from "@/components/InputGroup";
 import { api } from "@/lib/api";
+import { hojeLocal } from "@/lib/data";
 
 type StatusType = "Ativo" | "Inativo" | "Pausado";
 type TipoContribuicao = "Financeiro" | "Produto" | "Serviço";
@@ -45,7 +46,7 @@ export default function DetalhesColaboradorPage() {
   const [showModalContrib, setShowModalContrib] = useState(false);
   const [tipoContrib, setTipoContrib] = useState<TipoContribuicao>("Financeiro");
   const [valorContrib, setValorContrib] = useState("");
-  const [dataContrib, setDataContrib] = useState(new Date().toISOString().split("T")[0]);
+  const [dataContrib, setDataContrib] = useState(hojeLocal());
   const [salvandoContrib, setSalvandoContrib] = useState(false);
 
   // Modal confirmação exclusão
@@ -112,7 +113,11 @@ export default function DetalhesColaboradorPage() {
       setShowModalContrib(false);
       setValorContrib("");
       carregar();
-    } catch {
+    } catch (err) {
+      if (!(err instanceof TypeError)) {
+        alert(err instanceof Error ? err.message : "Erro ao salvar contribuição.");
+        return;
+      }
       // Fallback local
       setContribuicoes((prev) => [
         { valor: valorContrib, data: dataContrib, tipo: tipoContrib },

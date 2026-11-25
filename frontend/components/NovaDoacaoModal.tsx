@@ -6,6 +6,7 @@ import SelectGroup from "@/components/SelectGroup";
 import InputGroup from "@/components/InputGroup";
 import DoacaoFinanceiraForm from "@/components/DoacaoFinanceiraForm";
 import DoacaoItensForm, { LinhaItem } from "@/components/DoacaoItensForm";
+import { hojeLocal } from "@/lib/data";
 
 type TipoDoacao = "Dinheiro" | "Item" | "";
 
@@ -28,7 +29,7 @@ export default function NovaDoacaoModal({ onClose, onSalvar }: NovaDoacaoModalPr
   const [tipo, setTipo] = useState<TipoDoacao>("");
   const [itens, setItens] = useState<LinhaItem[]>([{ ...LINHA_VAZIA }]);
   const [valor, setValor] = useState("");
-  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
+  const [data, setData] = useState(hojeLocal());
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
 

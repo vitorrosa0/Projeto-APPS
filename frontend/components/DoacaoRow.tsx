@@ -5,6 +5,7 @@ import { MdArrowDropDown, MdArrowDropUp } from "react-icons/md";
 import { centavosParaReais } from "@/lib/dinheiro";
 
 interface Item {
+  id?: number;
   nome: string;
   quantidade: number;
 }
@@ -54,8 +55,8 @@ export default function DoacaoRow({ tipo, valorCentavos, itens = [] }: DoacaoRow
 
       {temDetalhes && expandido && (
         <div className="pb-2">
-          {itens.map((item) => (
-            <LinhaItem key={item.nome} nome={item.nome} quantidade={item.quantidade} />
+          {itens.map((item, index) => (
+            <LinhaItem key={item.id ?? `${item.nome}-${index}`} nome={item.nome} quantidade={item.quantidade} />
           ))}
         </div>
       )}

@@ -7,6 +7,11 @@ test("reaisParaCentavos", () => {
   assert.strictEqual(reaisParaCentavos("1.500,50"), 150050);
   assert.strictEqual(reaisParaCentavos("50.5"), 5050);
   assert.strictEqual(reaisParaCentavos("0,10"), 10);
+  assert.strictEqual(reaisParaCentavos("1.500,5"), 150050);
+  assert.strictEqual(reaisParaCentavos("150"), 15000);
+  assert.strictEqual(reaisParaCentavos("1.500"), 150000);
+  assert.strictEqual(reaisParaCentavos("1.000"), 100000);
+  assert.strictEqual(reaisParaCentavos("100.50"), 10050);
 });
 
 test("reaisParaCentavos rejeita vazio, texto e não positivos", () => {

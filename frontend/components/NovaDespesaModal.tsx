@@ -5,6 +5,7 @@ import { MdClose } from "react-icons/md";
 import SelectGroup from "@/components/SelectGroup";
 import InputGroup from "@/components/InputGroup";
 import type { DadosDespesa } from "@/lib/despesas";
+import { hojeLocal } from "@/lib/data";
 
 export type { DadosDespesa };
 
@@ -29,7 +30,7 @@ export const CATEGORIAS_DESPESA = [
 export default function NovaDespesaModal({ onClose, onSalvar }: NovaDespesaModalProps) {
   const [tipo, setTipo] = useState("");
   const [valor, setValor] = useState("");
-  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
+  const [data, setData] = useState(hojeLocal());
   const [descricao, setDescricao] = useState("");
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
