@@ -58,8 +58,8 @@ model Animal {
 model Colaborador {
   id                    Int            @id @default(autoincrement())
   nome                  String
-  email                 String         @unique
-  telefone              String
+  email                 String?        @unique
+  telefone              String?
   dataAdesao            String
   status                String         @default("Ativo")
   informacoesAdicionais String?
