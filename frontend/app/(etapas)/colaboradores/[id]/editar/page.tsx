@@ -27,43 +27,38 @@ export default function EditarColaboradorPage() {
   const [informacoesAdicionais, setInformacoesAdicionais] = useState("");
   const [modalConfirmar, setModalConfirmar] = useState(false);
   const [salvando, setSalvando] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+  const [carregado, setCarregado] = useState(false);
+  const [erro, setErro] = useState("");
 
-  const carregar = useCallback(() => {
-    if (!id) return;
-    api<{
-      nome: string;
-      email: string;
-      telefone: string;
-      dataAdesao: string;
-      status: StatusType;
-      informacoesAdicionais: string | null;
-    }>(`/colaboradores/${id}`)
-      .then((c) => {
-        setNome(c.nome);
-        setEmail(c.email);
-        setTelefone(c.telefone);
-        setDataAdesao(c.dataAdesao);
-        setStatus(c.status);
-        setInformacoesAdicionais(c.informacoesAdicionais ?? "");
-      })
-      .catch((err) => {
-        console.warn("Erro ao buscar pela API, verificando dados locais:", err);
-        try {
-          const stored = localStorage.getItem("sjpa_colaboradores");
-          if (stored) {
-            const list = JSON.parse(stored);
-            const found = list.find((item: any) => String(item.id) === String(id));
-            if (found) {
-              setNome(found.nome);
-              setEmail(found.email || "");
-              setTelefone(found.telefone || "");
-              setDataAdesao(found.dataAdesao || "");
-              setStatus(found.status || "Ativo");
-              setInformacoesAdicionais(found.informacoesAdicionais || "");
-            }
-          }
-        } catch {}
-      });
+  const carregar = useCallback(async () => {
+    setCarregando(true);
+    setErro("");
+    try {
+      const colaborador = await api<{
+        nome: string;
+        email: string | null;
+        telefone: string | null;
+        dataAdesao: string;
+        status: StatusType;
+        informacoesAdicionais: string | null;
+      }>(`/colaboradores/${id}`);
+      setNome(colaborador.nome);
+      setEmail(colaborador.email ?? "");
+      setTelefone(colaborador.telefone ?? "");
+      setDataAdesao(colaborador.dataAdesao);
+      setStatus(colaborador.status);
+      setInformacoesAdicionais(colaborador.informacoesAdicionais ?? "");
+      setCarregado(true);
+    } catch (err) {
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível carregar o colaborador."
+      );
+    } finally {
+      setCarregando(false);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -72,6 +67,7 @@ export default function EditarColaboradorPage() {
 
   const handleSalvar = async () => {
     setSalvando(true);
+    setErro("");
     try {
       await api(`/colaboradores/${id}`, {
         method: "PUT",
@@ -84,33 +80,16 @@ export default function EditarColaboradorPage() {
           informacoesAdicionais,
         }),
       });
+      router.push(`/colaboradores/${id}`);
     } catch (err) {
-      console.warn("Erro na API, atualizando localmente:", err);
-      try {
-        const stored = localStorage.getItem("sjpa_colaboradores");
-        if (stored) {
-          const list = JSON.parse(stored);
-          const atualizados = list.map((item: any) =>
-            String(item.id) === String(id)
-              ? {
-                  ...item,
-                  nome,
-                  email,
-                  telefone,
-                  dataAdesao,
-                  status,
-                  informacoesAdicionais,
-                }
-              : item
-          );
-          localStorage.setItem("sjpa_colaboradores", JSON.stringify(atualizados));
-        }
-      } catch (e) {
-        console.warn("Erro local:", e);
-      }
+      setErro(
+        err instanceof Error
+          ? err.message
+          : "Não foi possível salvar as alterações."
+      );
+      setModalConfirmar(false);
     } finally {
       setSalvando(false);
-      router.push(`/colaboradores/${id}`);
     }
   };
 
@@ -125,6 +104,26 @@ export default function EditarColaboradorPage() {
       <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-6">
         <PageTitle>Editar Colaborador</PageTitle>
 
+        {carregando ? (
+          <p className="text-center text-sm text-gray-500">Carregando colaborador...</p>
+        ) : !carregado ? (
+          <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+            <p>{erro || "Não foi possível carregar o colaborador."}</p>
+            <button
+              type="button"
+              onClick={() => void carregar()}
+              className="mt-2 font-semibold underline"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        ) : (
+          <>
+            {erro && (
+              <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+                {erro}
+              </p>
+            )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -172,6 +171,7 @@ export default function EditarColaboradorPage() {
             type="date"
             value={dataAdesao}
             onChange={(e) => setDataAdesao(e.target.value)}
+            required
           />
 
           <SelectGroup
@@ -216,6 +216,8 @@ export default function EditarColaboradorPage() {
             </button>
           </div>
         </form>
+          </>
+        )}
       </main>
 
       {modalConfirmar && (
