@@ -10,6 +10,7 @@ import PageTitle from "@/components/PageTitle";
 import InputGroup from "@/components/InputGroup";
 import SelectGroup from "@/components/SelectGroup";
 import { CATEGORIAS_DESPESA } from "@/components/NovaDespesaModal";
+import { criarDespesa } from "@/lib/despesas";
 
 export default function CadastrarDespesaPage() {
   const router = useRouter();
@@ -19,27 +20,19 @@ export default function CadastrarDespesaPage() {
   const [data, setData] = useState(new Date().toISOString().split("T")[0]);
   const [descricao, setDescricao] = useState("");
   const [salvo, setSalvo] = useState(false);
+  const [erro, setErro] = useState("");
 
-  const handleSalvar = (e: React.FormEvent) => {
+  const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tipo) {
-      alert("Selecione o tipo de despesa.");
-      return;
-    }
-    if (!valor) {
-      alert("Informe o valor da despesa.");
-      return;
-    }
-
+    if (!tipo) return setErro("Selecione o tipo de despesa.");
+    if (!valor) return setErro("Informe o valor da despesa.");
     try {
-      const stored = JSON.parse(localStorage.getItem("sjpa_despesas") || "[]");
-      stored.push({ id: Date.now(), tipo, valor, data, descricao });
-      localStorage.setItem("sjpa_despesas", JSON.stringify(stored));
+      await criarDespesa({ tipo, valor, data, descricao });
+      setErro("");
+      setSalvo(true);
     } catch (err) {
-      console.warn("Erro ao salvar localmente:", err);
+      setErro(err instanceof Error ? err.message : "Não foi possível salvar a despesa.");
     }
-
-    setSalvo(true);
   };
 
   return (
@@ -112,6 +105,7 @@ export default function CadastrarDespesaPage() {
               />
             </div>
 
+            {erro && <p className="text-sm text-red-600">{erro}</p>}
             <div className="flex gap-3 justify-end pt-2">
               <button
                 type="button"

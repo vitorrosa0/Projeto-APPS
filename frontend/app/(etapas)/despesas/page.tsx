@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import NovaDespesaModal, { DadosDespesa } from "@/components/NovaDespesaModal";
+import { criarDespesa } from "@/lib/despesas";
 
 const MESES_DO_ANO = [
   "Janeiro", "Fevereiro", "Março", "Abril",
@@ -35,17 +36,7 @@ export default function DespesasPage() {
     router.push(`/despesas/${index + 1}?mes=${encodeURIComponent(mes)}`);
   };
 
-  const handleSalvarDespesa = (dados: DadosDespesa) => {
-    console.log("Nova despesa cadastrada:", dados);
-    // Armazena temporariamente no sessionStorage/localStorage para visualização instantânea
-    try {
-      const stored = JSON.parse(localStorage.getItem("sjpa_despesas") || "[]");
-      stored.push({ id: Date.now(), ...dados });
-      localStorage.setItem("sjpa_despesas", JSON.stringify(stored));
-    } catch (e) {
-      console.warn("Não foi possível salvar no localStorage:", e);
-    }
-  };
+  const handleSalvarDespesa = (dados: DadosDespesa) => criarDespesa(dados);
 
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">

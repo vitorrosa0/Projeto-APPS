@@ -4,17 +4,13 @@ import { useState } from "react";
 import { MdClose } from "react-icons/md";
 import SelectGroup from "@/components/SelectGroup";
 import InputGroup from "@/components/InputGroup";
+import type { DadosDespesa } from "@/lib/despesas";
 
-export interface DadosDespesa {
-  tipo: string;
-  valor: string;
-  data: string;
-  descricao?: string;
-}
+export type { DadosDespesa };
 
 interface NovaDespesaModalProps {
   onClose: () => void;
-  onSalvar: (dados: DadosDespesa) => void;
+  onSalvar: (dados: DadosDespesa) => Promise<void>;
 }
 
 export const CATEGORIAS_DESPESA = [
@@ -35,18 +31,22 @@ export default function NovaDespesaModal({ onClose, onSalvar }: NovaDespesaModal
   const [valor, setValor] = useState("");
   const [data, setData] = useState(new Date().toISOString().split("T")[0]);
   const [descricao, setDescricao] = useState("");
+  const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
-  const handleSalvar = () => {
-    if (!tipo) {
-      alert("Selecione o tipo de despesa.");
-      return;
+  const handleSalvar = async () => {
+    if (!tipo) return setErro("Selecione o tipo de despesa.");
+    if (!valor) return setErro("Informe o valor da despesa.");
+    setSalvando(true);
+    setErro("");
+    try {
+      await onSalvar({ tipo, valor, data, descricao });
+      onClose();
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Não foi possível salvar a despesa.");
+    } finally {
+      setSalvando(false);
     }
-    if (!valor) {
-      alert("Informe o valor da despesa.");
-      return;
-    }
-    onSalvar({ tipo, valor, data, descricao });
-    onClose();
   };
 
   return (
@@ -110,6 +110,7 @@ export default function NovaDespesaModal({ onClose, onSalvar }: NovaDespesaModal
           </div>
         </div>
 
+        {erro && <p className="text-sm text-red-600">{erro}</p>}
         <div className="flex gap-3 justify-end pt-2">
           <button
             type="button"
@@ -121,9 +122,10 @@ export default function NovaDespesaModal({ onClose, onSalvar }: NovaDespesaModal
           <button
             type="button"
             onClick={handleSalvar}
+            disabled={salvando}
             className="px-6 py-2 rounded-full bg-[#2DB38B] text-white text-sm font-semibold hover:bg-[#25967A] active:scale-95 transition-all shadow-md cursor-pointer"
           >
-            Salvar
+            {salvando ? "Salvando..." : "Salvar"}
           </button>
         </div>
       </div>
