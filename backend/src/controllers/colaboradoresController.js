@@ -99,9 +99,10 @@ async function listarContribuicoes(req, res, next) {
 async function adicionarContribuicao(req, res, next) {
   try {
     const colaboradorId = Number(req.params.id);
+    if (!Number.isInteger(colaboradorId)) return res.status(400).json({ erro: "Id inválido" });
     const existe = await prisma.colaborador.findUnique({ where: { id: colaboradorId } });
     if (!existe) return res.status(404).json({ erro: "Colaborador não encontrado" });
-    const { tipo, valor, data } = req.body;
+    const { tipo, valor, data } = req.body ?? {};
     if (!tipo || !valor || !data) {
       return res.status(400).json({ erro: "Tipo, valor e data são obrigatórios" });
     }

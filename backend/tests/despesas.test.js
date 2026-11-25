@@ -50,3 +50,9 @@ test("GET /despesas com período inválido retorna 400", async () => {
   const res = await request(app).get("/despesas?ano=2026&mes=13");
   assert.strictEqual(res.status, 400);
 });
+
+test("POST /despesas: body ausente e descricao não string retornam 400", async () => {
+  const a = await request(app).post("/despesas");
+  const b = await request(app).post("/despesas").send({ ...base, descricao: 42 });
+  assert.deepStrictEqual([a.status, b.status], [400, 400]);
+});

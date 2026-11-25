@@ -37,8 +37,10 @@ async function totais(req, res, next) {
 
 async function buscarPorId(req, res, next) {
   try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(400).json({ erro: "Id inválido" });
     const doacao = await prisma.doacao.findUnique({
-      where: { id: Number(req.params.id) },
+      where: { id },
       include: { itens: true },
     });
     if (!doacao) return res.status(404).json({ erro: "Doação não encontrada" });
@@ -48,12 +50,20 @@ async function buscarPorId(req, res, next) {
 
 async function criar(req, res, next) {
   try {
-    const { tipo, valorCentavos, data, colaboradorId, doadorNome, observacoes, itens } = req.body;
+    const { tipo, valorCentavos, data, colaboradorId, doadorNome, observacoes, itens } = req.body ?? {};
     if (tipo !== "Dinheiro" && tipo !== "Item") {
       return res.status(400).json({ erro: "Tipo deve ser 'Dinheiro' ou 'Item'" });
     }
     if (!dataValida(data)) {
       return res.status(400).json({ erro: "Data deve estar no formato AAAA-MM-DD" });
+    }
+    if (colaboradorId !== undefined && colaboradorId !== null && !Number.isInteger(colaboradorId)) {
+      return res.status(400).json({ erro: "colaboradorId deve ser um inteiro" });
+    }
+    for (const [campo, v] of [["doadorNome", doadorNome], ["observacoes", observacoes]]) {
+      if (v !== undefined && v !== null && typeof v !== "string") {
+        return res.status(400).json({ erro: `${campo} deve ser texto` });
+      }
     }
     const temItens = Array.isArray(itens) && itens.length > 0;
     if (tipo === "Dinheiro") {
@@ -70,7 +80,7 @@ async function criar(req, res, next) {
       const itensValidos =
         temItens &&
         itens.every(
-          (i) => typeof i.nome === "string" && i.nome.trim() && Number.isInteger(i.quantidade) && i.quantidade > 0
+          (i) => i && typeof i === "object" && typeof i.nome === "string" && i.nome.trim() && Number.isInteger(i.quantidade) && i.quantidade > 0
         );
       if (!itensValidos) {
         return res.status(400).json({ erro: "Informe ao menos um item com nome e quantidade positiva" });

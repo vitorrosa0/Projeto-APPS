@@ -6,6 +6,10 @@ test("parseReais converte formatos comuns para centavos", () => {
   assert.strictEqual(parseReais("R$ 150,00"), 15000);
   assert.strictEqual(parseReais("1.500,5"), 150050);
   assert.strictEqual(parseReais("150"), 15000);
+  assert.strictEqual(parseReais("1.500"), 150000);
+  assert.strictEqual(parseReais("1.000"), 100000);
+  assert.strictEqual(parseReais("50.5"), 5050);
+  assert.strictEqual(parseReais("100.50"), 10050);
 });
 
 test("parseReais rejeita texto inválido e zero", () => {

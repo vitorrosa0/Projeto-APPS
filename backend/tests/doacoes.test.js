@@ -75,3 +75,16 @@ test("GET /doacoes/:id retorna 404 quando não existe", async () => {
   const res = await request(app).get("/doacoes/9999");
   assert.strictEqual(res.status, 404);
 });
+
+test("doações: entradas malformadas retornam 400", async () => {
+  const sem = await request(app).post("/doacoes");
+  const col = await request(app).post("/doacoes").send({ ...dinheiro, colaboradorId: "abc" });
+  const nulo = await request(app).post("/doacoes").send(item({ itens: [null] }));
+  const nome = await request(app).post("/doacoes").send({ ...dinheiro, doadorNome: 123 });
+  const obs = await request(app).post("/doacoes").send({ ...dinheiro, observacoes: 5 });
+  const id = await request(app).get("/doacoes/abc");
+  assert.deepStrictEqual(
+    [sem.status, col.status, nulo.status, nome.status, obs.status, id.status],
+    [400, 400, 400, 400, 400, 400]
+  );
+});

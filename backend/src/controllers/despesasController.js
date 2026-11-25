@@ -35,7 +35,7 @@ async function totais(req, res, next) {
 
 async function criar(req, res, next) {
   try {
-    const { categoria, valorCentavos, data, descricao } = req.body;
+    const { categoria, valorCentavos, data, descricao } = req.body ?? {};
     if (!CATEGORIAS.includes(categoria)) {
       return res.status(400).json({ erro: "Categoria inválida" });
     }
@@ -44,6 +44,9 @@ async function criar(req, res, next) {
     }
     if (!dataValida(data)) {
       return res.status(400).json({ erro: "Data deve estar no formato AAAA-MM-DD" });
+    }
+    if (descricao !== undefined && descricao !== null && typeof descricao !== "string") {
+      return res.status(400).json({ erro: "Descrição deve ser texto" });
     }
     const despesa = await prisma.despesa.create({
       data: { categoria, valorCentavos, data, descricao: descricao || null },
