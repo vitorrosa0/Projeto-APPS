@@ -96,24 +96,20 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 #### Resumo Financeiro (`/financeiro`)
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| GET | `/financeiro/resumo` | Retorna resumo consolidado de receitas, despesas e saldo (filtro opcional: `?mes=11&ano=2026`) |
+| GET | `/financeiro/resumo` | Resumo de receitas, despesas e saldo do período (`?ano=2026&mes=11`; sem parâmetros, ano corrente) |
 
-**Resposta do resumo:**
+**Resposta do resumo (valores em centavos):**
 ```json
 {
-  "periodo": { "mes": "11", "ano": "2026" },
-  "receitas": {
-    "total": 300.00,
-    "doacoesDinheiro": { "total": 200.00, "registros": [...] },
-    "contribuicoesColaboradores": { "total": 100.00, "registros": [...] }
-  },
+  "periodo": { "ano": 2026, "mes": 11 },
+  "receitas": { "totalCentavos": 30000, "doacoesDinheiro": [...] },
   "itensDoados": [...],
-  "despesas": { "total": 150.00, "registros": [...] },
-  "saldo": 150.00
+  "despesas": { "totalCentavos": 15000, "registros": [...] },
+  "saldoCentavos": 15000
 }
 ```
 
-> As receitas somam doações em dinheiro + contribuições financeiras de colaboradores, sem duplicação. Doações de itens físicos são listadas separadamente em `itensDoados` e não entram no total financeiro.
+> A receita vem só de `Doacao` em dinheiro, incluindo as de colaboradores (identificadas por `colaborador.nome`), sem duplicação. Doações de itens ficam em `itensDoados` e não entram no total.
 
 ---
 

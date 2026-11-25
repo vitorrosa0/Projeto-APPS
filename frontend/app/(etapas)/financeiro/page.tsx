@@ -7,6 +7,7 @@ import BottomNav from "@/components/BottomNav";
 import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import { api } from "@/lib/api";
+import { centavosParaReais } from "@/lib/dinheiro";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril",
@@ -14,28 +15,26 @@ const MESES = [
   "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-interface DoacaoItem {
+interface Doacao {
   id: number;
-  descricao?: string | null;
-  doador?: string | null;
+  valorCentavos: number | null;
   data: string;
+  doadorNome: string | null;
+  colaborador: { nome: string } | null;
+  itens?: { id: number; nome: string; quantidade: number }[];
 }
 
 interface ResumoApi {
-  periodo: { mes: string | null; ano: string | null };
-  receitas: {
-    total: number;
-    doacoesDinheiro: { total: number; registros: unknown[] };
-    contribuicoesColaboradores: { total: number; registros: unknown[] };
-  };
-  itensDoados: DoacaoItem[];
-  despesas: { total: number; registros: unknown[] };
-  saldo: number;
+  periodo: { ano: number; mes: number | null };
+  receitas: { totalCentavos: number; doacoesDinheiro: Doacao[] };
+  itensDoados: Doacao[];
+  despesas: { totalCentavos: number; registros: unknown[] };
+  saldoCentavos: number;
 }
 
-function formatarMoeda(valor: number): string {
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
+const doador = (d: Doacao) => d.colaborador?.nome ?? d.doadorNome ?? "Anônimo";
+
+const somar = (doacoes: Doacao[]) => doacoes.reduce((acc, d) => acc + (d.valorCentavos ?? 0), 0);
 
 export default function FinanceiroPage() {
   const hoje = new Date();
@@ -44,12 +43,15 @@ export default function FinanceiroPage() {
   const [resumo, setResumo] = useState<ResumoApi | null>(null);
 
   useEffect(() => {
-    api<ResumoApi>(`/financeiro/resumo?mes=${mes}&ano=${ano}`)
+    api<ResumoApi>(`/financeiro/resumo?ano=${ano}&mes=${mes}`)
       .then(setResumo)
       .catch((e) => console.error("Erro ao carregar resumo:", e));
   }, [mes, ano]);
 
-  const saldoPositivo = (resumo?.saldo ?? 0) >= 0;
+  const saldoPositivo = (resumo?.saldoCentavos ?? 0) >= 0;
+  const dinheiro = resumo?.receitas.doacoesDinheiro ?? [];
+  const deColaboradores = somar(dinheiro.filter((d) => d.colaborador));
+  const avulsas = somar(dinheiro.filter((d) => !d.colaborador));
 
   return (
     <div className="relative min-h-screen bg-gray-100 overflow-x-hidden flex flex-col md:ml-56 pb-20 md:pb-0">
@@ -100,14 +102,14 @@ export default function FinanceiroPage() {
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Receitas</p>
                 <p className="text-xs text-gray-400">
-                  Doações: {formatarMoeda(resumo?.receitas.doacoesDinheiro.total ?? 0)}
+                  Doações: {centavosParaReais(avulsas)}
                   {" · "}
-                  Colaboradores: {formatarMoeda(resumo?.receitas.contribuicoesColaboradores.total ?? 0)}
+                  Colaboradores: {centavosParaReais(deColaboradores)}
                 </p>
               </div>
             </div>
             <span className="text-base font-extrabold text-[#2DB38B]">
-              {formatarMoeda(resumo?.receitas.total ?? 0)}
+              {centavosParaReais(resumo?.receitas.totalCentavos ?? 0)}
             </span>
           </div>
 
@@ -125,7 +127,7 @@ export default function FinanceiroPage() {
               </div>
             </div>
             <span className="text-base font-extrabold text-red-400">
-              {formatarMoeda(resumo?.despesas.total ?? 0)}
+              {centavosParaReais(resumo?.despesas.totalCentavos ?? 0)}
             </span>
           </div>
 
@@ -148,7 +150,7 @@ export default function FinanceiroPage() {
               <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Saldo do Período</p>
             </div>
             <span className={`text-base font-extrabold ${saldoPositivo ? "text-[#2DB38B]" : "text-red-500"}`}>
-              {formatarMoeda(resumo?.saldo ?? 0)}
+              {centavosParaReais(resumo?.saldoCentavos ?? 0)}
             </span>
           </div>
         </div>
@@ -165,17 +167,15 @@ export default function FinanceiroPage() {
               Nenhum item doado neste período.
             </p>
           ) : (
-            resumo.itensDoados.map((item) => (
+            resumo.itensDoados.map((doacao) => (
               <div
-                key={item.id}
+                key={doacao.id}
                 className="flex items-center justify-between px-5 py-3 border-b border-gray-100 last:border-b-0"
               >
                 <span className="text-sm font-medium text-gray-700">
-                  {item.descricao ?? "Item doado"}
+                  {(doacao.itens ?? []).map((i) => `${i.quantidade} ${i.nome}`).join(", ")}
                 </span>
-                {item.doador && (
-                  <span className="text-xs text-gray-400">{item.doador}</span>
-                )}
+                <span className="text-xs text-gray-400">{doador(doacao)}</span>
               </div>
             ))
           )}
