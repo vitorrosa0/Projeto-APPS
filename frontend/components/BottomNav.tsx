@@ -10,6 +10,7 @@ import {
   MdVolunteerActivism,
   MdBadge,
   MdAccountCircle,
+  MdBarChart,
 } from "react-icons/md";
 import { IconType } from "react-icons";
 import Image from "next/image";
@@ -35,6 +36,7 @@ const desktopNavItems: NavItem[] = [
   { icon: MdPeople,        href: "/colaboradores",label: "Colaboradores" },
   { icon: MdAttachMoney,   href: "/despesas",     label: "Despesas" },
   { icon: MdFavorite,      href: "/doacoes",      label: "Doações" },
+  { icon: MdBarChart,      href: "/financeiro",   label: "Financeiro" },
   { icon: MdVolunteerActivism, href: "/voluntarios", label: "Voluntários" },
   { icon: MdBadge,         href: "/funcionarios", label: "Funcionários" },
   { icon: MdAccountCircle, href: "/perfil",       label: "Perfil" },

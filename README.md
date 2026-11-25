@@ -30,7 +30,9 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 - **Cadastro:** Registro de novos usuários com validação de campos.
 - **Recuperação de Senha:** Fluxo completo para solicitação de nova senha e confirmação de envio de link.
 - **Gestão de Animais:** Listagem e categorização (Cães/Gatos) de animais.
-- **Doações:** Listagem por mês e cadastro de novas doações.
+- **Doações:** Listagem por mês e cadastro de novas doações (integrado com API).
+- **Despesas:** Listagem por mês e cadastro de novas despesas (integrado com API).
+- **Financeiro:** Resumo consolidado de receitas, despesas e saldo com filtro por período.
 - **Colaboradores:** Listagem, cadastro e edição de colaboradores com histórico de contribuições.
 - **Interface Responsiva:** Otimizada para dispositivos móveis com menu inferior (`BottomNav`) e cabeçalho dinâmico.
 
@@ -70,7 +72,48 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
 
 **Campos do Colaborador:** `nome`, `email`, `telefone`, `dataAdesao`, `status` (Ativo/Inativo/Pausado), `informacoesAdicionais`
 
-**Campos da Contribuição:** `tipo` (Financeiro/Produto/Servico), `valor`, `data`
+**Campos da Contribuição:** `tipo` (Financeiro/Produto/Servico), `valor`, `data`. Financeiro e Produto são gravados como `Doacao` vinculada ao colaborador; apenas Servico fica em `Contribuicao`.
+
+#### Doações (`/doacoes`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/doacoes` | Lista as doações do período, com itens (`?ano=2026&mes=11`; sem parâmetros, ano corrente) |
+| GET | `/doacoes/totais` | `{ totalDinheiroCentavos, itens: [{ nome, quantidade }] }` do período |
+| GET | `/doacoes/:id` | Busca uma doação pelo ID |
+| POST | `/doacoes` | Cadastra uma nova doação |
+
+**Campos da Doação:** `tipo` (Dinheiro/Item), `valorCentavos` (inteiro > 0, somente Dinheiro), `itens` (`[{ nome, quantidade }]`, ao menos um, somente Item), `data` (AAAA-MM-DD), `colaboradorId` (opcional), `doadorNome` (opcional), `observacoes` (opcional). Itens nunca entram no total em R$.
+
+#### Despesas (`/despesas`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/despesas` | Lista as despesas do período (`?ano=2026&mes=11`; sem parâmetros, ano corrente) |
+| GET | `/despesas/totais` | `{ totalCentavos, porCategoria: [{ categoria, totalCentavos }] }` do período |
+| POST | `/despesas` | Cadastra uma nova despesa |
+
+**Campos da Despesa:** `categoria` (lista fixa), `valorCentavos` (inteiro > 0), `data` (AAAA-MM-DD), `descricao` (opcional)
+
+#### Resumo Financeiro (`/financeiro`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/financeiro/resumo` | Retorna resumo consolidado de receitas, despesas e saldo (filtro opcional: `?mes=11&ano=2026`) |
+
+**Resposta do resumo:**
+```json
+{
+  "periodo": { "mes": "11", "ano": "2026" },
+  "receitas": {
+    "total": 300.00,
+    "doacoesDinheiro": { "total": 200.00, "registros": [...] },
+    "contribuicoesColaboradores": { "total": 100.00, "registros": [...] }
+  },
+  "itensDoados": [...],
+  "despesas": { "total": 150.00, "registros": [...] },
+  "saldo": 150.00
+}
+```
+
+> As receitas somam doações em dinheiro + contribuições financeiras de colaboradores, sem duplicação. Doações de itens físicos são listadas separadamente em `itensDoados` e não entram no total financeiro.
 
 ---
 

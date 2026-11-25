@@ -10,6 +10,7 @@ import {
   MdVolunteerActivism,
   MdFavorite,
   MdBadge,
+  MdBarChart,
 } from "react-icons/md";
 
 
@@ -18,6 +19,7 @@ const menuItems = [
   { label: "Colaboradores", icon: <MdPeople size={22} />,            href: "/colaboradores" },
   { label: "Despesas",      icon: <MdAttachMoney size={22} />,       href: "/despesas" },
   { label: "Doações",       icon: <MdFavorite size={22} />,          href: "/doacoes" },
+  { label: "Financeiro",    icon: <MdBarChart size={22} />,          href: "/financeiro" },
   { label: "Voluntários",   icon: <MdVolunteerActivism size={22} />, href: "/voluntarios" },
   { label: "Funcionários",  icon: <MdBadge size={22} />,             href: "/funcionarios" },
 ];
