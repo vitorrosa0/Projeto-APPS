@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MdAdd, MdCheckCircle } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -10,6 +10,7 @@ import InputGroup from "@/components/InputGroup";
 import SelectGroup from "@/components/SelectGroup";
 import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
+import Toast from "@/components/Toast";
 import { api, API_URL } from "@/lib/api";
 import Image from 'next/image';
 import Link from 'next/link';
@@ -124,7 +125,6 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
       }
       showToast();
     } catch (err) {
-      console.error("Erro ao salvar:", err);
       setError(err instanceof Error ? err.message : "Erro ao salvar o animal.");
     } finally {
       setLoading(false);
@@ -136,16 +136,11 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
 
       <Header showBack onBack={() => router.push(backHref)} />
 
-      {/* Toast de sucesso */}
-      <div
-        aria-live="polite"
-        className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[#2DB38B] text-white px-6 py-3 rounded-full shadow-lg text-sm font-semibold transition-all duration-300 ${
-          saved ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
-        }`}
-      >
-        <MdCheckCircle size={20} />
-        {editId ? "Animal atualizado com sucesso!" : "Animal cadastrado com sucesso!"}
-      </div>
+      <Toast
+        mensagem={editId ? "Animal atualizado com sucesso!" : "Animal cadastrado com sucesso!"}
+        tipo="sucesso"
+        visivel={saved}
+      />
 
       <PawBackground />
 
