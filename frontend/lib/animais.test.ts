@@ -325,6 +325,25 @@ describe("gerarCsvAnimais", () => {
   });
 });
 
+describe("busca e CSV com nome especial e registro antigo", () => {
+  const especial = criarAnimal({ id: 1, nome: 'Cão; "A"', tipo: "cao", raca: "SRD" });
+  const antigo = criarAnimal({ id: 2, nome: "Antigo", tipo: null });
+
+  it("encontra pela raça e ignora o registro antigo sem opcionais", () => {
+    expect(filtrarAnimais([especial, antigo], " srd ")).toEqual([especial]);
+    expect(filtrarAnimais([especial, antigo], "ausente")).toEqual([]);
+    expect(descricaoAnimal(antigo)).toBe("");
+  });
+
+  it("preserva BOM, separador, aspas e quebras de linha CRLF no CSV", () => {
+    const csv = gerarCsvAnimais([especial, antigo]);
+
+    expect(csv.startsWith("﻿ID;Nome;Tipo;Raça")).toBe(true);
+    expect(csv).toContain('"Cão; ""A""";"Cão";"SRD"');
+    expect(csv).toContain("\r\n");
+  });
+});
+
 describe("nomeArquivoCsv", () => {
   afterEach(() => {
     vi.useRealTimers();
