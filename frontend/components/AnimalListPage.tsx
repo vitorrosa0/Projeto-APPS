@@ -125,7 +125,7 @@ export default function AnimalListPage({
       <Toast {...toast} />
       <PawBackground />
 
-      <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md mx-auto flex flex-col gap-4">
+      <main className="relative z-10 px-4 py-6 flex-1 w-full max-w-md lg:max-w-4xl xl:max-w-6xl mx-auto flex flex-col gap-4">
 
         <PageTitle>{titulo}</PageTitle>
 
@@ -180,12 +180,12 @@ export default function AnimalListPage({
               <p className="text-sm">Nenhum animal encontrado.</p>
             </div>
           ) : (
-            <ul className="divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-100 lg:divide-y-0 lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-px lg:bg-gray-100">
               {animaisFiltrados.map((animal) => {
                 const descricao = descricaoAnimal(animal);
                 const localizacao = localizacaoAnimal(animal);
                 return (
-                  <li key={animal.id} className="flex items-center gap-3 px-4 py-3">
+                  <li key={animal.id} className="flex items-center gap-3 px-4 py-3 bg-white">
 
                     <AnimalAvatar foto={animal.foto ?? undefined} nome={animal.nome} tipo={tipo} />
 
@@ -206,7 +206,7 @@ export default function AnimalListPage({
                       <button
                         onClick={() => setParaExcluir(animal)}
                         aria-label={`Excluir ${animal.nome}`}
-                        className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-red-500 active:scale-95 transition-all cursor-pointer"
+                        className="w-9 h-9 rounded-full bg-white border-2 border-red-500 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white active:scale-95 transition-all cursor-pointer"
                       >
                         <MdDelete size={18} />
                       </button>

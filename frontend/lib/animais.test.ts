@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  contarPorTipo,
   descricaoAnimal,
   filtrarAnimais,
   formatarData,
@@ -128,6 +129,28 @@ describe("localizacaoAnimal", () => {
 
   it("devolve texto vazio quando setor e canil estão vazios", () => {
     expect(localizacaoAnimal(criarAnimal())).toBe("");
+  });
+});
+
+describe("contarPorTipo", () => {
+  it("conta cães e gatos separadamente", () => {
+    const animais = [
+      criarAnimal({ id: 1, tipo: "cao" }),
+      criarAnimal({ id: 2, tipo: "gato" }),
+      criarAnimal({ id: 3, tipo: "cao" }),
+    ];
+
+    expect(contarPorTipo(animais)).toEqual({ cao: 2, gato: 1 });
+  });
+
+  it("ignora animais sem tipo ou com tipo fora de cão e gato", () => {
+    const animais = [criarAnimal({ id: 1, tipo: null }), criarAnimal({ id: 2, tipo: "ave" })];
+
+    expect(contarPorTipo(animais)).toEqual({ cao: 0, gato: 0 });
+  });
+
+  it("devolve zero para lista vazia", () => {
+    expect(contarPorTipo([])).toEqual({ cao: 0, gato: 0 });
   });
 });
 

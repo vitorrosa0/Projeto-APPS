@@ -34,6 +34,17 @@ export function localizacaoAnimal(animal: { setor?: string | null; canil?: strin
   return juntarPreenchidos([setor ? `Setor ${setor}` : null, animal.canil]);
 }
 
+export function contarPorTipo(animais: { tipo?: string | null }[]): { cao: number; gato: number } {
+  return animais.reduce(
+    (total, animal) => {
+      if (animal.tipo === "cao") total.cao += 1;
+      else if (animal.tipo === "gato") total.gato += 1;
+      return total;
+    },
+    { cao: 0, gato: 0 }
+  );
+}
+
 export interface AnimalExportavel {
   id: number;
   nome: string;
