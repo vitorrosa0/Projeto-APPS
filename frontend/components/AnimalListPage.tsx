@@ -20,6 +20,7 @@ import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import AnimalAvatar from "@/components/AnimalAvatar";
 import ConfirmModal from "@/components/ConfirmModal";
+import { NO_ABRIGO } from "@/lib/movimentacoes";
 import Toast, { useToast } from "@/components/Toast";
 import {
   filtrarAnimais,
@@ -65,6 +66,8 @@ export interface Animal {
   dataVacinacao?: string | null;
   foto?: string | null;
   outros?: string | null;
+  /** Calculado pelo backend a partir da última entrada ou saída (ANI-11). */
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -264,6 +267,7 @@ export default function AnimalListPage({
 
                     <div className="flex-1 min-w-0">
                       <Link href={`/animais/detalhes?id=${animal.id}`} className="font-bold text-gray-800 text-sm underline">{animal.nome}<span className="sr-only"> — Ver ficha</span></Link>
+                      {animal.status && <span className={`ml-2 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${animal.status === NO_ABRIGO ? "bg-[#2DB38B]/15 text-[#1E7A5F]" : "bg-gray-200 text-gray-700"}`}>{animal.status}</span>}
                       {descricao && <p className="text-xs text-gray-500">{descricao}</p>}
                       {localizacao && <p className="text-xs text-gray-400 mt-0.5">{localizacao}</p>}
                     </div>
