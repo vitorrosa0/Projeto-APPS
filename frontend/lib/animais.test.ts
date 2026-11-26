@@ -115,7 +115,7 @@ describe("filtrarAnimais com busca ampliada", () => {
 describe("aplicarFiltros", () => {
   const rex = criarAnimal({ id: 1, setor: "A", sexo: "Masculino", vacinacao: "Completa" });
   const mia = criarAnimal({ id: 2, nome: "Mia", setor: "B", sexo: "Feminino", vacinacao: "Completa" });
-  const bob = criarAnimal({ id: 3, nome: "Bob", setor: "A", sexo: "Masculino", vacinacao: "Incompleta" });
+  const bob = criarAnimal({ id: 3, nome: "Bob", setor: "A", sexo: "Masculino", vacinacao: "Incompleta", status: "Adotado" });
 
   it("devolve todos quando nenhum filtro está ativo", () => {
     expect(aplicarFiltros([rex, mia, bob], FILTROS_VAZIOS)).toEqual([rex, mia, bob]);
@@ -125,6 +125,7 @@ describe("aplicarFiltros", () => {
     ["setor", { setor: "A" }, [1, 3]],
     ["sexo", { sexo: "Feminino" }, [2]],
     ["vacinação", { vacinacao: "Incompleta" }, [3]],
+    ["situação", { status: "Adotado" }, [3]],
   ])("filtra por %s", (_nome, filtro, idsEsperados) => {
     const resultado = aplicarFiltros([rex, mia, bob], { ...FILTROS_VAZIOS, ...filtro });
 
@@ -132,7 +133,7 @@ describe("aplicarFiltros", () => {
   });
 
   it("combina vários filtros", () => {
-    const resultado = aplicarFiltros([rex, mia, bob], { setor: "A", sexo: "Masculino", vacinacao: "Completa" });
+    const resultado = aplicarFiltros([rex, mia, bob], { ...FILTROS_VAZIOS, setor: "A", sexo: "Masculino", vacinacao: "Completa" });
 
     expect(resultado).toEqual([rex]);
   });
