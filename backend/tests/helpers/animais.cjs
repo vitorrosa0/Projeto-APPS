@@ -1,4 +1,10 @@
+const jwt = require('jsonwebtoken');
 const prisma = require('../../src/prisma');
+const { JWT_SECRET } = require('../../src/auth');
+
+// Token de um usuário fictício, aceito pelo middleware exigirLogin.
+const token = jwt.sign({ id: 1, email: 'teste@sjpa.com' }, JWT_SECRET, { expiresIn: '1h' });
+const autorizacao = { Authorization: `Bearer ${token}` };
 
 // Dados válidos por padrão; cada teste sobrescreve só o campo que importa.
 function dadosAnimal(extra = {}) {
@@ -19,4 +25,4 @@ function registrarNoBanco(animalId, extra = {}) {
   return prisma.movimentacao.create({ data: { animalId, tipo: 'entrada', motivo: 'Resgate', data: '2026-01-10', ...extra } });
 }
 
-module.exports = { prisma, dadosAnimal, criarNoBanco, limparAnimais, registrarNoBanco };
+module.exports = { token, autorizacao, prisma, dadosAnimal, criarNoBanco, limparAnimais, registrarNoBanco };

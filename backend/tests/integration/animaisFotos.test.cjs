@@ -4,6 +4,7 @@ const express = require('express');
 const prisma = require('../../src/prisma');
 const { decodePhoto } = require('../../src/animalPhotos');
 const { validarAnimal } = require('../../src/animalValidation');
+const { autorizacao } = require('../helpers/animais.cjs');
 let server, base;
 const ids = new Set();
 const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a0YQAAAAASUVORK5CYII=';
@@ -16,7 +17,7 @@ before(async () => {
   base = 'http://127.0.0.1:' + server.address().port;
 });
 async function request(method, url, data) {
-  const response = await fetch(base + url, { method, headers: { 'Content-Type': 'application/json' }, ...(data !== undefined ? {body: JSON.stringify(data)} : {}) });
+  const response = await fetch(base + url, { method, headers: { 'Content-Type': 'application/json', ...autorizacao }, ...(data !== undefined ? {body: JSON.stringify(data)} : {}) });
   return { status: response.status, data: await response.json() };
 }
 async function create(data) { const r = await request('POST', '/animais', data); if (r.status === 201) ids.add(r.data.id); return r; }

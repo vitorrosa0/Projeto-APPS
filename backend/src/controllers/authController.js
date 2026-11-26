@@ -1,10 +1,7 @@
 const prisma = require("../prisma");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
-// Em produção isso viria do .env (JWT_SECRET). Para um protótipo
-// acadêmico um valor padrão já resolve.
-const JWT_SECRET = process.env.JWT_SECRET || "sjpa-dev-secret";
+const { JWT_SECRET } = require("../auth");
 
 async function registrar(req, res, next) {
   try {
