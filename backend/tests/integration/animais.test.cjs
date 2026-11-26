@@ -2,6 +2,10 @@ const { describe, test, beforeEach, after } = require('node:test');
 const assert = require('node:assert/strict');
 const request = require('supertest');
 const app = require('../../src/app');
+const { autorizacao } = require('../helpers/animais.cjs');
+// Todas as requisições destes testes vão autenticadas; o acesso sem login
+// é coberto em auth.test.cjs.
+const api = () => request.agent(app).set(autorizacao);
 const { prisma, dadosAnimal, criarNoBanco, limparAnimais } = require('../helpers/animais.cjs');
 
 beforeEach(limparAnimais);
@@ -15,7 +19,7 @@ describe('GET /animais', () => {
     await criarNoBanco({ nome: 'Tom', tipo: 'gato' });
     await criarNoBanco({ nome: 'Bidu', tipo: 'cao' });
 
-    const res = await request(app).get('/animais');
+    const res = await api().get('/animais');
 
     assert.equal(res.status, 200);
     assert.deepEqual(res.body.map((a) => a.nome), ['Bidu', 'Tom']);
@@ -25,14 +29,14 @@ describe('GET /animais', () => {
     await criarNoBanco({ nome: 'Tom', tipo: 'gato' });
     await criarNoBanco({ nome: 'Bidu', tipo: 'cao' });
 
-    const res = await request(app).get('/animais?tipo=gato');
+    const res = await api().get('/animais?tipo=gato');
 
     assert.equal(res.status, 200);
     assert.deepEqual(res.body.map((a) => a.nome), ['Tom']);
   });
 
   test('devolve lista vazia quando não há animais', async () => {
-    const res = await request(app).get('/animais');
+    const res = await api().get('/animais');
 
     assert.equal(res.status, 200);
     assert.deepEqual(res.body, []);
@@ -43,7 +47,7 @@ describe('GET /animais/:id', () => {
   test('devolve o animal pelo ID', async () => {
     const animal = await criarNoBanco({ nome: 'Mel', raca: 'SRD' });
 
-    const res = await request(app).get(`/animais/${animal.id}`);
+    const res = await api().get(`/animais/${animal.id}`);
 
     assert.equal(res.status, 200);
     assert.equal(res.body.nome, 'Mel');
@@ -51,14 +55,14 @@ describe('GET /animais/:id', () => {
   });
 
   test('responde 404 para ID inexistente', async () => {
-    const res = await request(app).get('/animais/999999');
+    const res = await api().get('/animais/999999');
 
     assert.equal(res.status, 404);
   });
 
   for (const id of ['abc', '0', '-1', '1.5']) {
     test(`responde 400 para ID inválido "${id}"`, async () => {
-      const res = await request(app).get(`/animais/${id}`);
+      const res = await api().get(`/animais/${id}`);
 
       assert.equal(res.status, 400);
       assert.equal(res.body.erro, 'ID inválido');
@@ -70,7 +74,7 @@ describe('POST /animais', () => {
   test('cadastra o animal e grava no banco', async () => {
     const dados = dadosAnimal({ nome: 'Luna', tipo: 'gato', sexo: 'Feminino', setor: 'C', canil: 'Baia 2' });
 
-    const res = await request(app).post('/animais').send(dados);
+    const res = await api().post('/animais').send(dados);
 
     assert.equal(res.status, 201);
     const gravado = await prisma.animal.findUnique({ where: { id: res.body.id } });
@@ -92,7 +96,7 @@ describe('POST /animais', () => {
   };
   for (const [caso, extra] of Object.entries(invalidos)) {
     test(`rejeita com 400 e não grava: ${caso}`, async () => {
-      const res = await request(app).post('/animais').send(dadosAnimal(extra));
+      const res = await api().post('/animais').send(dadosAnimal(extra));
 
       assert.equal(res.status, 400);
       assert.equal(typeof res.body.erro, 'string');
@@ -105,7 +109,7 @@ describe('PUT /animais/:id', () => {
   test('edita os campos enviados e mantém os demais', async () => {
     const animal = await criarNoBanco({ nome: 'Bob', raca: 'SRD' });
 
-    const res = await request(app).put(`/animais/${animal.id}`).send({ setor: 'A', canil: 'Canil 1' });
+    const res = await api().put(`/animais/${animal.id}`).send({ setor: 'A', canil: 'Canil 1' });
 
     assert.equal(res.status, 200);
     const gravado = await prisma.animal.findUnique({ where: { id: animal.id } });
@@ -117,7 +121,7 @@ describe('PUT /animais/:id', () => {
     test(`rejeita com 400 e não altera: ${caso}`, async () => {
       const animal = await criarNoBanco({ nome: 'Bob' });
 
-      const res = await request(app).put(`/animais/${animal.id}`).send(extra);
+      const res = await api().put(`/animais/${animal.id}`).send(extra);
 
       assert.equal(res.status, 400);
       const gravado = await prisma.animal.findUnique({ where: { id: animal.id } });
@@ -127,7 +131,7 @@ describe('PUT /animais/:id', () => {
   }
 
   test('responde 404 para ID inexistente', async () => {
-    const res = await request(app).put('/animais/999999').send({ nome: 'Ninguém' });
+    const res = await api().put('/animais/999999').send({ nome: 'Ninguém' });
 
     assert.equal(res.status, 404);
   });
@@ -137,14 +141,14 @@ describe('DELETE /animais/:id', () => {
   test('remove o animal do banco', async () => {
     const animal = await criarNoBanco();
 
-    const res = await request(app).delete(`/animais/${animal.id}`);
+    const res = await api().delete(`/animais/${animal.id}`);
 
     assert.equal(res.status, 200);
     assert.equal(await prisma.animal.findUnique({ where: { id: animal.id } }), null);
   });
 
   test('responde 404 para ID inexistente', async () => {
-    const res = await request(app).delete('/animais/999999');
+    const res = await api().delete('/animais/999999');
 
     assert.equal(res.status, 404);
   });

@@ -24,8 +24,15 @@ app.use("/colaboradores", colaboradoresRoutes);
 app.use("/voluntarios", voluntariosRoutes);
 app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') return res.status(413).json({ erro: 'A foto deve ter no máximo 5 MiB.' });
+  // Erros do cliente (ex.: JSON malformado) mantêm o status e a mensagem;
+  // erros internos ficam só no log, sem expor detalhes ao cliente.
+  const status = err.status || err.statusCode;
+  if (status >= 400 && status < 500) {
+    const generica = status === 404 ? 'Não encontrado.' : 'Requisição inválida.';
+    return res.status(status).json({ erro: err.expose ? err.message : generica });
+  }
   console.error(err);
-  res.status(500).json({ erro: err.message });
+  res.status(500).json({ erro: 'Erro interno no servidor. Tente novamente.' });
 });
 
 module.exports = app;
