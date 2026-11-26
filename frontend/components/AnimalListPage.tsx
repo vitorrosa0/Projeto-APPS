@@ -40,6 +40,7 @@ const CAMPOS_FILTRO: { campo: keyof FiltrosAnimais; rotulo: string; todos: strin
   { campo: "setor", rotulo: "Setor", todos: "Todos os setores" },
   { campo: "sexo", rotulo: "Sexo", todos: "Todos" },
   { campo: "vacinacao", rotulo: "Vacinação", todos: "Todas" },
+  { campo: "status", rotulo: "Situação", todos: "Todas" },
 ];
 
 const ORDENS: { valor: OrdemAnimais; rotulo: string }[] = [
@@ -181,7 +182,7 @@ export default function AnimalListPage({
         </div>
 
         {/* Filtros e ordenação */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {CAMPOS_FILTRO.map(({ campo, rotulo, todos }) => (
             <label key={campo} className="flex flex-col gap-1 text-xs font-semibold text-gray-600">
               {rotulo}
