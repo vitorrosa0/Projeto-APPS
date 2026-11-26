@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -34,6 +35,8 @@ export interface Animal {
   dataVacinacao?: string | null;
   foto?: string | null;
   outros?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface AnimalListPageProps {
@@ -108,6 +111,7 @@ export default function AnimalListPage({
         <div className="relative">
           <input
             type="search"
+            aria-label="Buscar animais por nome, raça, setor ou canil"
             placeholder="Digite um nome/setor/canil"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -142,7 +146,7 @@ export default function AnimalListPage({
                     <AnimalAvatar foto={animal.foto ?? undefined} nome={animal.nome} tipo={tipo} />
 
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-800 text-sm truncate">{animal.nome}</p>
+                      <Link href={`/animais/detalhes?id=${animal.id}`} className="font-bold text-gray-800 text-sm underline">{animal.nome}<span className="sr-only"> — Ver ficha</span></Link>
                       {descricao && <p className="text-xs text-gray-500">{descricao}</p>}
                       {localizacao && <p className="text-xs text-gray-400 mt-0.5">{localizacao}</p>}
                     </div>
@@ -202,7 +206,7 @@ export default function AnimalListPage({
       </main>
 
       {paraExcluir && (
-        <ConfirmModal
+        <ConfirmModal acessivel
           titulo="Excluir animal"
           mensagem={`Tem certeza que deseja excluir ${paraExcluir.nome}?`}
           labelConfirmar="Excluir"

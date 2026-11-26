@@ -50,7 +50,7 @@ export interface AnimalExportavel {
   outros?: string | null;
 }
 
-const TIPO_ANIMAL: Record<string, string> = { cao: "Cachorro", gato: "Gato" };
+const TIPO_ANIMAL: Record<string, string> = { cao: "Cão", gato: "Gato" };
 
 export function formatarData(valor: TextoOpcional): string {
   const texto = valor?.trim() ?? "";

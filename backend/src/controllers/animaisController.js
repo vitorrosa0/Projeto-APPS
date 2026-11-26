@@ -1,4 +1,6 @@
 const prisma = require("../prisma");
+const { validarAnimal } = require('../animalValidation');
+const { savePhoto, removePhoto } = require('../animalPhotos');
 
 async function listar(req, res, next) {
   try {
@@ -30,33 +32,31 @@ function extrairDados(body) {
   return data;
 }
 
-async function criar(req, res, next) {
-  try {
-    const { nome, tipo } = req.body;
-    if (!nome || !tipo) {
-      return res.status(400).json({ erro: "Nome e tipo são obrigatórios" });
-    }
-    if (!["cao", "gato"].includes(tipo)) {
-      return res.status(400).json({ erro: "Tipo deve ser 'cao' ou 'gato'" });
-    }
-    const animal = await prisma.animal.create({ data: extrairDados(req.body) });
-    res.status(201).json(animal);
-  } catch (e) { next(e); }
-}
-
-async function atualizar(req, res, next) {
+async function salvar(req, res, next, criarNovo) {
+  let novaFoto;
   try {
     const id = Number(req.params.id);
-    const existe = await prisma.animal.findUnique({ where: { id } });
-    if (!existe) return res.status(404).json({ erro: "Animal não encontrado" });
-    const { tipo } = req.body;
-    if (tipo && !["cao", "gato"].includes(tipo)) {
-      return res.status(400).json({ erro: "Tipo deve ser 'cao' ou 'gato'" });
+    const anterior = criarNovo ? null : await prisma.animal.findUnique({ where: { id } });
+    if (!criarNovo && !anterior) return res.status(404).json({ erro: 'Animal não encontrado' });
+    const data = extrairDados(req.body || {});
+    const erros = validarAnimal({ ...anterior, ...data });
+    if (Object.keys(erros).length) return res.status(400).json({ erro: Object.values(erros)[0], campos: erros });
+    data.nome = (data.nome ?? anterior.nome).trim();
+    if (data.foto !== undefined && data.foto !== null && data.foto !== anterior?.foto) {
+      novaFoto = await savePhoto(data.foto);
+      data.foto = novaFoto;
     }
-    const animal = await prisma.animal.update({ where: { id }, data: extrairDados(req.body) });
-    res.json(animal);
-  } catch (e) { next(e); }
+    const animal = criarNovo ? await prisma.animal.create({ data }) : await prisma.animal.update({ where: { id }, data });
+    if (anterior?.foto && anterior.foto !== animal.foto) await removePhoto(anterior.foto);
+    res.status(criarNovo ? 201 : 200).json(animal);
+  } catch (e) {
+    if (novaFoto) await removePhoto(novaFoto);
+    if (e.status) return res.status(e.status).json({ erro: e.message });
+    next(e);
+  }
 }
+const criar = (req, res, next) => salvar(req, res, next, true);
+const atualizar = (req, res, next) => salvar(req, res, next, false);
 
 async function remover(req, res, next) {
   try {
@@ -64,6 +64,7 @@ async function remover(req, res, next) {
     const existe = await prisma.animal.findUnique({ where: { id } });
     if (!existe) return res.status(404).json({ erro: "Animal não encontrado" });
     await prisma.animal.delete({ where: { id } });
+    await removePhoto(existe.foto);
     res.json({ mensagem: "Animal removido com sucesso" });
   } catch (e) { next(e); }
 }

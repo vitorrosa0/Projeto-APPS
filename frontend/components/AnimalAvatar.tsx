@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { API_URL } from "@/lib/api";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 
 interface AnimalAvatarProps {
@@ -11,8 +13,8 @@ export default function AnimalAvatar({ foto, nome, tipo }: AnimalAvatarProps) {
 
   if (foto) {
     return (
-      <img
-        src={foto}
+      <Image unoptimized width={56} height={56}
+        src={foto.startsWith("/animais/fotos/") ? `${API_URL}${foto}` : foto}
         alt={nome}
         className="w-14 h-14 rounded-full object-cover border-2 border-[#2DB38B] flex-shrink-0"
       />
