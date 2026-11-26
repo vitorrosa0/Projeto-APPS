@@ -98,6 +98,12 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
    http://localhost:3000
    ```
 
+5. Rode os testes (Vitest + Testing Library):
+   ```
+   npm test
+   ```
+   Use `npm run test:watch` para reexecutar os testes a cada alteração.
+
 ### Backend
 
 1. Acesse a pasta do backend:
@@ -168,7 +174,7 @@ Com Node 24 (ambiente usado na validação), sem instalar executor novo nem alte
 cd backend
 node --test tests/animais.test.cjs
 cd ../frontend
-node --test tests/animais.test.mjs
+npm run test
 npm run lint
 npx tsc --noEmit
 npm run build
@@ -192,3 +198,8 @@ O teste de navegador `frontend/scripts/verificar-animais.mjs` usa Playwright com
 - `npx tsc --noEmit`, `npm run build` e `git diff --check`: aprovados. Os dois `npm run dev` iniciaram normalmente.
 - Cinco migrations existentes aplicadas no banco local novo e Prisma Client gerado; nenhuma migration criada ou alterada.
 - O Node 24 emite aviso de detecção de módulo ao importar os utilitários TypeScript no teste; a execução passa. Nenhuma configuração geral foi alterada para suprimir o aviso.
+
+
+### Integração com ANI-14
+
+A suíte Vitest/Testing Library da ANI-14 foi integrada da branch do grupo. Os testes adicionais de validação e CSV usam agora esse executor; as expectativas de CSV acompanham o termo Cão da ANI-10, e a lista verifica também o texto acessível do link da ficha. Os registros anteriores descrevem a validação antes dessa integração.

@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { filtrarAnimais, gerarCsvAnimais, descricaoAnimal } from '../lib/animais.ts';
 import { validarFormulario } from '../lib/animalValidation.ts';
