@@ -98,6 +98,12 @@ Esta é a interface do projeto **SJPA**, uma aplicação voltada para a gestão 
    http://localhost:3000
    ```
 
+5. Rode os testes (Vitest + Testing Library):
+   ```
+   npm test
+   ```
+   Use `npm run test:watch` para reexecutar os testes a cada alteração.
+
 ### Backend
 
 1. Acesse a pasta do backend:
