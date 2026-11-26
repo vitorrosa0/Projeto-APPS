@@ -127,8 +127,8 @@ describe("AnimalForm com valores fora das opções", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
-    expect(await screen.findByText("Corrija os campos marcados.")).toBeDefined();
-    expect(screen.getByText("Use no máximo 100 caracteres.").id).toBe("raca-error");
+    const mensagens = await screen.findAllByText("Use no máximo 100 caracteres.");
+    expect(mensagens.map((m) => m.id)).toEqual(["", "raca-error"]);
     expect(screen.getByLabelText("Raça").getAttribute("aria-describedby")).toBe("raca-error");
   });
 });

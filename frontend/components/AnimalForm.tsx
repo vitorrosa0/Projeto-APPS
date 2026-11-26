@@ -135,12 +135,9 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
       showToast();
     } catch (err) {
       // Erros de campo vindos do backend aparecem junto ao campo, como os do formulário.
-      if (err instanceof ApiError && Object.keys(err.campos).length) {
-        setErrors(err.campos);
-        setError('Corrija os campos marcados.');
-      } else {
-        setError(err instanceof Error ? err.message : "Erro ao salvar o animal.");
-      }
+      // O topo mantém a mensagem da API, que também cobre campos sem área de erro (ex.: foto).
+      if (err instanceof ApiError && Object.keys(err.campos).length) setErrors(err.campos);
+      setError(err instanceof Error ? err.message : "Erro ao salvar o animal.");
     } finally {
       setLoading(false);
     }
