@@ -28,9 +28,11 @@ export interface FiltrosAnimais {
   setor: string;
   sexo: string;
   vacinacao: string;
+  /** Situação calculada pelo histórico de entradas e saídas (ANI-11). */
+  status: string;
 }
 
-export const FILTROS_VAZIOS: FiltrosAnimais = { setor: "", sexo: "", vacinacao: "" };
+export const FILTROS_VAZIOS: FiltrosAnimais = { setor: "", sexo: "", vacinacao: "", status: "" };
 
 type CampoFiltro = keyof FiltrosAnimais;
 type AnimalFiltravel = { [campo in CampoFiltro]?: string | null };

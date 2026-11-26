@@ -164,6 +164,24 @@ describe("AnimalListPage com filtros e ordenação", () => {
     expect(nomesNaLista()).toEqual(["Luna", "Max", "Nina"]);
   });
 
+  it("filtra pela situação calculada pelo histórico", async () => {
+    apiMock.mockResolvedValue([
+      { ...luna, status: "No abrigo" },
+      { ...max, status: "Adotado" },
+      { ...nina, status: "Adotado" },
+    ]);
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Luna");
+
+    const situacao = screen.getByRole("combobox", { name: "Situação" });
+    expect([...(situacao as HTMLSelectElement).options].map((o) => o.text)).toEqual(["Todas", "Adotado", "No abrigo"]);
+    await usuario.selectOptions(situacao, "Adotado");
+    await usuario.selectOptions(screen.getByRole("combobox", { name: "Sexo" }), "Feminino");
+
+    expect(nomesNaLista()).toEqual(["Nina"]);
+  });
+
   it("ordena pelo cadastro mais recente", async () => {
     apiMock.mockResolvedValue([luna, max, nina]);
     const usuario = userEvent.setup();
