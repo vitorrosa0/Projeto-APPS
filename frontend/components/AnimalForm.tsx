@@ -11,11 +11,11 @@ import SelectGroup from "@/components/SelectGroup";
 import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import Toast from "@/components/Toast";
-import { api, API_URL } from "@/lib/api";
+import { api, API_URL, ApiError } from "@/lib/api";
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Animal } from './AnimalListPage';
-import { validarFormulario } from '@/lib/animalValidation';
+import { validarFormulario, LIMITES_TEXTO } from '@/lib/animalValidation';
 
 // O backend espera tipo "cao" | "gato"; o formulário usa rótulos amigáveis.
 const TIPO_MAP: Record<string, string> = { Cão: "cao", Gato: "gato" };
@@ -125,6 +125,8 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
       }
       showToast();
     } catch (err) {
+      // Erros de campo vindos do backend aparecem junto ao campo, como os do formulário.
+      if (err instanceof ApiError && Object.keys(err.campos).length) setErrors(err.campos);
       setError(err instanceof Error ? err.message : "Erro ao salvar o animal.");
     } finally {
       setLoading(false);
@@ -175,12 +177,12 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
         <form onSubmit={handleSubmit} noValidate className="space-y-4 bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
           <fieldset disabled={loading || saved} className="space-y-4">
 
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Nome do animal"      aria-invalid={!!errors.nome} aria-describedby={errors.nome ? "nome-error" : undefined} required name="nome"          placeholder="Ex: Robson"        value={formData.nome}          onChange={handleChange} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Nome do animal"      aria-invalid={!!errors.nome} aria-describedby={errors.nome ? "nome-error" : undefined} required name="nome" maxLength={LIMITES_TEXTO.nome}          placeholder="Ex: Robson"        value={formData.nome}          onChange={handleChange} />
           {errors.nome && <p id="nome-error" role="alert" className="text-red-700 text-sm">{errors.nome}</p>}
           <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Tipo do animal"     aria-invalid={!!errors.tipo} aria-describedby={errors.tipo ? "tipo-error" : undefined} required name="tipo"          options={["Cão", "Gato"]}  value={formData.tipo}          onChange={handleChange} />
           {errors.tipo && <p id="tipo-error" role="alert" className="text-red-700 text-sm">{errors.tipo}</p>}
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Raça" name="raca" value={formData.raca} onChange={handleChange} placeholder="Ex: Sem raça definida" />
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Idade (aproximada)"  name="idade"         placeholder="Ex: 3 anos"        value={formData.idade}         onChange={handleChange} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Raça" name="raca" maxLength={LIMITES_TEXTO.raca} value={formData.raca} onChange={handleChange} placeholder="Ex: Sem raça definida" />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Idade (aproximada)"  name="idade" maxLength={LIMITES_TEXTO.idade}         placeholder="Ex: 3 anos"        value={formData.idade}         onChange={handleChange} />
           <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Sexo"               name="sexo"          options={["Masculino", "Feminino"]} value={formData.sexo}      onChange={handleChange} />
 
           <div className="grid grid-cols-2 gap-3">
@@ -188,8 +190,8 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
             <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Canil" name="canil" options={canilOptions}  value={formData.canil} onChange={handleChange} disabled={!formData.setor} />
           </div>
 
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Coloração do pelo"  name="cor"           placeholder="Ex: Marrom"        value={formData.cor}           onChange={handleChange} />
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Temperamento"        name="temperamento"  placeholder="Ex: Dócil"         value={formData.temperamento}  onChange={handleChange} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Coloração do pelo"  name="cor" maxLength={LIMITES_TEXTO.cor}           placeholder="Ex: Marrom"        value={formData.cor}           onChange={handleChange} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Temperamento"        name="temperamento" maxLength={LIMITES_TEXTO.temperamento}  placeholder="Ex: Dócil"         value={formData.temperamento}  onChange={handleChange} />
           <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Vacinação"          name="vacinacao"     options={["Completa", "Incompleta", "Não vacinado"]} value={formData.vacinacao} onChange={handleChange} />
           <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Data de vacinação"   aria-invalid={!!errors.dataVacinacao} aria-describedby={errors.dataVacinacao ? "data-error" : undefined} max={new Date().toLocaleDateString("sv-SE")} name="dataVacinacao" type="date"                     value={formData.dataVacinacao} onChange={handleChange} />
 
@@ -197,7 +199,7 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
           <div className="flex flex-col gap-1">
             <label htmlFor="outros" className="text-sm font-semibold ml-2 text-gray-800">Outros:</label>
             <textarea
-              id="outros" name="outros"
+              id="outros" name="outros" maxLength={LIMITES_TEXTO.outros}
               rows={3}
               placeholder="Ex: Precisa de medicação, vacina x em falta etc."
               value={formData.outros}
