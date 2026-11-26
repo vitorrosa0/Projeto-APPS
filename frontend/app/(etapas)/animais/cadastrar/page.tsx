@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MdAdd, MdCheckCircle } from "react-icons/md";
+import { MdAdd, MdErrorOutline } from "react-icons/md";
 import { PiDogFill, PiCatFill } from "react-icons/pi";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -10,6 +10,7 @@ import InputGroup from "@/components/InputGroup";
 import SelectGroup from "@/components/SelectGroup";
 import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
+import Toast, { useToast } from "@/components/Toast";
 import { api } from "@/lib/api";
 
 // O backend espera tipo "cao" | "gato"; o formulário usa rótulos amigáveis.
@@ -54,11 +55,15 @@ export default function CadastroPet() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>(FORM_INITIAL);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [animalCarregado, setAnimalCarregado] = useState(false);
+  const [erroCarregamento, setErroCarregamento] = useState(false);
   const [backHref, setBackHref] = useState("/animais");
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { toast, mostrarToast } = useToast();
+
+  const carregandoAnimal = editId !== null && !animalCarregado;
+  const formularioBloqueado = carregandoAnimal || (editId !== null && erroCarregamento);
 
   const listaHref = (tipo: string | null | undefined) =>
     tipo === "cao" ? "/animais/caes" : tipo === "gato" ? "/animais/gatos" : "/animais";
@@ -97,10 +102,8 @@ export default function CadastroPet() {
         });
         if (animal.foto) setPhotoPreview(animal.foto);
       })
-      .catch((err) => {
-        console.error("Erro ao carregar animal:", err);
-        alert("Não foi possível carregar os dados do animal.");
-      });
+      .catch(() => setErroCarregamento(true))
+      .finally(() => setAnimalCarregado(true));
   }, []);
 
   const handleChange = (
@@ -118,12 +121,6 @@ export default function CadastroPet() {
     setPhotoPreview(URL.createObjectURL(file));
   };
 
-  const showToast = () => {
-    setSaved(true);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setSaved(false), 3500);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -137,10 +134,13 @@ export default function CadastroPet() {
         setFormData(FORM_INITIAL);
         setPhotoPreview(null);
       }
-      showToast();
+      mostrarToast(editId ? "Pet atualizado com sucesso!" : "Pet cadastrado com sucesso!");
     } catch (err) {
-      console.error("Erro ao salvar:", err);
-      alert(err instanceof Error ? err.message : "Erro ao salvar o animal.");
+      const mensagem =
+        err instanceof Error && !(err instanceof TypeError)
+          ? err.message
+          : "Não foi possível salvar. Verifique a conexão e tente de novo.";
+      mostrarToast(mensagem, "erro");
     } finally {
       setLoading(false);
     }
@@ -151,16 +151,7 @@ export default function CadastroPet() {
 
       <Header showBack onBack={() => router.push(backHref)} />
 
-      {/* Toast de sucesso */}
-      <div
-        aria-live="polite"
-        className={`fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[#2DB38B] text-white px-6 py-3 rounded-full shadow-lg text-sm font-semibold transition-all duration-300 ${
-          saved ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
-        }`}
-      >
-        <MdCheckCircle size={20} />
-        {editId ? "Pet atualizado com sucesso!" : "Pet cadastrado com sucesso!"}
-      </div>
+      <Toast {...toast} />
 
       <PawBackground />
 
@@ -189,8 +180,23 @@ export default function CadastroPet() {
           </label>
         </div>
 
+        {carregandoAnimal && (
+          <div role="status" className="flex items-center justify-center gap-2 mb-6 text-sm text-gray-600">
+            <span className="w-4 h-4 rounded-full border-2 border-[#2DB38B] border-t-transparent animate-spin" />
+            Carregando dados do pet…
+          </div>
+        )}
+
+        {editId !== null && erroCarregamento && (
+          <div role="alert" className="flex items-center gap-2 mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <MdErrorOutline size={20} className="flex-shrink-0" />
+            Não foi possível carregar os dados do animal. Volte à lista e tente de novo.
+          </div>
+        )}
+
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} aria-busy={carregandoAnimal}>
+        <fieldset disabled={formularioBloqueado} className="space-y-4 min-w-0">
 
           <InputGroup label="Nome do animal"      name="nome"          placeholder="Ex: Robson"        value={formData.nome}          onChange={handleChange} />
           <SelectGroup label="Tipo do animal"     name="tipo"          options={["Cachorro", "Gato"]}  value={formData.tipo}          onChange={handleChange} />
@@ -229,6 +235,7 @@ export default function CadastroPet() {
             </button>
           </div>
 
+        </fieldset>
         </form>
       </main>
 
