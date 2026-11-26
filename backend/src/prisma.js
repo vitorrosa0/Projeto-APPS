@@ -15,7 +15,10 @@ const { PrismaClient } = require("@prisma/client");
 // [SQLITE] - Remover ao migrar para PostgreSQL
 const { PrismaBetterSqlite3 } = require("@prisma/adapter-better-sqlite3");
 const path = require("path");
-const dbPath = path.resolve(__dirname, "../dev.db");
+// SQLITE_PATH permite apontar para outro arquivo (os testes usam um banco temporário).
+const dbPath = process.env.SQLITE_PATH
+  ? path.resolve(process.env.SQLITE_PATH)
+  : path.resolve(__dirname, "../dev.db");
 const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
 const prisma = new PrismaClient({ adapter });
 // [/SQLITE]

@@ -1,16 +1,16 @@
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const express = require('express');
-const prisma = require('../src/prisma');
-const { decodePhoto } = require('../src/animalPhotos');
-const { validarAnimal } = require('../src/animalValidation');
+const prisma = require('../../src/prisma');
+const { decodePhoto } = require('../../src/animalPhotos');
+const { validarAnimal } = require('../../src/animalValidation');
 let server, base;
 const ids = new Set();
 const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a0YQAAAAASUVORK5CYII=';
 before(async () => {
   const app = express();
   app.use(express.json({ limit: '8mb' }));
-  app.use('/animais', require('../src/routes/animais'));
+  app.use('/animais', require('../../src/routes/animais'));
   app.use((err, req, res, next) => res.status(err.status || 500).json({ erro: err.message }));
   server = await new Promise(resolve => { const s = app.listen(0, '127.0.0.1', () => resolve(s)); });
   base = 'http://127.0.0.1:' + server.address().port;
@@ -71,7 +71,7 @@ test('rejeita MIME falso e SVG; aceita assinaturas JPEG, PNG e WebP', () => {
 
 test('falha ao atualizar o banco preserva foto anterior e limpa o novo arquivo', async () => {
   const fs = require('node:fs/promises');
-  const { directory } = require('../src/animalPhotos');
+  const { directory } = require('../../src/animalPhotos');
   const created = await create({nome:'Teste ANI rollback',tipo:'cao',foto:png});
   assert.equal(created.status,201);
   const before = (await fs.readdir(directory)).sort();

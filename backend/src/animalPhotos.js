@@ -1,7 +1,10 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const directory = path.resolve(__dirname, '../uploads/animais');
+// UPLOADS_DIR permite guardar as fotos em outra pasta (os testes usam uma pasta temporária).
+const directory = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR, 'animais')
+  : path.resolve(__dirname, '../uploads/animais');
 const MAX_BYTES = 5 * 1024 * 1024;
 function invalid(message, status = 400) { return Object.assign(new Error(message), { status }); }
 function decodePhoto(value) {
