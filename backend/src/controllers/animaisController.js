@@ -1,21 +1,31 @@
 const prisma = require("../prisma");
 const { validarAnimal } = require('../animalValidation');
 const { savePhoto, removePhoto } = require('../animalPhotos');
+const { statusAtual } = require('../movimentacoes');
+
+// Inclui só a movimentação mais recente, usada para calcular o status.
+const COM_ULTIMA_MOVIMENTACAO = {
+  movimentacoes: { orderBy: [{ data: 'desc' }, { id: 'desc' }], take: 1 },
+};
+
+function comStatus({ movimentacoes, ...animal }) {
+  return { ...animal, status: statusAtual(movimentacoes[0]) };
+}
 
 async function listar(req, res, next) {
   try {
     const { tipo } = req.query;
     const where = tipo ? { tipo } : {};
-    const animais = await prisma.animal.findMany({ where, orderBy: { nome: "asc" } });
-    res.json(animais);
+    const animais = await prisma.animal.findMany({ where, orderBy: { nome: "asc" }, include: COM_ULTIMA_MOVIMENTACAO });
+    res.json(animais.map(comStatus));
   } catch (e) { next(e); }
 }
 
 async function buscarPorId(req, res, next) {
   try {
-    const animal = await prisma.animal.findUnique({ where: { id: Number(req.params.id) } });
+    const animal = await prisma.animal.findUnique({ where: { id: Number(req.params.id) }, include: COM_ULTIMA_MOVIMENTACAO });
     if (!animal) return res.status(404).json({ erro: "Animal não encontrado" });
-    res.json(animal);
+    res.json(comStatus(animal));
   } catch (e) { next(e); }
 }
 
@@ -63,6 +73,9 @@ async function remover(req, res, next) {
     const id = Number(req.params.id);
     const existe = await prisma.animal.findUnique({ where: { id } });
     if (!existe) return res.status(404).json({ erro: "Animal não encontrado" });
+    if (await prisma.movimentacao.count({ where: { animalId: id } })) {
+      return res.status(409).json({ erro: "Este animal tem histórico de entradas e saídas e não pode ser excluído. Registre uma saída." });
+    }
     await prisma.animal.delete({ where: { id } });
     await removePhoto(existe.foto);
     res.json({ mensagem: "Animal removido com sucesso" });

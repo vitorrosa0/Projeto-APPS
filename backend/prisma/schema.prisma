@@ -51,8 +51,26 @@ model Animal {
   dataVacinacao String?
   foto          String?
   outros        String?
+  movimentacoes Movimentacao[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+// Entradas e saídas do animal no abrigo (ANI-11). O status atual do animal
+// é calculado pela última movimentação. onDelete: Restrict impede apagar
+// um animal que já tem histórico.
+model Movimentacao {
+  id         Int      @id @default(autoincrement())
+  animalId   Int
+  animal     Animal   @relation(fields: [animalId], references: [id], onDelete: Restrict)
+  tipo       String // "entrada" | "saida"
+  motivo     String
+  data       String // AAAA-MM-DD
+  observacao String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([animalId, data])
 }
 
 model Colaborador {

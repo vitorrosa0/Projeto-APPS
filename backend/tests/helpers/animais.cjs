@@ -10,7 +10,13 @@ function criarNoBanco(extra = {}) {
 }
 
 async function limparAnimais() {
+  // Movimentações primeiro: a relação impede apagar animais com histórico.
+  await prisma.movimentacao.deleteMany();
   await prisma.animal.deleteMany();
 }
 
-module.exports = { prisma, dadosAnimal, criarNoBanco, limparAnimais };
+function registrarNoBanco(animalId, extra = {}) {
+  return prisma.movimentacao.create({ data: { animalId, tipo: 'entrada', motivo: 'Resgate', data: '2026-01-10', ...extra } });
+}
+
+module.exports = { prisma, dadosAnimal, criarNoBanco, limparAnimais, registrarNoBanco };
