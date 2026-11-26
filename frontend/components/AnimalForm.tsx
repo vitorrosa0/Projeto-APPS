@@ -212,7 +212,7 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
             <button
               type="submit"
               disabled={loading}
-              className="bg-[#2DB38B] text-white px-8 py-2 rounded-full font-bold text-lg border-2 border-black hover:bg-[#25967A] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="bg-[#2DB38B] text-white px-8 py-2 rounded-full font-bold text-lg hover:bg-[#25967A] active:scale-95 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? "Salvando…" : "Salvar"}
             </button>
