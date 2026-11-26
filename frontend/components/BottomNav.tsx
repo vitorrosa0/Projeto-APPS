@@ -12,7 +12,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: MdHome,          href: "/",            label: "Início" },
+  { icon: MdHome,          href: "/home",        label: "Início" },
   { icon: MdPets,          href: "/animais",     label: "Animais" },
   { icon: MdFavorite,      href: "/voluntarios", label: "Voluntários" },
   { icon: MdAccountCircle, href: "/perfil",      label: "Perfil" },
@@ -23,7 +23,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const isActive = (href: string): boolean =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+    pathname.startsWith(href);
 
   return (
     <>
