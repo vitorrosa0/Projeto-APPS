@@ -11,22 +11,23 @@ import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import AnimalAvatar from "@/components/AnimalAvatar";
 import ConfirmModal from "@/components/ConfirmModal";
+import { filtrarAnimais, descricaoAnimal, localizacaoAnimal } from "@/lib/animais";
 
 export interface Animal {
   id: number;
   nome: string;
-  tipo?: string;
-  raca?: string;
-  idade?: string;
-  sexo?: string;
-  setor?: string;
-  canil?: string;
-  cor?: string;
-  temperamento?: string;
-  vacinacao?: string;
-  dataVacinacao?: string;
-  foto?: string;
-  outros?: string;
+  tipo?: string | null;
+  raca?: string | null;
+  idade?: string | null;
+  sexo?: string | null;
+  setor?: string | null;
+  canil?: string | null;
+  cor?: string | null;
+  temperamento?: string | null;
+  vacinacao?: string | null;
+  dataVacinacao?: string | null;
+  foto?: string | null;
+  outros?: string | null;
 }
 
 interface AnimalListPageProps {
@@ -50,7 +51,6 @@ export default function AnimalListPage({
 
   useEffect(() => {
     let ativo = true;
-    setCarregando(true);
     api<Animal[]>(`/animais?tipo=${tipo}`)
       .then((dados) => { if (ativo) setAnimais(dados); })
       .catch((err) => console.error("Erro ao carregar animais:", err))
@@ -58,17 +58,7 @@ export default function AnimalListPage({
     return () => { ativo = false; };
   }, [tipo]);
 
-  const animaisFiltrados = useMemo(() => {
-    const termo = busca.toLowerCase().trim();
-    if (!termo) return animais;
-    return animais.filter(
-      (a) =>
-        a.nome.toLowerCase().includes(termo) ||
-        a.raca.toLowerCase().includes(termo) ||
-        a.setor.toLowerCase().includes(termo) ||
-        a.canil.toLowerCase().includes(termo)
-    );
-  }, [animais, busca]);
+  const animaisFiltrados = useMemo(() => filtrarAnimais(animais, busca), [animais, busca]);
 
   const handleEditar = (animal: Animal) => {
     router.push(`${editarBase}?id=${animal.id}`);
@@ -147,38 +137,40 @@ export default function AnimalListPage({
             </div>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {animaisFiltrados.map((animal) => (
-                <li key={animal.id} className="flex items-center gap-3 px-4 py-3">
+              {animaisFiltrados.map((animal) => {
+                const descricao = descricaoAnimal(animal);
+                const localizacao = localizacaoAnimal(animal);
+                return (
+                  <li key={animal.id} className="flex items-center gap-3 px-4 py-3">
 
-                  <AnimalAvatar foto={animal.foto} nome={animal.nome} tipo={tipo} />
+                    <AnimalAvatar foto={animal.foto ?? undefined} nome={animal.nome} tipo={tipo} />
 
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-gray-800 text-sm truncate">{animal.nome}</p>
-                    <p className="text-xs text-gray-500">{animal.idade} · {animal.raca}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      Setor {animal.setor} &nbsp;·&nbsp; {animal.canil}
-                    </p>
-                  </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-800 text-sm truncate">{animal.nome}</p>
+                      {descricao && <p className="text-xs text-gray-500">{descricao}</p>}
+                      {localizacao && <p className="text-xs text-gray-400 mt-0.5">{localizacao}</p>}
+                    </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => handleEditar(animal)}
-                      aria-label={`Editar ${animal.nome}`}
-                      className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-[#25967A] active:scale-95 transition-all cursor-pointer"
-                    >
-                      <MdEdit size={18} />
-                    </button>
-                    <button
-                      onClick={() => setParaExcluir(animal)}
-                      aria-label={`Excluir ${animal.nome}`}
-                      className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-red-500 active:scale-95 transition-all cursor-pointer"
-                    >
-                      <MdDelete size={18} />
-                    </button>
-                  </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleEditar(animal)}
+                        aria-label={`Editar ${animal.nome}`}
+                        className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-[#25967A] active:scale-95 transition-all cursor-pointer"
+                      >
+                        <MdEdit size={18} />
+                      </button>
+                      <button
+                        onClick={() => setParaExcluir(animal)}
+                        aria-label={`Excluir ${animal.nome}`}
+                        className="w-9 h-9 rounded-full bg-[#2DB38B] flex items-center justify-center text-white hover:bg-red-500 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <MdDelete size={18} />
+                      </button>
+                    </div>
 
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
