@@ -23,11 +23,32 @@ import ConfirmModal from "@/components/ConfirmModal";
 import Toast, { useToast } from "@/components/Toast";
 import {
   filtrarAnimais,
+  aplicarFiltros,
+  ordenarAnimais,
+  opcoesDoCampo,
+  FILTROS_VAZIOS,
   descricaoAnimal,
   localizacaoAnimal,
   gerarCsvAnimais,
   nomeArquivoCsv,
+  type FiltrosAnimais,
+  type OrdemAnimais,
 } from "@/lib/animais";
+
+const CAMPOS_FILTRO: { campo: keyof FiltrosAnimais; rotulo: string; todos: string }[] = [
+  { campo: "setor", rotulo: "Setor", todos: "Todos os setores" },
+  { campo: "sexo", rotulo: "Sexo", todos: "Todos" },
+  { campo: "vacinacao", rotulo: "Vacinação", todos: "Todas" },
+];
+
+const ORDENS: { valor: OrdemAnimais; rotulo: string }[] = [
+  { valor: "nome", rotulo: "Nome (A–Z)" },
+  { valor: "recentes", rotulo: "Cadastro mais recente" },
+  { valor: "antigos", rotulo: "Cadastro mais antigo" },
+];
+
+const ESTILO_SELECT =
+  "w-full h-10 bg-white border-2 border-gray-300 rounded-full px-3 text-sm text-gray-800 outline-none focus:border-[#2DB38B] transition-colors";
 
 export interface Animal {
   id: number;
@@ -65,6 +86,8 @@ export default function AnimalListPage({
   const [erroCarregamento, setErroCarregamento] = useState(false);
   const [tentativa, setTentativa] = useState(0);
   const [busca, setBusca] = useState("");
+  const [filtros, setFiltros] = useState<FiltrosAnimais>(FILTROS_VAZIOS);
+  const [ordem, setOrdem] = useState<OrdemAnimais>("nome");
   const [paraExcluir, setParaExcluir] = useState<Animal | null>(null);
   const { toast, mostrarToast } = useToast();
 
@@ -89,7 +112,16 @@ export default function AnimalListPage({
     setTentativa((n) => n + 1);
   };
 
-  const animaisFiltrados = useMemo(() => filtrarAnimais(animais, busca), [animais, busca]);
+  const animaisFiltrados = useMemo(
+    () => ordenarAnimais(filtrarAnimais(aplicarFiltros(animais, filtros), busca), ordem),
+    [animais, filtros, busca, ordem]
+  );
+
+  const filtrosAtivos = Object.values(filtros).some((valor) => valor !== "");
+
+  const alterarFiltro = (campo: keyof FiltrosAnimais, valor: string) => {
+    setFiltros((atuais) => ({ ...atuais, [campo]: valor }));
+  };
 
   const handleEditar = (animal: Animal) => {
     router.push(`${editarBase}?id=${animal.id}`);
@@ -133,8 +165,8 @@ export default function AnimalListPage({
         <div className="relative">
           <input
             type="search"
-            aria-label="Buscar animais por nome, raça, setor ou canil"
-            placeholder="Digite um nome/setor/canil"
+            aria-label="Buscar animais por nome, raça, setor, canil, cor ou temperamento"
+            placeholder="Buscar por nome, raça, setor, canil, cor…"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             className="w-full h-11 bg-white border-2 border-gray-300 rounded-full pl-4 pr-11 text-sm text-gray-800 outline-none focus:border-[#2DB38B] transition-colors placeholder:text-gray-400"
@@ -144,6 +176,47 @@ export default function AnimalListPage({
             className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
           />
         </div>
+
+        {/* Filtros e ordenação */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {CAMPOS_FILTRO.map(({ campo, rotulo, todos }) => (
+            <label key={campo} className="flex flex-col gap-1 text-xs font-semibold text-gray-600">
+              {rotulo}
+              <select
+                value={filtros[campo]}
+                onChange={(e) => alterarFiltro(campo, e.target.value)}
+                className={ESTILO_SELECT}
+              >
+                <option value="">{todos}</option>
+                {opcoesDoCampo(animais, campo).map((opcao) => (
+                  <option key={opcao} value={opcao}>{opcao}</option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <label className="flex flex-col gap-1 text-xs font-semibold text-gray-600">
+            Ordenar por
+            <select
+              value={ordem}
+              onChange={(e) => setOrdem(e.target.value as OrdemAnimais)}
+              className={ESTILO_SELECT}
+            >
+              {ORDENS.map(({ valor, rotulo }) => (
+                <option key={valor} value={valor}>{rotulo}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {filtrosAtivos && (
+          <button
+            type="button"
+            onClick={() => setFiltros(FILTROS_VAZIOS)}
+            className="self-start text-sm font-semibold text-[#2DB38B] underline cursor-pointer"
+          >
+            Limpar filtros
+          </button>
+        )}
 
         {/* Lista */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
