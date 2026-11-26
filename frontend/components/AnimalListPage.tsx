@@ -51,7 +51,6 @@ export default function AnimalListPage({
 
   useEffect(() => {
     let ativo = true;
-    setCarregando(true);
     api<Animal[]>(`/animais?tipo=${tipo}`)
       .then((dados) => { if (ativo) setAnimais(dados); })
       .catch((err) => console.error("Erro ao carregar animais:", err))
