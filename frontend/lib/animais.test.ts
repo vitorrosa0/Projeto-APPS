@@ -173,7 +173,7 @@ describe("gerarCsvAnimais", () => {
   it("exporta campos opcionais vazios como células vazias", () => {
     const csv = gerarCsvAnimais([criarAnimal({ id: 7, nome: "Bolinha", tipo: "cao" })]);
 
-    expect(linhasDoCsv(csv)[1]).toBe('"7";"Bolinha";"Cachorro";"";"";"";"";"";"";"";"";"";""');
+    expect(linhasDoCsv(csv)[1]).toBe('"7";"Bolinha";"Cão";"";"";"";"";"";"";"";"";"";""');
   });
 
   it("traduz o tipo e formata a data de vacinação", () => {
@@ -188,7 +188,7 @@ describe("gerarCsvAnimais", () => {
   it("mantém os acentos dos valores", () => {
     const csv = gerarCsvAnimais([criarAnimal({ nome: "João", raca: "Pastor Alemão", temperamento: "Dócil" })]);
 
-    expect(linhasDoCsv(csv)[1]).toContain('"João";"Cachorro";"Pastor Alemão"');
+    expect(linhasDoCsv(csv)[1]).toContain('"João";"Cão";"Pastor Alemão"');
     expect(linhasDoCsv(csv)[1]).toContain('"Dócil"');
   });
 

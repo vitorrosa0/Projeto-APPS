@@ -118,6 +118,6 @@ describe("AnimalListPage", () => {
     renderizarLista();
 
     const item = (await screen.findByText("Bolinha")).closest("li");
-    expect(item?.textContent).toBe("Bolinha");
+    expect(item?.textContent).toBe("Bolinha — Ver ficha");
   });
 });
