@@ -11,7 +11,13 @@ import PawBackground from "@/components/PawBackground";
 import PageTitle from "@/components/PageTitle";
 import AnimalAvatar from "@/components/AnimalAvatar";
 import ConfirmModal from "@/components/ConfirmModal";
-import { filtrarAnimais, descricaoAnimal, localizacaoAnimal } from "@/lib/animais";
+import {
+  filtrarAnimais,
+  descricaoAnimal,
+  localizacaoAnimal,
+  gerarCsvAnimais,
+  nomeArquivoCsv,
+} from "@/lib/animais";
 
 export interface Animal {
   id: number;
@@ -65,21 +71,11 @@ export default function AnimalListPage({
   };
 
   const exportarCSV = () => {
-    const colunas = ["ID", "Nome", "Raça", "Idade", "Sexo", "Setor", "Canil", "Cor", "Temperamento", "Vacinação", "Data Vacinação", "Outros"];
-    const campos: (keyof Animal)[] = ["id", "nome", "raca", "idade", "sexo", "setor", "canil", "cor", "temperamento", "vacinacao", "dataVacinacao", "outros"];
-
-    const linhas = [
-      colunas.join(","),
-      ...animaisFiltrados.map((a) =>
-        campos.map((c) => `"${String(a[c] ?? "").replace(/"/g, '""')}"`).join(",")
-      ),
-    ];
-
-    const blob = new Blob(["﻿" + linhas.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([gerarCsvAnimais(animaisFiltrados)], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${tipo === "cao" ? "caes" : "gatos"}.csv`;
+    link.download = nomeArquivoCsv(tipo);
     link.click();
     URL.revokeObjectURL(url);
   };
