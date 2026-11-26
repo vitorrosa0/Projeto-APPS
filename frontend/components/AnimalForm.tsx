@@ -15,25 +15,11 @@ import { api, API_URL, ApiError } from "@/lib/api";
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Animal } from './AnimalListPage';
-import { validarFormulario, LIMITES_TEXTO } from '@/lib/animalValidation';
+import { validarFormulario, validarOpcoes, LIMITES_TEXTO, SETORES, SEXOS, CANIS_POR_SETOR } from '@/lib/animalValidation';
 
 // O backend espera tipo "cao" | "gato"; o formulário usa rótulos amigáveis.
 const TIPO_MAP: Record<string, string> = { Cão: "cao", Gato: "gato" };
 const TIPO_LABEL: Record<string, string> = { cao: "Cão", gato: "Gato" };
-
-const SETORES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
-
-const CANAIS_POR_SETOR: Record<string, string[]> = {
-  A: ["5 Estrelas", "5 Estrelas / Canil 2", "5 Estrelas / Canil 1", "Baia 1", "Baia 2", "Baia 3", "Baia 4", "Baia 5", "Baia 6", "Baia 7", "Canil 1"],
-  B: ["5 Estrelas", "5 Estrelas / Canil 2", "5 Estrelas / Canil 1", "Baia 1", "Baia 2", "Baia 3", "Baia 4", "Baia 5", "Baia 6", "Baia 7"],
-  C: ["Baia 1", "Baia 2", "Baia 3", "Baia 4"],
-  D: ["Baia 1", "Baia 2", "Baia 3"],
-  E: ["Baia 1", "Baia 2"],
-  F: ["Baia 1", "Baia 2", "Baia 3"],
-  G: ["Baia 1", "Baia 2"],
-  H: ["Baia 1", "Baia 2"],
-  I: ["Baia 1"],
-};
 
 interface FormData {
   nome: string;
@@ -56,6 +42,14 @@ const FORM_INITIAL: FormData = {
   vacinacao: "", dataVacinacao: "", outros: "",
 };
 
+const CAMPOS_OPCOES = ['sexo', 'setor', 'canil'] as const;
+
+/** Erro de um campo, com o valor salvo quando ele não existe mais nas opções. */
+function ErroCampo({ id, erro, valorAntigo }: { id: string; erro?: string; valorAntigo?: string }) {
+  if (!erro) return null;
+  return <p id={id} role="alert" className="text-red-700 text-sm">{erro}{valorAntigo ? ` Valor salvo: "${valorAntigo}".` : ''}</p>;
+}
+
 interface AnimalFormProps { animal?: Animal; tipoInicial?: string; }
 export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps) {
   const router = useRouter();
@@ -74,8 +68,16 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [errors, setErrors] = useState<Record<string,string>>({});
-  const canilOptions = formData.setor ? (CANAIS_POR_SETOR[formData.setor] ?? []) : [];
+  // Cadastros anteriores ao ANI-04 podem ter sexo, setor ou canil fora das opções;
+  // nesse caso o formulário já abre apontando o campo e o valor salvo.
+  const [valoresAntigos] = useState<Record<string, string>>(() => {
+    if (!animal) return {};
+    const invalidos = validarOpcoes(animal);
+    return Object.fromEntries(CAMPOS_OPCOES.filter((campo) => invalidos[campo]).map((campo) => [campo, String(animal[campo])]));
+  });
+  const [errors, setErrors] = useState<Record<string,string>>(() => (animal ? validarOpcoes(animal) : {}));
+  const ariaErro = (campo: string) => ({ 'aria-invalid': !!errors[campo], 'aria-describedby': errors[campo] ? `${campo}-error` : undefined });
+  const canilOptions = formData.setor ? (CANIS_POR_SETOR[formData.setor] ?? []) : [];
   useEffect(() => () => { if (photoPreview?.startsWith('blob:')) URL.revokeObjectURL(photoPreview); }, [photoPreview]);
 
   const handleChange = (
@@ -83,6 +85,13 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
   ) => {
     const { name, value } = e.target;
     setSaved(false);
+    setErrors((atuais) => {
+      if (!atuais[name] && !(name === 'setor' && atuais.canil)) return atuais;
+      const restantes = { ...atuais };
+      delete restantes[name];
+      if (name === 'setor') delete restantes.canil;
+      return restantes;
+    });
     setFormData((prev) =>
       name === "setor" ? { ...prev, setor: value, canil: "" } : { ...prev, [name]: value }
     );
@@ -126,8 +135,12 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
       showToast();
     } catch (err) {
       // Erros de campo vindos do backend aparecem junto ao campo, como os do formulário.
-      if (err instanceof ApiError && Object.keys(err.campos).length) setErrors(err.campos);
-      setError(err instanceof Error ? err.message : "Erro ao salvar o animal.");
+      if (err instanceof ApiError && Object.keys(err.campos).length) {
+        setErrors(err.campos);
+        setError('Corrija os campos marcados.');
+      } else {
+        setError(err instanceof Error ? err.message : "Erro ao salvar o animal.");
+      }
     } finally {
       setLoading(false);
     }
@@ -153,6 +166,7 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
         </div>
 
         {saved && <div role="status" className="mb-4 rounded-xl bg-white p-4 text-gray-800">Animal salvo. <Link href={backHref} className="underline">Voltar à lista</Link> · <button type="button" className="underline" onClick={() => { if (editId) { router.push('/animais/cadastrar?tipo=' + (TIPO_MAP[formData.tipo] ?? '')); return; } setFormData({ ...FORM_INITIAL, tipo: formData.tipo }); setPhotoFile(null); setPhotoPreview(null); setPhotoRemoved(false); setSaved(false); }}>Cadastrar outro</button></div>}
+        {CAMPOS_OPCOES.some((campo) => valoresAntigos[campo] && formData[campo] === valoresAntigos[campo]) && <p role="status" className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900">Este cadastro tem valores que não existem mais nas opções do formulário. Escolha uma opção nos campos marcados antes de salvar.</p>}
         {error && <p role="alert" className="mb-4 text-red-700">{error}</p>}
         {/* Upload / Preview de foto */}
         <div className="flex justify-center mb-3">
@@ -181,18 +195,26 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
           {errors.nome && <p id="nome-error" role="alert" className="text-red-700 text-sm">{errors.nome}</p>}
           <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Tipo do animal"     aria-invalid={!!errors.tipo} aria-describedby={errors.tipo ? "tipo-error" : undefined} required name="tipo"          options={["Cão", "Gato"]}  value={formData.tipo}          onChange={handleChange} />
           {errors.tipo && <p id="tipo-error" role="alert" className="text-red-700 text-sm">{errors.tipo}</p>}
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Raça" name="raca" maxLength={LIMITES_TEXTO.raca} value={formData.raca} onChange={handleChange} placeholder="Ex: Sem raça definida" />
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Idade (aproximada)"  name="idade" maxLength={LIMITES_TEXTO.idade}         placeholder="Ex: 3 anos"        value={formData.idade}         onChange={handleChange} />
-          <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Sexo"               name="sexo"          options={["Masculino", "Feminino"]} value={formData.sexo}      onChange={handleChange} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Raça" name="raca" maxLength={LIMITES_TEXTO.raca} value={formData.raca} onChange={handleChange} placeholder="Ex: Sem raça definida" {...ariaErro('raca')} />
+          <ErroCampo id="raca-error" erro={errors.raca} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Idade (aproximada)"  name="idade" maxLength={LIMITES_TEXTO.idade}         placeholder="Ex: 3 anos"        value={formData.idade}         onChange={handleChange} {...ariaErro('idade')} />
+          <ErroCampo id="idade-error" erro={errors.idade} />
+          <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Sexo"               name="sexo"          options={SEXOS} value={formData.sexo}      onChange={handleChange} {...ariaErro('sexo')} />
+          <ErroCampo id="sexo-error" erro={errors.sexo} valorAntigo={valoresAntigos.sexo} />
 
           <div className="grid grid-cols-2 gap-3">
-            <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Setor" name="setor" options={SETORES}       value={formData.setor} onChange={handleChange} />
-            <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Canil" name="canil" options={canilOptions}  value={formData.canil} onChange={handleChange} disabled={!formData.setor} />
+            <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Setor" name="setor" options={SETORES}       value={formData.setor} onChange={handleChange} {...ariaErro('setor')} />
+            <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Canil" name="canil" options={canilOptions}  value={formData.canil} onChange={handleChange} disabled={!formData.setor} {...ariaErro('canil')} />
           </div>
+          <ErroCampo id="setor-error" erro={errors.setor} valorAntigo={valoresAntigos.setor} />
+          <ErroCampo id="canil-error" erro={errors.canil} valorAntigo={valoresAntigos.canil} />
 
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Coloração do pelo"  name="cor" maxLength={LIMITES_TEXTO.cor}           placeholder="Ex: Marrom"        value={formData.cor}           onChange={handleChange} />
-          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Temperamento"        name="temperamento" maxLength={LIMITES_TEXTO.temperamento}  placeholder="Ex: Dócil"         value={formData.temperamento}  onChange={handleChange} />
-          <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Vacinação"          name="vacinacao"     options={["Completa", "Incompleta", "Não vacinado"]} value={formData.vacinacao} onChange={handleChange} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Coloração do pelo"  name="cor" maxLength={LIMITES_TEXTO.cor}           placeholder="Ex: Marrom"        value={formData.cor}           onChange={handleChange} {...ariaErro('cor')} />
+          <ErroCampo id="cor-error" erro={errors.cor} />
+          <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Temperamento"        name="temperamento" maxLength={LIMITES_TEXTO.temperamento}  placeholder="Ex: Dócil"         value={formData.temperamento}  onChange={handleChange} {...ariaErro('temperamento')} />
+          <ErroCampo id="temperamento-error" erro={errors.temperamento} />
+          <SelectGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Vacinação"          name="vacinacao"     options={["Completa", "Incompleta", "Não vacinado"]} value={formData.vacinacao} onChange={handleChange} {...ariaErro('vacinacao')} />
+          <ErroCampo id="vacinacao-error" erro={errors.vacinacao} />
           <InputGroup className="w-full h-10 bg-white border-2 border-gray-300 rounded-full px-4 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors disabled:opacity-50" label="Data de vacinação"   aria-invalid={!!errors.dataVacinacao} aria-describedby={errors.dataVacinacao ? "data-error" : undefined} max={new Date().toLocaleDateString("sv-SE")} name="dataVacinacao" type="date"                     value={formData.dataVacinacao} onChange={handleChange} />
 
           {errors.dataVacinacao && <p id="data-error" role="alert" className="text-red-700 text-sm">{errors.dataVacinacao}</p>}
@@ -204,8 +226,10 @@ export default function AnimalForm({ animal, tipoInicial = '' }: AnimalFormProps
               placeholder="Ex: Precisa de medicação, vacina x em falta etc."
               value={formData.outros}
               onChange={handleChange}
+              {...ariaErro('outros')}
               className="w-full bg-white border-2 border-gray-300 rounded-2xl px-4 py-3 text-gray-800 outline-none placeholder:text-gray-400 focus:border-[#2DB38B] transition-colors resize-none"
             />
+            <ErroCampo id="outros-error" erro={errors.outros} />
           </div>
 
           <div className="flex justify-end pt-6">

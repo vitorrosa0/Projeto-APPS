@@ -7,6 +7,9 @@ interface SelectGroupProps extends React.SelectHTMLAttributes<HTMLSelectElement>
 }
 
 export default function SelectGroup({ label, name, options, value, onChange, ...rest }: SelectGroupProps) {
+  // Valor salvo que não está nas opções (ex.: cadastro antigo): aparece como
+  // opção desabilitada, em vez de o navegador mostrar a primeira da lista.
+  const valorForaDaLista = typeof value === "string" && value !== "" && !options.includes(value) ? value : null;
   return (
     <div className="flex flex-col gap-1 relative">
       <label htmlFor={name} className="text-sm font-semibold ml-2 text-gray-800">
@@ -24,6 +27,11 @@ export default function SelectGroup({ label, name, options, value, onChange, ...
           <option value="" disabled className="text-black/50">
             Selecione
           </option>
+          {valorForaDaLista && (
+            <option value={valorForaDaLista} disabled className="text-black/50">
+              {valorForaDaLista}
+            </option>
+          )}
           {options.map((opt) => (
             <option key={opt} value={opt} className="text-black bg-white">
               {opt}
