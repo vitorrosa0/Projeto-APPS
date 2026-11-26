@@ -5,17 +5,69 @@ export interface AnimalBuscavel {
   raca?: string | null;
   setor?: string | null;
   canil?: string | null;
+  cor?: string | null;
+  temperamento?: string | null;
+}
+
+export function normalizarTexto(texto: string): string {
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 }
 
 export function filtrarAnimais<T extends AnimalBuscavel>(animais: T[], busca: string): T[] {
-  const termo = busca.trim().toLowerCase();
+  const termo = normalizarTexto(busca);
   if (!termo) return animais;
 
   return animais.filter((animal) =>
-    [animal.nome, animal.raca, animal.setor, animal.canil].some(
-      (campo) => campo?.toLowerCase().includes(termo) ?? false
+    [animal.nome, animal.raca, animal.setor, animal.canil, animal.cor, animal.temperamento].some(
+      (campo) => (campo ? normalizarTexto(campo).includes(termo) : false)
     )
   );
+}
+
+export interface FiltrosAnimais {
+  setor: string;
+  sexo: string;
+  vacinacao: string;
+}
+
+export const FILTROS_VAZIOS: FiltrosAnimais = { setor: "", sexo: "", vacinacao: "" };
+
+type CampoFiltro = keyof FiltrosAnimais;
+type AnimalFiltravel = { [campo in CampoFiltro]?: string | null };
+
+export function aplicarFiltros<T extends AnimalFiltravel>(animais: T[], filtros: FiltrosAnimais): T[] {
+  const ativos = (Object.keys(filtros) as CampoFiltro[]).filter((campo) => filtros[campo] !== "");
+  if (ativos.length === 0) return animais;
+  return animais.filter((animal) => ativos.every((campo) => animal[campo] === filtros[campo]));
+}
+
+export function opcoesDoCampo(animais: AnimalFiltravel[], campo: CampoFiltro): string[] {
+  const valores = new Set<string>();
+  for (const animal of animais) {
+    const valor = animal[campo]?.trim();
+    if (valor) valores.add(valor);
+  }
+  return [...valores].sort((a, b) => a.localeCompare(b, "pt-BR"));
+}
+
+export type OrdemAnimais = "nome" | "recentes" | "antigos";
+
+export function ordenarAnimais<T extends { nome: string; createdAt?: string }>(
+  animais: T[],
+  ordem: OrdemAnimais
+): T[] {
+  const copia = [...animais];
+  if (ordem === "nome") {
+    return copia.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }));
+  }
+  const instante = (animal: T) => (animal.createdAt ? Date.parse(animal.createdAt) : Number.NaN);
+  return copia.sort((a, b) => {
+    const ta = instante(a);
+    const tb = instante(b);
+    if (Number.isNaN(ta)) return Number.isNaN(tb) ? 0 : 1;
+    if (Number.isNaN(tb)) return -1;
+    return ordem === "recentes" ? tb - ta : ta - tb;
+  });
 }
 
 export function juntarPreenchidos(partes: TextoOpcional[], separador = " · "): string {

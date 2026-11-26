@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AnimalListPage from "./AnimalListPage";
@@ -119,5 +119,78 @@ describe("AnimalListPage", () => {
 
     const item = (await screen.findByText("Bolinha")).closest("li");
     expect(item?.textContent).toBe("Bolinha — Ver ficha");
+  });
+});
+
+describe("AnimalListPage com filtros e ordenação", () => {
+  const luna = criarAnimal({ id: 10, nome: "Luna", setor: "A", sexo: "Feminino", cor: "Caramelo", createdAt: "2026-11-20T10:00:00.000Z" });
+  const max = criarAnimal({ id: 11, nome: "Max", setor: "A", sexo: "Masculino", cor: "Preto", createdAt: "2026-11-25T10:00:00.000Z" });
+  const nina = criarAnimal({ id: 12, nome: "Nina", setor: "B", sexo: "Feminino", cor: "Caramelo", createdAt: "2026-11-22T10:00:00.000Z" });
+
+  function nomesNaLista() {
+    return screen.getAllByRole("link", { name: /Ver ficha/ }).map((link) => link.textContent?.replace(" — Ver ficha", ""));
+  }
+
+  afterEach(() => {
+    Reflect.deleteProperty(URL, "createObjectURL");
+    Reflect.deleteProperty(URL, "revokeObjectURL");
+  });
+
+  it("combina o filtro de setor com a busca por cor", async () => {
+    apiMock.mockResolvedValue([luna, max, nina]);
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Luna");
+
+    await usuario.selectOptions(screen.getByRole("combobox", { name: "Setor" }), "A");
+    await usuario.type(screen.getByRole("searchbox"), "caramelo");
+
+    expect(nomesNaLista()).toEqual(["Luna"]);
+  });
+
+  it("oferece só os valores existentes e limpa os filtros", async () => {
+    apiMock.mockResolvedValue([luna, max, nina]);
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Luna");
+
+    const sexo = screen.getByRole("combobox", { name: "Sexo" });
+    expect([...(sexo as HTMLSelectElement).options].map((o) => o.text)).toEqual(["Todos", "Feminino", "Masculino"]);
+    await usuario.selectOptions(sexo, "Masculino");
+    expect(nomesNaLista()).toEqual(["Max"]);
+
+    await usuario.click(screen.getByRole("button", { name: "Limpar filtros" }));
+
+    expect(nomesNaLista()).toEqual(["Luna", "Max", "Nina"]);
+  });
+
+  it("ordena pelo cadastro mais recente", async () => {
+    apiMock.mockResolvedValue([luna, max, nina]);
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Luna");
+
+    await usuario.selectOptions(screen.getByRole("combobox", { name: "Ordenar por" }), "recentes");
+
+    expect(nomesNaLista()).toEqual(["Max", "Nina", "Luna"]);
+  });
+
+  it("exporta no CSV só os animais que passaram pelos filtros", async () => {
+    apiMock.mockResolvedValue([luna, max, nina]);
+    const criarUrl = vi.fn<(blob: Blob) => string>(() => "blob:teste");
+    Object.assign(URL, { createObjectURL: criarUrl, revokeObjectURL: vi.fn() });
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Luna");
+
+    await usuario.selectOptions(screen.getByRole("combobox", { name: "Sexo" }), "Feminino");
+    await usuario.click(screen.getByRole("button", { name: /CSV/ }));
+
+    const csv = await criarUrl.mock.calls[0][0].text();
+    const linhas = csv.replace("﻿", "").split("\r\n");
+    expect(linhas).toHaveLength(3);
+    expect(linhas[1]).toContain('"Luna"');
+    expect(linhas[2]).toContain('"Nina"');
   });
 });

@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  FILTROS_VAZIOS,
+  aplicarFiltros,
+  normalizarTexto,
+  opcoesDoCampo,
+  ordenarAnimais,
   contarPorTipo,
   descricaoAnimal,
   filtrarAnimais,
@@ -79,6 +84,104 @@ describe("filtrarAnimais", () => {
     const resultado = filtrarAnimais(animais, "zzz");
 
     expect(resultado).toEqual([]);
+  });
+});
+
+describe("normalizarTexto", () => {
+  it("remove acentos, espaços nas pontas e diferenças de maiúsculas", () => {
+    expect(normalizarTexto("  Cão PASTOR Alemão ")).toBe("cao pastor alemao");
+  });
+});
+
+describe("filtrarAnimais com busca ampliada", () => {
+  it("ignora acentos no termo e no valor do campo", () => {
+    const animal = criarAnimal({ raca: "Pastor Alemão" });
+
+    expect(filtrarAnimais([animal], "alemao")).toEqual([animal]);
+    expect(filtrarAnimais([criarAnimal({ raca: "Pastor Alemao" })], "ALEMÃO")).toHaveLength(1);
+  });
+
+  it.each([
+    ["cor", { cor: "Caramelo" }, "caramelo"],
+    ["temperamento", { temperamento: "Dócil" }, "docil"],
+  ])("encontra o animal pelo campo %s", (_campo, dados, busca) => {
+    const procurado = criarAnimal({ id: 1, ...dados });
+    const outro = criarAnimal({ id: 2, nome: "Mia" });
+
+    expect(filtrarAnimais([procurado, outro], busca)).toEqual([procurado]);
+  });
+});
+
+describe("aplicarFiltros", () => {
+  const rex = criarAnimal({ id: 1, setor: "A", sexo: "Masculino", vacinacao: "Completa" });
+  const mia = criarAnimal({ id: 2, nome: "Mia", setor: "B", sexo: "Feminino", vacinacao: "Completa" });
+  const bob = criarAnimal({ id: 3, nome: "Bob", setor: "A", sexo: "Masculino", vacinacao: "Incompleta" });
+
+  it("devolve todos quando nenhum filtro está ativo", () => {
+    expect(aplicarFiltros([rex, mia, bob], FILTROS_VAZIOS)).toEqual([rex, mia, bob]);
+  });
+
+  it.each([
+    ["setor", { setor: "A" }, [1, 3]],
+    ["sexo", { sexo: "Feminino" }, [2]],
+    ["vacinação", { vacinacao: "Incompleta" }, [3]],
+  ])("filtra por %s", (_nome, filtro, idsEsperados) => {
+    const resultado = aplicarFiltros([rex, mia, bob], { ...FILTROS_VAZIOS, ...filtro });
+
+    expect(resultado.map((a) => a.id)).toEqual(idsEsperados);
+  });
+
+  it("combina vários filtros", () => {
+    const resultado = aplicarFiltros([rex, mia, bob], { setor: "A", sexo: "Masculino", vacinacao: "Completa" });
+
+    expect(resultado).toEqual([rex]);
+  });
+
+  it("exclui animais com o campo vazio quando o filtro está ativo", () => {
+    const semSetor = criarAnimal({ id: 4, setor: null });
+
+    expect(aplicarFiltros([semSetor], { ...FILTROS_VAZIOS, setor: "A" })).toEqual([]);
+  });
+});
+
+describe("opcoesDoCampo", () => {
+  it("lista os valores preenchidos, sem repetir e em ordem alfabética", () => {
+    const animais = [
+      criarAnimal({ id: 1, setor: "C" }),
+      criarAnimal({ id: 2, setor: "A" }),
+      criarAnimal({ id: 3, setor: "C" }),
+      criarAnimal({ id: 4, setor: null }),
+      criarAnimal({ id: 5, setor: " " }),
+    ];
+
+    expect(opcoesDoCampo(animais, "setor")).toEqual(["A", "C"]);
+  });
+});
+
+describe("ordenarAnimais", () => {
+  const bia = criarAnimal({ id: 1, nome: "bia", createdAt: "2026-11-20T10:00:00.000Z" });
+  const ana = criarAnimal({ id: 2, nome: "Ána", createdAt: "2026-11-25T10:00:00.000Z" });
+  const caio = criarAnimal({ id: 3, nome: "Caio", createdAt: "2026-11-22T10:00:00.000Z" });
+  const semData = criarAnimal({ id: 4, nome: "Zeca" });
+
+  it("ordena por nome sem diferenciar acentos e maiúsculas", () => {
+    expect(ordenarAnimais([caio, bia, ana], "nome").map((a) => a.id)).toEqual([2, 1, 3]);
+  });
+
+  it("ordena do cadastro mais recente para o mais antigo, com os sem data no fim", () => {
+    expect(ordenarAnimais([semData, bia, ana, caio], "recentes").map((a) => a.id)).toEqual([2, 3, 1, 4]);
+  });
+
+  it("ordena do cadastro mais antigo para o mais recente, com os sem data no fim", () => {
+    expect(ordenarAnimais([semData, ana, bia, caio], "antigos").map((a) => a.id)).toEqual([1, 3, 2, 4]);
+  });
+
+  it("não altera a lista original", () => {
+    const lista = [caio, bia];
+
+    ordenarAnimais(lista, "nome");
+
+    expect(lista).toEqual([caio, bia]);
   });
 });
 
