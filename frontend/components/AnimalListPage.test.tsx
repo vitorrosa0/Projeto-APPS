@@ -70,6 +70,48 @@ describe("AnimalListPage", () => {
     expect(await screen.findByText("Nenhum animal encontrado.")).toBeDefined();
   });
 
+  it("mostra erro com opção de tentar de novo quando a API falha", async () => {
+    apiMock.mockRejectedValueOnce(new TypeError("Failed to fetch")).mockResolvedValueOnce([rex]);
+    const usuario = userEvent.setup();
+    renderizarLista();
+
+    expect(await screen.findByText("Não foi possível carregar os animais.")).toBeDefined();
+    expect(screen.queryByText("Nenhum animal encontrado.")).toBeNull();
+    await usuario.click(screen.getByRole("button", { name: "Tentar de novo" }));
+
+    expect(await screen.findByText("Rex")).toBeDefined();
+    expect(screen.queryByText("Não foi possível carregar os animais.")).toBeNull();
+  });
+
+  it("confirma na tela quando o animal é excluído", async () => {
+    apiMock.mockResolvedValueOnce([rex, bolinha]).mockResolvedValueOnce(undefined);
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Rex");
+
+    await usuario.click(screen.getByRole("button", { name: "Excluir Rex" }));
+    await usuario.click(screen.getByRole("button", { name: "Excluir" }));
+
+    expect(await screen.findByRole("status")).toHaveProperty("textContent", "Animal excluído: Rex");
+    expect(screen.queryByText("Rex")).toBeNull();
+    expect(apiMock).toHaveBeenLastCalledWith("/animais/1", { method: "DELETE" });
+  });
+
+  it("mostra o erro na tela, sem alert, quando a exclusão falha", async () => {
+    apiMock.mockResolvedValueOnce([rex]).mockRejectedValueOnce(new Error("Erro 500 na requisição"));
+    const alerta = vi.spyOn(window, "alert").mockImplementation(() => {});
+    const usuario = userEvent.setup();
+    renderizarLista();
+    await screen.findByText("Rex");
+
+    await usuario.click(screen.getByRole("button", { name: "Excluir Rex" }));
+    await usuario.click(screen.getByRole("button", { name: "Excluir" }));
+
+    expect(await screen.findByText("Não foi possível excluir Rex. Tente de novo.")).toBeDefined();
+    expect(screen.getByText("Rex")).toBeDefined();
+    expect(alerta).not.toHaveBeenCalled();
+  });
+
   it("não mostra separadores nem o prefixo Setor para animal sem campos opcionais", async () => {
     apiMock.mockResolvedValue([bolinha]);
 
